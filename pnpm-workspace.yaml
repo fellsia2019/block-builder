@@ -1,0 +1,4 @@
+# pnpm-workspace.yaml
+packages:
+  - 'packages/*'
+  - 'examples/*'  # Если хочешь, чтобы примеры тоже были частью workspace

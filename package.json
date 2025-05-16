@@ -1,0 +1,16 @@
+{
+  "name": "block-builder-monorepo",
+  "private": true,
+  "scripts": {
+    "build": "pnpm -r run build",
+    "test": "pnpm -r run test"
+  },
+  "workspaces": [
+    "packages/*"
+  ],
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "rollup": "^3.20.0"
+  },
+  "packageManager": "pnpm@8.0.0"
+}
