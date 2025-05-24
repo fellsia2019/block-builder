@@ -1,3 +1,5 @@
+import { CUSTOM_BUTTON_TEMPLATE } from '../controls/btn/CustomButton'
+
 export const FORM_TEMPLATE = `
     <form class="bb-form">
         <div class="bb-form__inner">
@@ -14,9 +16,8 @@ export const FORM_TEMPLATE = `
             </div>
 
             <div class="bb-form__footer">
-                <button>кнопка отправить</button>
+                ${CUSTOM_BUTTON_TEMPLATE}
             </div>
         </div>
     </form>
-
 `

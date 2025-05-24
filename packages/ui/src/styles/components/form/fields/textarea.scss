@@ -1,0 +1,11 @@
+$b: '.bb-textarea';
+
+#{$b} {
+    
+    // .bb-textarea__textarea
+    &__textarea {
+        height: 280px;
+        resize: none;
+        -moz-appearance: none;
+    }
+}

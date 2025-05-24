@@ -1,11 +1,9 @@
 // @ts-ignore - когда опубликую пакет убрать игнор флаг
-import type { OptBlockModel } from '@block-builder/core';
+import { type OptBlockModel, BlockManager } from '@block-builder/core';
 import { type BlockRendererMap, BlockControlTypes } from './types'
 
-// key - string as type block
-// value - string as HTMLString template
-import { BaseBlockRenderer } from './BaseBlockRenderer'
 
+import { BaseBlockRenderer } from './BaseBlockRenderer'
 import { BTN_CONTROL_TEMPLATE } from './components/controls/btn/BtnControl'
 import { ICONS_TEMPLATE } from './components/common/icons'
 import { MODAL_TEMPLATE } from './components/modal/Modal'
@@ -14,19 +12,40 @@ import { FORM_TEMPLATE } from './components/form/Form'
 import { INPUT_TEMPLATE } from './components/form/fields/Input'
 import { TEXT_AREA_TEMPLATE } from './components/form/fields/TextArea'
 import { FIELDSET_TEMPLATE } from './components/form/fields/Fieldset'
+import { GROUP_FIELD_TEMPLATE } from './components/form/fields/GroupField.ts'
+import { BASE_BLOCK_TEMPLATE } from './components/blocks/OptBlock'
+
+
+// вынести в утилсы
+function isEmpty(value: any) {
+  return typeof value === 'string' || Array.isArray(value)
+    ? !value?.length
+    : typeof value === 'object'
+      ? !Object.keys(value).some(Boolean)
+      : !value
+}
 
 export class OptBlockRenderer extends BaseBlockRenderer {
+
     constructor(
         private blocksData: Array<OptBlockModel>,
         private renderers: BlockRendererMap,
-        private registeredBlocks: Record<string, OptBlockModel>
+        private manager: BlockManager,
+        private renderHTMLContainer: HTMLElement
     ) {
         super();
+        this.renderOptMain()
+        this.renderOptServices()
     }
 
-    renderOpt(container: HTMLElement) {
-        container.innerHTML = '';
-        this.blocksData.forEach((block: OptBlockModel) => {
+    get registeredBlocks(): Record<string, OptBlockModel> {
+        return this.manager.getRegisteredBlocks()
+    }
+
+    renderOptMain() {
+        this.renderHTMLContainer.innerHTML = '';
+
+        this.blocksData.forEach((block: OptBlockModel, index: number) => {
             const renderBoilerplate = this.renderers[block.type]
             // рендер ui самого блока
             const element: HTMLElement | null = this.createFallbackBlock(block, renderBoilerplate);
@@ -44,18 +63,64 @@ export class OptBlockRenderer extends BaseBlockRenderer {
                 return
             }
 
-            element.append(controls);
-            if (controllAdd) {
-                element.append(controllAdd);
+            const blockNode = this.getRender(
+                {
+                    id: block.id,
+                    type: block.type,
+                    name: '',
+                    props: {
+                        controlAddTop: controllAdd && index === 0 ? controllAdd : null,
+                        controlAddBottom: controllAdd ? controllAdd : null,
+                        controls,
+                        userBlock: element,
+                        id: block.id,
+                        type: block.type,
+                    }
+                },
+                BASE_BLOCK_TEMPLATE
+            )
+
+            if (!blockNode) {
+                return
             }
 
-            element.classList.add('bb-block')
-            element.setAttribute('data-bb-type-block', block.type)
-            element.setAttribute('id', block.id)
+            this.renderHTMLContainer.appendChild(blockNode);
 
-            container.appendChild(element);
+
+            // events
+            const controlsNodes = this.renderHTMLContainer.querySelectorAll('[data-bb-control]')
+            controlsNodes.forEach(control => {
+                control.addEventListener('click', (e: Event) => {
+                    if (!e?.currentTarget || !(e.currentTarget instanceof HTMLElement)) {
+                        return
+                    }
+    
+                    const type: string | null = e.currentTarget.getAttribute('data-type')
+    
+                    if (!type) {
+                        return
+                    }
+    
+                    if ([BlockControlTypes.EDIT, BlockControlTypes.ADD].includes(type as BlockControlTypes)) {
+                        this.renderModalFromControlType(type as (BlockControlTypes.ADD | BlockControlTypes.EDIT), e)
+                    }
+                    if (type === BlockControlTypes.REMOVE) {
+                        console.log('сквозное сообщение что блок удален')
+                        this.removeBlockFromControl(e)
+                    }
+    
+                    if (type === BlockControlTypes.MOVE_PREV) {
+                        this.moveBlockFromControl(BlockControlTypes.MOVE_PREV, e)
+                    }
+                    if (type === BlockControlTypes.MOVE_NEXT) {
+                        this.moveBlockFromControl(BlockControlTypes.MOVE_NEXT, e)
+                    }
+                })
+            })
         });
+    }
 
+    renderOptServices() {
         // ---start рендер спрайт иконки
         const parser = new DOMParser();
         const doc = parser.parseFromString(ICONS_TEMPLATE, 'text/html');
@@ -101,35 +166,51 @@ export class OptBlockRenderer extends BaseBlockRenderer {
             return null
         }
 
-        control.setAttribute('data-type', type)
-
-        control.addEventListener('click', (e: Event) => {
-            if (!e?.currentTarget || !(e.currentTarget instanceof HTMLElement)) {
-                return
-            }
-
-            const type: string | null = e.currentTarget.getAttribute('data-type')
-
-            if (!type) {
-                return
-            }
-
-            if ([BlockControlTypes.EDIT, BlockControlTypes.ADD].includes(type as BlockControlTypes)) {
-                this.renderModalFromControlType(type as (BlockControlTypes.ADD | BlockControlTypes.EDIT), e)
-            }
-            if (type === BlockControlTypes.REMOVE) {
-                console.log('сквозное сообщение что блок удален')
-            }
-
-            if (type === BlockControlTypes.MOVE_PREV) {
-                console.log('MOVE_PREV')
-            }
-            if (type === BlockControlTypes.MOVE_NEXT) {
-                console.log('MOVE_NEXT')
-            }
-        })
-
         return control
+    }
+
+    moveBlockFromControl(direction: BlockControlTypes.MOVE_PREV | BlockControlTypes.MOVE_NEXT, e: Event) {
+        const id = (e?.target as HTMLElement)?.closest('[data-bb-type-block]')?.getAttribute('id')
+        const index = this.blocksData.findIndex(block => block.id === id)
+
+        if (!this.blocksData[index] || !id) {
+            return
+        }
+
+        if (direction === BlockControlTypes.MOVE_PREV) {
+            this.manager.movePrevBlock(index)
+        } 
+        if (direction === BlockControlTypes.MOVE_NEXT) {
+            this.manager.moveNextBlock(index)
+        }
+
+        this.updateDataFromManager()
+
+        setTimeout(() => {
+            this.scrollToBlock(id)
+        }, 100);
+    }
+
+    scrollToBlock(id: string) {
+        document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
+    }
+
+    removeBlockFromControl(e: Event) {
+        const id = (e?.target as HTMLElement)?.closest('[data-bb-type-block]')?.getAttribute('id')
+        if (!id) {
+            return
+        }
+        this.removeBlock(id)
+    }
+
+    removeBlock(id: string) {
+        this.manager.removeBlock(id)
+        this.updateDataFromManager()
+    }
+ 
+    updateDataFromManager() {
+        this.blocksData = this.manager.getBlocks()
+        this.renderOptMain()
     }
 
     createFields(registerBlock: OptBlockModel) {
@@ -138,7 +219,9 @@ export class OptBlockRenderer extends BaseBlockRenderer {
         for (let key in registerBlock.form) {
             const value = registerBlock.form[key]
 
-            const field: HTMLElement | null = this.createField(value, key)
+            const propsValue = registerBlock.props[key]
+            const mergeValues = !isEmpty(propsValue) ? propsValue : null
+            const field: HTMLElement | null = this.createField(value, key, mergeValues)
 
             if (field) {
                 fields.push(field)
@@ -148,7 +231,7 @@ export class OptBlockRenderer extends BaseBlockRenderer {
         return fields
     }
 
-    createField(value, key: string) {
+    createField(value, key: string, mergeValue?: any): HTMLElement | null {
         if (value.typeField === 'image') {
             // рендерим блок с загрузкой изображения
             // пока пропускаем
@@ -162,7 +245,8 @@ export class OptBlockRenderer extends BaseBlockRenderer {
                     props: {
                         label: value.label || 'Текст',
                         placeholder: value.placeholder || '',
-                        value: '',
+                        value: mergeValue || '',
+                        id: `${Date.now()}-${Math.random().toString(16).slice(2)}` // вынести в утилс, такой же генератор айди есть в BlockManager
                     }
 
                 },
@@ -182,7 +266,8 @@ export class OptBlockRenderer extends BaseBlockRenderer {
                     props: {
                         label:value.label || 'Текст большой',
                         placeholder: value.placeholder || '',
-                        value: '',
+                        value: mergeValue || '',
+                        id: `${Date.now()}-${Math.random().toString(16).slice(2)}` // вынести в утилс, такой же генератор айди есть в BlockManager
                     }
 
                 },
@@ -199,7 +284,19 @@ export class OptBlockRenderer extends BaseBlockRenderer {
                 return null
             }
 
-            const field = this.createField(value.each, key)
+            const field = value.each.typeField === 'each-object'
+                ? this.createField(value.each, key, mergeValue)
+                : this.createField(value.each, key)
+
+            let fieldsFromMegeValue: Array<HTMLElement | null> = []
+            if (Array.isArray(mergeValue) && mergeValue.length && (value.each.typeField !== 'each-object')) {
+                mergeValue.forEach((item: any) => {
+                    fieldsFromMegeValue.push(
+                        this.createField(value.each, key, item)
+                    )
+                })
+            }
+
             const fieldset: HTMLElement | null = value.each.typeField === 'each-object'
                 ? field 
                 : this.getRender(
@@ -207,7 +304,12 @@ export class OptBlockRenderer extends BaseBlockRenderer {
                         id: `bb-fieldset-${value.typeField}-${key}`,
                         type: `bb-fieldset-${value.type}`,
                         props: {
-                            fields: [field]
+                            fields: [...fieldsFromMegeValue, field],
+                            label: value.label || '',
+                            btnText: 'Добавить',
+                            btnIcon: 'add',
+                            btnTheme: 'dark-outline',
+                            btnSize: 'sm'
                         }
 
                     },
@@ -225,7 +327,7 @@ export class OptBlockRenderer extends BaseBlockRenderer {
             }
 
             let fields: Array<HTMLElement> = []
-            
+           
             for (let eachKey in value.each) {
                 const field = this.createField(value.each[eachKey], eachKey)
                 if (field) {
@@ -233,12 +335,60 @@ export class OptBlockRenderer extends BaseBlockRenderer {
                 }
             }
 
+            const groupItem = this.getRender(
+                {
+                    id: `bb-fieldset-${value.typeField}-${key}`,
+                    type: `bb-fieldset-${value.type}`,
+                    props: {
+                        fields,
+                    }
+
+                },
+                GROUP_FIELD_TEMPLATE
+            )
+
+            
+            let fieldsFromMegeValue: Array<HTMLElement | null> = []
+            if (Array.isArray(mergeValue)) {
+                mergeValue.forEach(item => {
+                    let fields: Array<HTMLElement> = []
+
+                    for (let key in item) {
+                        const v = item[key]
+
+                        const field = this.createField(value.each[key], key, v)
+                        if (field) {
+                            fields.push(field)
+                        }
+                    }
+
+                    const groupItem = this.getRender(
+                        {
+                            id: `bb-fieldset-${value.typeField}-${key}`,
+                            type: `bb-fieldset-${value.type}`,
+                            props: {
+                                fields
+                            }
+
+                        },
+                        GROUP_FIELD_TEMPLATE
+                    )
+
+                    fieldsFromMegeValue.push(groupItem)
+                })
+            }
+
             const field: HTMLElement | null = this.getRender(
                 {
                     id: `bb-fieldset-${value.typeField}-${key}`,
                     type: `bb-fieldset-${value.type}`,
                     props: {
-                        fields
+                        fields: [...fieldsFromMegeValue, groupItem],
+                        label: value.label || '',
+                        btnText: 'Добавить',
+                        btnIcon: 'add',
+                        btnTheme: 'dark-outline',
+                        btnSize: 'sm'
                     }
 
                 },
@@ -272,10 +422,10 @@ export class OptBlockRenderer extends BaseBlockRenderer {
         }
 
         if (type === BlockControlTypes.EDIT) {
-            const typeBlock = (e?.target as HTMLElement)?.closest('[data-bb-type-block]')?.getAttribute('data-bb-type-block')
-            const registerBlock: OptBlockModel | null = typeBlock ? this.registeredBlocks[typeBlock] : null
+            const id = (e?.target as HTMLElement)?.closest('[data-bb-type-block]')?.getAttribute('id')
+            const block = this.blocksData.find(item => item.id === id)
 
-            let fields = this.createFields(registerBlock)
+            let fields = this.createFields(block)
 
             // рендерим форму
             const form = this.getRender(
@@ -283,8 +433,9 @@ export class OptBlockRenderer extends BaseBlockRenderer {
                     id: 'bb-form-edit',
                     type: 'bb-form-edit',
                     props: {
-                        title: registerBlock?.name,
-                        fields
+                        title: block?.name,
+                        fields,
+                        btnText: 'Сохранить'
                     }
                 },
                 FORM_TEMPLATE
@@ -345,28 +496,10 @@ export class OptBlockRenderer extends BaseBlockRenderer {
                     MODAL_TEMPLATE
                 )
 
-                console.log('click form', modalHTMLElement)
-
                 this.createModal(modalHTMLElement)
             })
 
         });
-    }
-
-    getModalRender(): HTMLElement | null {
-        const modalHTMLElement: HTMLElement | null = this.getRender(
-            {
-                id: 'bb-modal',
-                type: 'bb-modal',
-                name: '',
-                props: {
-                    body: { a: 123, test: 'mnogo4len' }
-                }
-            },
-            MODAL_TEMPLATE
-        )
-
-        return modalHTMLElement
     }
 
     createModal(modal: HTMLElement | null) {

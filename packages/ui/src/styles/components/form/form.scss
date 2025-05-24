@@ -1,0 +1,31 @@
+$b: '.bb-form';
+
+#{$b} {
+
+    // .bb-form__inner
+    &__inner {
+        display: flex;
+        flex-direction: column;
+        gap: 36px;
+    }
+
+    // .bb-form__header
+    &__header {
+        .bb-modal & {
+            margin-right: 40px;
+        }
+    }
+
+    // .bb-form__title
+    &__title {
+        font-size: 22px;
+        line-height: normal;
+    }
+
+    // .bb-form__body
+    &__body {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+}

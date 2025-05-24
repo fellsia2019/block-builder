@@ -1,0 +1,25 @@
+$b: '.bb-base-field';
+
+#{$b} {
+    font-size: 16px;
+    line-height: normal;
+
+    // .bb-base-field__label
+    &__label {
+        display: inline-block;
+        margin-bottom: 10px;
+
+        .bb-fieldset__item & {
+            margin-right: 30px;
+        }
+    }
+
+    // .bb-base-field__field
+    &__field {
+        width: 100%;
+        background-color: white;
+        border: 1px solid black;
+        border-radius: 12px;
+        padding: 12px 24px;
+    }
+}

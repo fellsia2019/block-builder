@@ -1,0 +1,9 @@
+$b: '.bb-input';
+
+#{$b} {
+
+    // .bb-input__input
+    &__input {
+        min-height: 50px;
+    }
+}

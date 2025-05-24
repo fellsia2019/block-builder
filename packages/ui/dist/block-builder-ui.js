@@ -1,8 +1,8 @@
-"use strict";Object.defineProperty(exports,Symbol.toStringTag,{value:"Module"});class y{constructor(){}getRender(e,o){return this.createFallbackBlock(e,o)}createFallbackBlock(e,o){var a;let t=this.decodeHTMLEntities(this.renderTemplate(o,e));const s=new DOMParser().parseFromString(t,"text/html");return((a=s==null?void 0:s.body)==null?void 0:a.firstChild)||null}decodeHTMLEntities(e){const o=document.createElement("textarea");return o.innerHTML=e,o.value}renderTemplate(e,o){const r=new DOMParser().parseFromString(e,"text/html");return this.processForDirectives(r.body,o.props),this.processConditionalRendering(r.body,o.props),this.processTemplateExpressions(r.body,o.props),r.body.innerHTML}processConditionalRendering(e,o){e.querySelectorAll("[render-if]").forEach(r=>{const s=r.getAttribute("render-if");r.removeAttribute("render-if"),this.evaluateCondition(o,s)||r.remove()})}processTemplateExpressions(e,o){const t=document.createTreeWalker(e,NodeFilter.SHOW_TEXT|NodeFilter.SHOW_ELEMENT,null);for(;t.nextNode();){const r=t.currentNode;r.nodeType===Node.TEXT_NODE?this.processTextNode(r,o):r.nodeType===Node.ELEMENT_NODE&&this.processElementAttributes(r,o)}}processTextNode(e,o){const t=e.nodeValue.replace(/\[\[\s*([^\]]+?)\s*\]\]/g,(r,s)=>this.evaluateExpression(s,o));t!==e.nodeValue&&(e.nodeValue=t)}evaluateExpression(e,o){try{const t={...o,Math,Date,JSON},r=new Function(...Object.keys(t),`return ${e}`)(...Object.values(t));if(r==null)return"";if(typeof r=="object"){if(r instanceof HTMLElement){const s=r.outerHTML,i=document.createElement("div");return i.innerHTML=s,i.innerHTML}return JSON.stringify(r,null,2)}return String(r)}catch(t){return console.warn(`Error evaluating expression "${e}":`,t),""}}processElementAttributes(e,o){Array.from(e.attributes).forEach(t=>{t.value.includes("[[")&&e.setAttribute(t.name,t.value.replace(/\[\[\s*([^\]]+?)\s*\]\]/g,(r,s)=>this.getPropertyValue(o,s)))})}getPropertyValue(e,o){const t=o.split(".").reduce((r,s)=>r==null?void 0:r[s],e);return t==null?"":typeof t=="object"?JSON.stringify(t,null,2):String(t)}evaluateCondition(e,o){if(o.startsWith("!"))return!this.getPropertyValue(e,o.substring(1));if(o.includes("===")){const[r,s]=o.split("===").map(i=>i.trim());return this.getPropertyValue(e,r)===s}const t=this.getPropertyValue(e,o);return["number","boolean"].includes(typeof t)?Boolean(t):!!t}processForDirectives(e,o){Array.from(e.querySelectorAll("[render-for]")).forEach(r=>{const s=r.getAttribute("render-for");r.removeAttribute("render-for");const{itemName:i,indexName:a,collectionPath:n}=this.parseForExpression(s);if(!i||!n){console.warn(`Invalid render-for expression: ${s}`);return}const l=this.getNestedProperty(o,n);if(!l){r.remove();return}this.renderCollection(r,l,i,a||"",o)})}parseForExpression(e){const t=e.replace(/\s*,\s*/g,",").trim().split(/\s+/).filter(Boolean);if(t.length===3&&t[1]==="in"){const r=t[0].match(/^\((\w+),(\w+)\)$/);if(r)return{itemName:r[1],indexName:r[2],collectionPath:t[2]}}if(t.length===3&&t[1]==="in")return{itemName:t[0],collectionPath:t[2]};throw new Error(`Invalid render-for expression: ${e}`)}renderCollection(e,o,t,r,s){const i=e.parentNode,a=document.createDocumentFragment(),n=Array.isArray(o);Object.entries(o).forEach(([l,c],b)=>{const m=e.cloneNode(!0),f={...s,[t]:c,...r?{[r]:n?b:l}:{},$key:`${l}-${b}`,$index:b,$parent:s};this.processNode(m,f),a.appendChild(m)}),i.replaceChild(a,e)}processNode(e,o){this.processElementAttributes(e,o),this.processConditionalRendering(e,o);const t=document.createTreeWalker(e,NodeFilter.SHOW_ELEMENT|NodeFilter.SHOW_TEXT,null);for(;t.nextNode();){const r=t.currentNode;r.nodeType===Node.TEXT_NODE?this.processTextNode(r,o):r.nodeType===Node.ELEMENT_NODE&&this.processNode(r,o)}}getNestedProperty(e,o){return o.split(".").reduce((t,r)=>{const s=r.match(/^(\w+)\[(\d+)\]$/);return s&&Array.isArray(t==null?void 0:t[s[1]])?t[s[1]][Number(s[2])]:t==null?void 0:t[r]},e)}}var d=(p=>(p.ADD="add",p.EDIT="edit",p.REMOVE="remove",p.MOVE_NEXT="move-next",p.MOVE_PREV="move-prev",p))(d||{});const _=`
-    <button class="bb-btn-control bb-border-box" title="[[type]]">
-        <svg class="svg-icon bb-btn-control__svg"><use href="#bb-icon-[[type]]"></use></svg>
+"use strict";Object.defineProperty(exports,Symbol.toStringTag,{value:"Module"});class E{constructor(){}getRender(e,r){return this.createFallbackBlock(e,r)}createFallbackBlock(e,r){var n;let t=this.decodeHTMLEntities(this.renderTemplate(r,e));const s=new DOMParser().parseFromString(t,"text/html");return((n=s==null?void 0:s.body)==null?void 0:n.firstChild)||null}decodeHTMLEntities(e){const r=document.createElement("textarea");return r.innerHTML=e,r.value}renderTemplate(e,r){const o=new DOMParser().parseFromString(e,"text/html");return this.processForDirectives(o.body,r.props),this.processConditionalRendering(o.body,r.props),this.processTemplateExpressions(o.body,r.props),o.body.innerHTML}processConditionalRendering(e,r){e.querySelectorAll("[render-if]").forEach(o=>{const s=o.getAttribute("render-if");o.removeAttribute("render-if"),this.evaluateCondition(r,s)||o.remove()})}processTemplateExpressions(e,r){const t=document.createTreeWalker(e,NodeFilter.SHOW_TEXT|NodeFilter.SHOW_ELEMENT,null);for(;t.nextNode();){const o=t.currentNode;o.nodeType===Node.TEXT_NODE?this.processTextNode(o,r):o.nodeType===Node.ELEMENT_NODE&&this.processElementAttributes(o,r)}}processTextNode(e,r){const t=e.nodeValue.replace(/\[\[\s*([^\]]+?)\s*\]\]/g,(o,s)=>this.evaluateExpression(s,r));t!==e.nodeValue&&(e.nodeValue=t)}evaluateExpression(e,r){try{const t={...r,Math,Date,JSON},o=new Function(...Object.keys(t),`return ${e}`)(...Object.values(t));if(o==null)return"";if(typeof o=="object"){if(o instanceof HTMLElement){const s=o.outerHTML,i=document.createElement("div");return i.innerHTML=s,i.innerHTML}return JSON.stringify(o,null,2)}return String(o)}catch(t){return console.warn(`Error evaluating expression "${e}":`,t),""}}processElementAttributes(e,r){Array.from(e.attributes).forEach(t=>{t.value.includes("[[")&&e.setAttribute(t.name,t.value.replace(/\[\[\s*([^\]]+?)\s*\]\]/g,(o,s)=>this.getPropertyValue(r,s)))})}getPropertyValue(e,r){const t=r.split(".").reduce((o,s)=>o==null?void 0:o[s],e);return t==null?"":typeof t=="object"?JSON.stringify(t,null,2):String(t)}evaluateCondition(e,r){if(r.startsWith("!"))return!this.getPropertyValue(e,r.substring(1));if(r.includes("===")){const[o,s]=r.split("===").map(i=>i.trim());return this.getPropertyValue(e,o)===s}const t=this.getPropertyValue(e,r);return["number","boolean"].includes(typeof t)?Boolean(t):!!t}processForDirectives(e,r){Array.from(e.querySelectorAll("[render-for]")).forEach(o=>{const s=o.getAttribute("render-for");o.removeAttribute("render-for");const{itemName:i,indexName:n,collectionPath:p}=this.parseForExpression(s);if(!i||!p){console.warn(`Invalid render-for expression: ${s}`);return}const l=this.getNestedProperty(r,p);if(!l){o.remove();return}this.renderCollection(o,l,i,n||"",r)})}parseForExpression(e){const t=e.replace(/\s*,\s*/g,",").trim().split(/\s+/).filter(Boolean);if(t.length===3&&t[1]==="in"){const o=t[0].match(/^\((\w+),(\w+)\)$/);if(o)return{itemName:o[1],indexName:o[2],collectionPath:t[2]}}if(t.length===3&&t[1]==="in")return{itemName:t[0],collectionPath:t[2]};throw new Error(`Invalid render-for expression: ${e}`)}renderCollection(e,r,t,o,s){const i=e.parentNode,n=document.createDocumentFragment(),p=Array.isArray(r);Object.entries(r).forEach(([l,a],d)=>{const m=e.cloneNode(!0),f={...s,[t]:a,...o?{[o]:p?d:l}:{},$key:`${l}-${d}`,$index:d,$parent:s};this.processNode(m,f),n.appendChild(m)}),i.replaceChild(n,e)}processNode(e,r){this.processElementAttributes(e,r),this.processConditionalRendering(e,r);const t=document.createTreeWalker(e,NodeFilter.SHOW_ELEMENT|NodeFilter.SHOW_TEXT,null);for(;t.nextNode();){const o=t.currentNode;o.nodeType===Node.TEXT_NODE?this.processTextNode(o,r):o.nodeType===Node.ELEMENT_NODE&&this.processNode(o,r)}}getNestedProperty(e,r){return r.split(".").reduce((t,o)=>{const s=o.match(/^(\w+)\[(\d+)\]$/);return s&&Array.isArray(t==null?void 0:t[s[1]])?t[s[1]][Number(s[2])]:t==null?void 0:t[o]},e)}}var b=(c=>(c.ADD="add",c.EDIT="edit",c.REMOVE="remove",c.MOVE_NEXT="move-next",c.MOVE_PREV="move-prev",c))(b||{});const T=`
+    <button class="bb-btn-control bb-border-box" title="[[ type ]]" data-bb-control data-type="[[ type ]]">
+        <svg class="svg-icon bb-btn-control__svg"><use href="#bb-icon-[[ type ]]"></use></svg>
     </button>
-`,g=`
+`,C=`
     <svg
         id="__svg__icons__dom__"
         xmlns="http://www.w3.org/2000/svg"
@@ -45,11 +45,11 @@
             <path d="M5.46967 0.469669C5.76256 0.176776 6.23744 0.176776 6.53033 0.469669L11.3033 5.24264C11.5962 5.53553 11.5962 6.01041 11.3033 6.3033C11.0104 6.59619 10.5355 6.59619 10.2426 6.3033L6 2.06066L1.75736 6.3033C1.46447 6.59619 0.989593 6.59619 0.6967 6.3033C0.403806 6.01041 0.403806 5.53553 0.6967 5.24264L5.46967 0.469669ZM5.25 16L5.25 0.999999L6.75 0.999999L6.75 16L5.25 16Z" fill="currentColor"/>
         </svg>
     </svg>
-`,u=`
+`,h=`
     <div class="bb-modal bb-border-box" data-bb-modal>
         <div class="bb-modal__inner">
             <button class="bb-modal__close" data-bb-modal-close>
-                X
+                <svg class="svg-icon bb-modal__close-icon"><use href="#bb-icon-cross"></use></svg>
             </button>
             <div class="bb-modal__body">
                 [[ body ]]
@@ -57,7 +57,7 @@
         </div>
     </div>
 
-`,C=`
+`,L=`
     <div class="bb-window-add-block bb-border-box">
         <div class="bb-window-add-block__inner">
             <div class="bb-window-add-block__aside">
@@ -73,7 +73,14 @@
             </div>
         </div>
     </div>
-`,E=`
+`,g=`
+    <button class="bb-custom-button" data-theme="[[ btnTheme ]]" data-size="[[ btnSize ]]">
+        <div class="bb-custom-button__inner">
+            <span>[[ btnText ]]</span>
+            <svg render-if="btnIcon" class="svg-icon bb-custom-button__svg"><use href="#bb-icon-[[ btnIcon ]]"></use></svg>
+        </div>
+    </button>
+`,u=`
     <form class="bb-form">
         <div class="bb-form__inner">
             <div class="bb-form__header">
@@ -89,43 +96,72 @@
             </div>
 
             <div class="bb-form__footer">
-                <button>кнопка отправить</button>
+                ${g}
             </div>
         </div>
     </form>
-
-`,L=`
-    <div class="bb-input">
+`,M=`
+    <div class="bb-input bb-base-field">
         <div class="bb-input__inner">
-            <label for="" class="bb-input__label">
+            <label for="bb-control-[[ id ]]" class="bb-input__label bb-base-field__label">
                 [[ label ]]
             </label>
-            <input class="bb-input__input" value="[[ value ]]" placeholder="[[ placeholder ]]" />
+            <input id="bb-control-[[ id ]]" class="bb-input__input bb-base-field__field" value="[[ value ]]" placeholder="[[ placeholder ]]" />
         </div>
     </div>
 
-`,T=`
-    <div class="bb-textarea">
+`,w=`
+    <div class="bb-textarea bb-base-field">
         <div class="bb-textarea__inner">
-            <label for="" class="bb-textarea__label">
+            <label for="bb-control-[[ id ]]" class="bb-textarea__label bb-base-field__label">
                 [[ label ]]
             </label>
-            <textarea class="bb-textarea__textarea" placeholder="[[ placeholder ]]">[[ value ]]</textarea>
+            <textarea id="bb-control-[[ id ]]" class="bb-textarea__textarea bb-base-field__field" placeholder="[[ placeholder ]]">[[ value ]]</textarea>
         </div>
     </div>
 
-`,v=`
+`,_=`
     <div class="bb-fieldset">
+        <div render-if="label" class="bb-fieldset__label">
+            [[ label ]]
+        </div>
         <div class="bb-fieldset__inner">
-            <div render-for="(item, i) in fields" class="bb-fieldset__item">
+            <div render-for="item in fields" class="bb-fieldset__item">
                 [[ item ]]
+
+                <button class="bb-fieldset__remove">
+                    <svg class="svg-icon bb-fieldset__remove-icon"><use href="#bb-icon-cross"></use></svg>
+                </button>
             </div>
         </div>
 
         <div class="bb-fieldset__footer">
-            <button>
-                Добавить +
-            </button>
+            ${g}
         </div>
     </div>
-`;class M extends y{constructor(e,o,t){super(),this.blocksData=e,this.renderers=o,this.registeredBlocks=t}renderOpt(e){var s;e.innerHTML="",this.blocksData.forEach(i=>{const a=this.renderers[i.type],n=this.createFallbackBlock(i,a),l=this.getRenderControls(i),c=this.getRenderControl(i,d.ADD);c==null||c.classList.add("bb-block-control-add"),n&&(n.append(l),c&&n.append(c),n.classList.add("bb-block"),n.setAttribute("data-bb-type-block",i.type),n.setAttribute("id",i.id),e.appendChild(n))});const t=new DOMParser().parseFromString(g,"text/html"),r=(s=t==null?void 0:t.body)==null?void 0:s.firstChild;r&&document.body.append(r)}getRenderControls(e){const o=document.createElement("div");return o.classList.add("bb-block-controls","bb-border-box"),[d.EDIT,d.REMOVE,d.MOVE_PREV,d.MOVE_NEXT].forEach(t=>{const r=this.getRenderControl(e,t);r&&o.append(r)}),o}getRenderControl(e,o){const t=this.getRender({id:`control-${o}-${e.id}`,type:`control-${o}`,name:"",props:{type:o}},_);return t?(t.setAttribute("data-type",o),t.addEventListener("click",r=>{if(!(r!=null&&r.currentTarget)||!(r.currentTarget instanceof HTMLElement))return;const s=r.currentTarget.getAttribute("data-type");s&&([d.EDIT,d.ADD].includes(s)&&this.renderModalFromControlType(s,r),s===d.REMOVE&&console.log("сквозное сообщение что блок удален"),s===d.MOVE_PREV&&console.log("MOVE_PREV"),s===d.MOVE_NEXT&&console.log("MOVE_NEXT"))}),t):null}createFields(e){let o=[];for(let t in e.form){const r=e.form[t],s=this.createField(r,t);s&&o.push(s)}return o}createField(e,o){if(e.typeField,e.typeField==="text"){const t=this.getRender({id:`bb-field-${e.typeField}-${o}`,type:`bb-field-${e.type}`,props:{label:e.label||"Текст",placeholder:e.placeholder||"",value:""}},L);if(t)return t}if(e.typeField==="textarea"){const t=this.getRender({id:`bb-field-${e.typeField}-${o}`,type:`bb-field-${e.type}`,props:{label:e.label||"Текст большой",placeholder:e.placeholder||"",value:""}},T);if(t)return t}if(e.typeField==="each-array"){if(!Object.hasOwn(e,"each"))return console.warn("Для типа each-array свойство each обязательно! Reference ",e),null;const t=this.createField(e.each,o),r=e.each.typeField==="each-object"?t:this.getRender({id:`bb-fieldset-${e.typeField}-${o}`,type:`bb-fieldset-${e.type}`,props:{fields:[t]}},v);if(r)return r}if(e.typeField==="each-object"){if(!Object.hasOwn(e,"each"))return console.warn("Для типа each-object свойство each обязательно! Reference ",e),null;let t=[];for(let s in e.each){const i=this.createField(e.each[s],s);i&&t.push(i)}const r=this.getRender({id:`bb-fieldset-${e.typeField}-${o}`,type:`bb-fieldset-${e.type}`,props:{fields:t}},v);if(r)return r}return null}renderModalFromControlType(e,o){var i,a;let t=null;if(e===d.ADD&&(t=this.getRender({id:"bb-window-add",type:"bb-window-add",props:{items:Object.values(this.registeredBlocks)}},C)),e===d.EDIT){const n=(a=(i=o==null?void 0:o.target)==null?void 0:i.closest("[data-bb-type-block]"))==null?void 0:a.getAttribute("data-bb-type-block"),l=n?this.registeredBlocks[n]:null;let c=this.createFields(l);t=this.getRender({id:"bb-form-edit",type:"bb-form-edit",props:{title:l==null?void 0:l.name,fields:c}},E)}const r=this.getRender({id:`bb-modal-${e}`,type:`bb-modal-${e}`,name:"",props:{body:t}},u);this.createModal(r);const s=r==null?void 0:r.querySelectorAll("[data-item]");s==null||s.forEach(n=>{n.addEventListener("click",l=>{if(!(l.currentTarget instanceof HTMLElement))return;const c=l.currentTarget.getAttribute("data-item"),b=c?this.registeredBlocks[c]:null;let m=this.createFields(b);const f=this.getRender({id:"bb-form-edit",type:"bb-form-edit",props:{title:b==null?void 0:b.name,fields:m}},E),h=this.getRender({id:`bb-modal-${e}`,type:`bb-modal-${e}`,name:"",props:{body:f}},u);console.log("click form",h),this.createModal(h)})})}getModalRender(){return this.getRender({id:"bb-modal",type:"bb-modal",name:"",props:{body:{a:123,test:"mnogo4len"}}},u)}createModal(e){if(!e)return;const o=document.querySelector("[data-bb-modal]");o&&o.remove(),e.addEventListener("click",t=>{!t.target||!(t.target instanceof HTMLElement)||(t.target.hasAttribute("data-bb-modal-close")||t.target.hasAttribute("data-bb-modal"))&&(e.remove(),document.body.classList.remove("bb-scrollbar-is-locked"))}),document.body.classList.add("bb-scrollbar-is-locked"),document.body.append(e)}}exports.BaseBlockRenderer=y;exports.OptBlockRenderer=M;
+`,v=`
+    <div class="bb-group-field">
+        <div class="bb-group-field__inner">
+            <div render-for="item in fields" class="bb-group-field__item">
+                [[ item ]]
+            </div>
+        </div>
+    </div>
+`,x=`
+    <div class="bb-opt-block" id="[[ id ]]" data-bb-type-block="[[ type ]]">
+        <div class="bb-opt-block__inner">
+            <div render-if="controlAddTop" class="bb-opt-block__control-add">
+                [[ controlAddTop ]]
+            </div>
+
+            <div class="bb-opt-block__body">
+                [[ userBlock ]]
+                [[ controls ]]
+            </div>
+
+            <div class="bb-opt-block__control-add">
+                [[ controlAddBottom ]]
+            </div>
+        </div>
+    </div>
+`;function A(c){return typeof c=="string"||Array.isArray(c)?!(c!=null&&c.length):typeof c=="object"?!Object.keys(c).some(Boolean):!c}class F extends E{constructor(e,r,t,o){super(),this.blocksData=e,this.renderers=r,this.manager=t,this.renderHTMLContainer=o,this.renderOptMain(),this.renderOptServices()}get registeredBlocks(){return this.manager.getRegisteredBlocks()}renderOptMain(){this.renderHTMLContainer.innerHTML="",this.blocksData.forEach((e,r)=>{const t=this.renderers[e.type],o=this.createFallbackBlock(e,t),s=this.getRenderControls(e),i=this.getRenderControl(e,b.ADD);if(i==null||i.classList.add("bb-block-control-add"),!o)return;const n=this.getRender({id:e.id,type:e.type,name:"",props:{controlAddTop:i&&r===0?i:null,controlAddBottom:i||null,controls:s,userBlock:o,id:e.id,type:e.type}},x);if(!n)return;this.renderHTMLContainer.appendChild(n),this.renderHTMLContainer.querySelectorAll("[data-bb-control]").forEach(l=>{l.addEventListener("click",a=>{if(!(a!=null&&a.currentTarget)||!(a.currentTarget instanceof HTMLElement))return;const d=a.currentTarget.getAttribute("data-type");d&&([b.EDIT,b.ADD].includes(d)&&this.renderModalFromControlType(d,a),d===b.REMOVE&&(console.log("сквозное сообщение что блок удален"),this.removeBlockFromControl(a)),d===b.MOVE_PREV&&this.moveBlockFromControl(b.MOVE_PREV,a),d===b.MOVE_NEXT&&this.moveBlockFromControl(b.MOVE_NEXT,a))})})})}renderOptServices(){var o;const r=new DOMParser().parseFromString(C,"text/html"),t=(o=r==null?void 0:r.body)==null?void 0:o.firstChild;t&&document.body.append(t)}getRenderControls(e){const r=document.createElement("div");return r.classList.add("bb-block-controls","bb-border-box"),[b.EDIT,b.REMOVE,b.MOVE_PREV,b.MOVE_NEXT].forEach(t=>{const o=this.getRenderControl(e,t);o&&r.append(o)}),r}getRenderControl(e,r){const t=this.getRender({id:`control-${r}-${e.id}`,type:`control-${r}`,name:"",props:{type:r}},T);return t||null}moveBlockFromControl(e,r){var s,i;const t=(i=(s=r==null?void 0:r.target)==null?void 0:s.closest("[data-bb-type-block]"))==null?void 0:i.getAttribute("id"),o=this.blocksData.findIndex(n=>n.id===t);!this.blocksData[o]||!t||(e===b.MOVE_PREV&&this.manager.movePrevBlock(o),e===b.MOVE_NEXT&&this.manager.moveNextBlock(o),this.updateDataFromManager(),setTimeout(()=>{this.scrollToBlock(t)},100))}scrollToBlock(e){var r;(r=document.getElementById(e))==null||r.scrollIntoView({behavior:"smooth"})}removeBlockFromControl(e){var t,o;const r=(o=(t=e==null?void 0:e.target)==null?void 0:t.closest("[data-bb-type-block]"))==null?void 0:o.getAttribute("id");r&&this.removeBlock(r)}removeBlock(e){this.manager.removeBlock(e),this.updateDataFromManager()}updateDataFromManager(){this.blocksData=this.manager.getBlocks(),this.renderOptMain()}createFields(e){let r=[];for(let t in e.form){const o=e.form[t],s=e.props[t],i=A(s)?null:s,n=this.createField(o,t,i);n&&r.push(n)}return r}createField(e,r,t){if(e.typeField,e.typeField==="text"){console.log("WWWWWWWWWWWWWWWWWWWWWWWWW",e);const o=this.getRender({id:`bb-field-${e.typeField}-${r}`,type:`bb-field-${e.type}`,props:{label:e.label||"Текст",placeholder:e.placeholder||"",value:t||"",id:`${Date.now()}-${Math.random().toString(16).slice(2)}`}},M);if(o)return o}if(e.typeField==="textarea"){const o=this.getRender({id:`bb-field-${e.typeField}-${r}`,type:`bb-field-${e.type}`,props:{label:e.label||"Текст большой",placeholder:e.placeholder||"",value:t||"",id:`${Date.now()}-${Math.random().toString(16).slice(2)}`}},w);if(o)return o}if(e.typeField==="each-array"){if(!Object.hasOwn(e,"each"))return console.warn("Для типа each-array свойство each обязательно! Reference ",e),null;const o=e.each.typeField==="each-object"?this.createField(e.each,r,t):this.createField(e.each,r);let s=[];Array.isArray(t)&&t.length&&e.each.typeField!=="each-object"&&t.forEach(n=>{s.push(this.createField(e.each,r,n))}),console.log("value.label",e.label);const i=e.each.typeField==="each-object"?o:this.getRender({id:`bb-fieldset-${e.typeField}-${r}`,type:`bb-fieldset-${e.type}`,props:{fields:[...s,o],label:e.label||"",btnText:"Добавить",btnIcon:"add",btnTheme:"dark-outline",btnSize:"sm"}},_);if(i)return i}if(e.typeField==="each-object"){if(!Object.hasOwn(e,"each"))return console.warn("Для типа each-object свойство each обязательно! Reference ",e),null;let o=[];for(let p in e.each){const l=this.createField(e.each[p],p);l&&o.push(l)}const s=this.getRender({id:`bb-fieldset-${e.typeField}-${r}`,type:`bb-fieldset-${e.type}`,props:{fields:o}},v);let i=[];Array.isArray(t)&&t.forEach(p=>{let l=[];for(let d in p){const m=p[d],f=this.createField(e.each[d],d,m);f&&l.push(f)}const a=this.getRender({id:`bb-fieldset-${e.typeField}-${r}`,type:`bb-fieldset-${e.type}`,props:{fields:l}},v);i.push(a)});const n=this.getRender({id:`bb-fieldset-${e.typeField}-${r}`,type:`bb-fieldset-${e.type}`,props:{fields:[...i,s],label:e.label||"",btnText:"Добавить",btnIcon:"add",btnTheme:"dark-outline",btnSize:"sm"}},_);if(n)return n}return null}renderModalFromControlType(e,r){var i,n;let t=null;if(e===b.ADD&&(t=this.getRender({id:"bb-window-add",type:"bb-window-add",props:{items:Object.values(this.registeredBlocks)}},L)),e===b.EDIT){const p=(n=(i=r==null?void 0:r.target)==null?void 0:i.closest("[data-bb-type-block]"))==null?void 0:n.getAttribute("id"),l=this.blocksData.find(m=>m.id===p);let a=this.createFields(l);t=this.getRender({id:"bb-form-edit",type:"bb-form-edit",props:{title:l==null?void 0:l.name,fields:a,btnText:"Сохранить"}},u)}const o=this.getRender({id:`bb-modal-${e}`,type:`bb-modal-${e}`,name:"",props:{body:t}},h);this.createModal(o);const s=o==null?void 0:o.querySelectorAll("[data-item]");s==null||s.forEach(p=>{p.addEventListener("click",l=>{if(!(l.currentTarget instanceof HTMLElement))return;const a=l.currentTarget.getAttribute("data-item"),d=a?this.registeredBlocks[a]:null;let m=this.createFields(d);const f=this.getRender({id:"bb-form-edit",type:"bb-form-edit",props:{title:d==null?void 0:d.name,fields:m}},u),y=this.getRender({id:`bb-modal-${e}`,type:`bb-modal-${e}`,name:"",props:{body:f}},h);this.createModal(y)})})}createModal(e){if(!e)return;const r=document.querySelector("[data-bb-modal]");r&&r.remove(),e.addEventListener("click",t=>{!t.target||!(t.target instanceof HTMLElement)||(t.target.hasAttribute("data-bb-modal-close")||t.target.hasAttribute("data-bb-modal"))&&(e.remove(),document.body.classList.remove("bb-scrollbar-is-locked"))}),document.body.classList.add("bb-scrollbar-is-locked"),document.body.append(e)}}exports.BaseBlockRenderer=E;exports.OptBlockRenderer=F;

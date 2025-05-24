@@ -60,6 +60,46 @@ export class BlockManager {
         this.blocks = this.blocks.filter(block => block.id !== id);
     }
 
+    moveNextBlock(index: number) {
+      if (index === this.blocks?.length - 1) {
+        return
+      }
+
+      const originalBLock = this.blocks[index]
+      const nextBlock = this.blocks[index + 1]
+
+      const leftItems = index === 0 ? [] : this.blocks.slice(0, index)
+      const rightItems = this.blocks.slice(index + 2)
+
+      const leftPart = [...(leftItems || [])]
+
+      if (nextBlock) {
+        leftPart.push(nextBlock)
+      }
+
+      this.blocks = [...leftPart, originalBLock, ...(rightItems || [])]
+    }
+
+    movePrevBlock(index: number) {
+      if (index === 0) {
+        return
+      }
+
+      const originalBLock = this.blocks[index]
+      const prevBlock = this.blocks[index - 1]
+
+      const leftItems = this.blocks.slice(0, index - 1)
+      const rightItems = this.blocks.slice(index + 1)
+
+      const leftPart = [...(leftItems || []), originalBLock]
+
+      if (prevBlock) {
+        leftPart.push(prevBlock)
+      }
+
+      this.blocks = [...leftPart, ...(rightItems || [])]
+    }
+
     getBlocks(): OptBlockModel[] {
         return this.blocks;
     }

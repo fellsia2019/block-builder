@@ -1,10 +1,10 @@
 export const INPUT_TEMPLATE = `
-    <div class="bb-input">
+    <div class="bb-input bb-base-field">
         <div class="bb-input__inner">
-            <label for="" class="bb-input__label">
+            <label for="bb-control-[[ id ]]" class="bb-input__label bb-base-field__label">
                 [[ label ]]
             </label>
-            <input class="bb-input__input" value="[[ value ]]" placeholder="[[ placeholder ]]" />
+            <input id="bb-control-[[ id ]]" class="bb-input__input bb-base-field__field" value="[[ value ]]" placeholder="[[ placeholder ]]" />
         </div>
     </div>
 

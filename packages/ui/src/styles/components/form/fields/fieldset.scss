@@ -1,0 +1,61 @@
+$b: '.bb-fieldset';
+
+#{$b} {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 12px;
+    border-radius: 12px;
+    background-color: rgb(235, 235, 247);
+
+    // .bb-fieldset__label
+    &__label {
+        position: relative;
+        font-size: 18px;
+        line-height: normal;
+        text-transform: uppercase;
+    }
+
+    // .bb-fieldset__inner
+    &__inner {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    // .bb-fieldset__item
+    &__item {
+        position: relative;
+    }
+
+    // .bb-fieldset__remove
+    &__remove {
+        position: absolute;
+        right: 4px;
+        top: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 20px;
+        min-width: 20px;
+        height: 20px;
+        color: black;
+        padding: 4px;
+        border-radius: 50%;
+        border: 1px solid black;
+        background-color: white;
+        transition: all 0.3s ease;
+        cursor: pointer;
+
+        &:hover {
+            color: white;
+            background-color: black;
+        }
+
+        // .bb-fieldset__remove-icon
+        &-icon {
+            width: 100%;
+            height: 100%;
+        }
+    }
+}

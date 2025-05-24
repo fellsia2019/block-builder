@@ -1,0 +1,22 @@
+$b: '.bb-window-add-block';
+
+#{$b} {
+    
+
+    // .bb-window-add-block__aside
+    &__aside {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+
+        // .bb-window-add-block__aside-item
+        &-item {
+            transition: all 0.3s ease;
+            cursor: pointer;
+            
+            &:hover {
+                color: rgb(114, 114, 255);
+            }
+        }
+    }
+}

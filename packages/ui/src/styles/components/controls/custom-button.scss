@@ -1,0 +1,65 @@
+$b: '.bb-custom-button';
+
+#{$b} {
+    display: inline-flex;
+    border: none;
+    box-shadow: none;
+    background-color: transparent;
+    cursor: pointer;
+
+    white-space: nowrap;
+    user-select: none;
+    transition: all 0.3s ease;
+
+    // as :default
+    &[data-size=""],
+    &[data-size="md"] {
+        border-radius: 12px;
+        padding: 14px 28px;
+    }
+
+    &[data-size="sm"] {
+        border-radius: 12px;
+        padding: 10px 22px;
+    }
+
+    // as :default
+    &[data-theme=""],
+    &[data-theme="dark"] {
+        background-color: #191919;
+        color: white;
+        border: 1px solid #191919;
+
+        &:hover {
+            color: #191919;
+            background-color: white;
+        }
+    }
+
+    &[data-theme="dark-outline"] {
+        background-color: white;
+        color: #191919;
+        border: 1px solid #191919;
+
+        &:hover {
+            background-color: #191919;
+            color: white;
+        }
+    }
+
+    // .bb-custom-button__inner
+    &__inner {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        gap: 10px;
+    }
+
+    // .bb-custom-button__svg
+    &__svg {
+        width: 16px;
+        min-width: 16px;
+        height: 16px;
+    }
+}

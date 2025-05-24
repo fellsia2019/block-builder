@@ -1,3 +1,4 @@
+// @ts-ignore - когда опубликую пакет убрать игнор флаг
 import type { BaseBlockModel } from '@block-builder/core';
 
 export class BaseBlockRenderer {
@@ -109,8 +110,6 @@ export class BaseBlockRenderer {
                     const tempDiv = document.createElement('div');
                     tempDiv.innerHTML = htmlString;
                     return tempDiv.innerHTML
-
-                    // return value
                 }
                 return JSON.stringify(value, null, 2);
             };

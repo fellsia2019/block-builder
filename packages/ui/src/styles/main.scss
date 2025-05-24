@@ -1,3 +1,14 @@
 @import './common/global.scss'; 
 
+@import './components/opt-block.scss'; 
 @import './components/modal.scss'; 
+@import './components/controls/block-controls.scss';
+@import './components/controls/btn-control.scss';
+@import './components/controls/custom-button.scss';
+@import './components/form/form.scss';
+@import './components/form/fields/base-field.scss';
+@import './components/form/fields/input.scss';
+@import './components/form/fields/textarea.scss';
+@import './components/form/fields/fieldset.scss';
+@import './components/form/fields/group-field.scss';
+@import './components/window/window-add-block.scss';

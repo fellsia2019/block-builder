@@ -1,0 +1,36 @@
+$b: '.bb-block-controls';
+
+#{$b} {
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 100%;
+    min-height: 250px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 10px;
+    transition: all 0.3s ease;
+    opacity: 0.3;
+
+    &::before {
+        content: '';
+        position: absolute;
+        right: 0;
+        top: 0;
+        width: calc(100% + 20px);
+        height: 100%;
+        opacity: 0;
+        background: linear-gradient(-90deg, white, transparent);
+        pointer-events: none;
+        touch-action: none;
+        transition: all 0.3s ease;
+    }
+
+    &:hover {
+        opacity: 1;
+        &::before {
+            opacity: 1;
+        }
+    }
+}
