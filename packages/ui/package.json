@@ -1,0 +1,27 @@
+{
+  "name": "@block-builder/ui",
+  "version": "1.0.0",
+  "main": "./dist/block-builder-ui.js",
+  "module": "./dist/block-builder-ui.mjs",
+  "types": "./dist/index.d.ts",
+  "style": "./dist/style.css",
+  "exports": {
+    ".": {
+      "require": "./dist/block-builder-ui.js",
+      "import": "./dist/block-builder-ui.mjs"
+    },
+    "./dist/index.css": "./dist/index.css"
+  },
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite serve"
+  },
+  "dependencies": {
+    "@block-builder/core": "workspace:*"
+  },
+  "devDependencies": {
+    "vite": "^4.0.0",
+    "sass": "^1.58.0",
+    "typescript": "^4.0.0"
+  }
+}

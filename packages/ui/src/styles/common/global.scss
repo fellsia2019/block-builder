@@ -1,0 +1,15 @@
+.bb-border-box {
+    box-sizing: border-box;
+
+    *, *::before, *::after {
+        box-sizing: border-box;
+    }
+}
+
+body {
+    &.bb-scrollbar-is-locked {
+        overflow: hidden;
+        height: var(--app-height, 100vh);
+        will-change: scroll-position;
+    }
+}

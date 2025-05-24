@@ -1,10 +1,10 @@
-import type { BlockModel } from './types';
+import type { BaseBlockModel } from './types';
 
 /**
  * Валидирует блок по минимальной схеме.
  * @throws {Error} – Если блок невалиден.
  */
-export function validateBlock(block: BlockModel): void {
+export function validateBlock(block: BaseBlockModel): void {
   if (!block.type) {
     throw new Error('Block type is required');
   }
