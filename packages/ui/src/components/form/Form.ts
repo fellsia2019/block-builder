@@ -1,7 +1,7 @@
 import { CUSTOM_BUTTON_TEMPLATE } from '../controls/btn/CustomButton'
 
 export const FORM_TEMPLATE = `
-    <form class="bb-form">
+    <form class="bb-form" data-bb-form>
         <div class="bb-form__inner">
             <div class="bb-form__header">
                 <div class="bb-form__title">

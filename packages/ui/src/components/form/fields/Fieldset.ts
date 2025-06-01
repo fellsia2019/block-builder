@@ -1,7 +1,7 @@
 import { CUSTOM_BUTTON_TEMPLATE } from '../../controls/btn/CustomButton'
 
 export const FIELDSET_TEMPLATE = `
-    <div class="bb-fieldset">
+    <div class="bb-fieldset" data-bb-field-key="[[ key ]]">
         <div render-if="label" class="bb-fieldset__label">
             [[ label ]]
         </div>

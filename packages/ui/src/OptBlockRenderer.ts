@@ -1,3 +1,103 @@
+// вынести эти три класса FormModel, FormParserService, FormController куда-то отдельно
+
+// Модель данных
+class FormModel {
+  schema: any;
+  data: {};
+  constructor(schema) {
+    this.schema = schema;
+    this.data = {};
+  }
+
+  update(data) {
+    this.data = data;
+  }
+
+  getData() {
+    return this.data;
+  }
+}
+
+// Сервис для парсинга формы
+class FormParserService {
+  schema: any;
+  constructor(schema) {
+    this.schema = schema;
+  }
+
+  parse(formElement) {
+    const result = {};
+    
+    for (const [fieldKey, fieldSchema] of Object.entries(this.schema)) {
+      if (fieldSchema.typeField === 'each-array') {
+        result[fieldKey] = this._parseArrayField(formElement, fieldKey, fieldSchema);
+      } else {
+        result[fieldKey] = this._parseSimpleField(formElement, fieldKey);
+      }
+    }
+    
+    return result;
+  }
+
+  _parseSimpleField(formElement, fieldKey) {
+    const fieldElement = formElement.querySelector(`[data-bb-field-key="${fieldKey}"]`);
+    if (!fieldElement) return '';
+    
+    const inputElement = fieldElement.querySelector('.bb-base-field__field');
+    return inputElement ? inputElement.value : '';
+  }
+
+  _parseArrayField(formElement, fieldKey, fieldSchema) {
+    const container = formElement.querySelector(`[data-bb-field-key="${fieldKey}"]`);
+    if (!container) return [];
+
+    const items = container.querySelectorAll('.bb-fieldset__item');
+    const result = [];
+
+    items.forEach(item => {
+      if (fieldSchema.each.typeField === 'each-object') {
+        // Обработка вложенных объектов (как в items)
+        const obj = {};
+        for (const [nestedKey, nestedSchema] of Object.entries(fieldSchema.each.each)) {
+          const nestedField = item.querySelector(`[data-bb-field-key="${nestedKey}"]`);
+          if (nestedField) {
+            const input = nestedField.querySelector('.bb-base-field__field');
+            obj[nestedKey] = input ? input.value : '';
+          }
+        }
+        result.push(obj);
+      } else {
+        // Обработка простых массивов (как в tags)
+        const input = item.querySelector('.bb-base-field__field');
+        if (input && input.value) {
+          result.push(input.value);
+        }
+      }
+    });
+
+    return result;
+  }
+}
+
+// Контроллер/Презентер
+class FormController {
+  model: FormModel;
+  parser: FormParserService;
+  formElement: any;
+  constructor(formElement, schema) {
+    this.model = new FormModel(schema);
+    this.parser = new FormParserService(schema);
+    this.formElement = formElement;
+  }
+
+  getFormData() {
+    const data = this.parser.parse(this.formElement);
+    this.model.update(data);
+    return this.model.getData();
+  }
+}
+
+
 // @ts-ignore - когда опубликую пакет убрать игнор флаг
 import { type OptBlockModel, BlockManager } from '@block-builder/core';
 import { type BlockRendererMap, BlockControlTypes } from './types'
@@ -84,11 +184,10 @@ export class OptBlockRenderer extends BaseBlockRenderer {
                 return
             }
 
-            this.renderHTMLContainer.appendChild(blockNode);
-
+            this.renderHTMLContainer.append(blockNode);
 
             // events
-            const controlsNodes = this.renderHTMLContainer.querySelectorAll('[data-bb-control]')
+            const controlsNodes = blockNode.querySelectorAll('[data-bb-control]')
             controlsNodes.forEach(control => {
                 control.addEventListener('click', (e: Event) => {
                     if (!e?.currentTarget || !(e.currentTarget instanceof HTMLElement)) {
@@ -103,6 +202,19 @@ export class OptBlockRenderer extends BaseBlockRenderer {
     
                     if ([BlockControlTypes.EDIT, BlockControlTypes.ADD].includes(type as BlockControlTypes)) {
                         this.renderModalFromControlType(type as (BlockControlTypes.ADD | BlockControlTypes.EDIT), e)
+
+                        const modal = document.querySelector('[data-bb-modal]')
+                        const form = modal?.querySelector('[data-bb-form]')
+
+                        form?.addEventListener('submit', e => {
+                            e.preventDefault()
+
+                            const formController = new FormController(form, block.form);
+
+                            // Получение данных формы
+                            const formData = formController.getFormData();
+                            console.log('!!!!!!!!!!!!!!!', formData);
+                        })
                     }
                     if (type === BlockControlTypes.REMOVE) {
                         console.log('сквозное сообщение что блок удален')
@@ -117,6 +229,8 @@ export class OptBlockRenderer extends BaseBlockRenderer {
                     }
                 })
             })
+
+
         });
     }
 
@@ -246,7 +360,8 @@ export class OptBlockRenderer extends BaseBlockRenderer {
                         label: value.label || 'Текст',
                         placeholder: value.placeholder || '',
                         value: mergeValue || '',
-                        id: `${Date.now()}-${Math.random().toString(16).slice(2)}` // вынести в утилс, такой же генератор айди есть в BlockManager
+                        id: `${Date.now()}-${Math.random().toString(16).slice(2)}`, // вынести в утилс, такой же генератор айди есть в BlockManager
+                        key
                     }
 
                 },
@@ -267,7 +382,8 @@ export class OptBlockRenderer extends BaseBlockRenderer {
                         label:value.label || 'Текст большой',
                         placeholder: value.placeholder || '',
                         value: mergeValue || '',
-                        id: `${Date.now()}-${Math.random().toString(16).slice(2)}` // вынести в утилс, такой же генератор айди есть в BlockManager
+                        id: `${Date.now()}-${Math.random().toString(16).slice(2)}`, // вынести в утилс, такой же генератор айди есть в BlockManager
+                        key
                     }
 
                 },
@@ -309,7 +425,8 @@ export class OptBlockRenderer extends BaseBlockRenderer {
                             btnText: 'Добавить',
                             btnIcon: 'add',
                             btnTheme: 'dark-outline',
-                            btnSize: 'sm'
+                            btnSize: 'sm',
+                            key
                         }
 
                     },
@@ -341,6 +458,7 @@ export class OptBlockRenderer extends BaseBlockRenderer {
                     type: `bb-fieldset-${value.type}`,
                     props: {
                         fields,
+                        key
                     }
 
                 },
@@ -367,7 +485,8 @@ export class OptBlockRenderer extends BaseBlockRenderer {
                             id: `bb-fieldset-${value.typeField}-${key}`,
                             type: `bb-fieldset-${value.type}`,
                             props: {
-                                fields
+                                fields,
+                                key
                             }
 
                         },
@@ -388,7 +507,8 @@ export class OptBlockRenderer extends BaseBlockRenderer {
                         btnText: 'Добавить',
                         btnIcon: 'add',
                         btnTheme: 'dark-outline',
-                        btnSize: 'sm'
+                        btnSize: 'sm',
+                        key
                     }
 
                 },
@@ -404,7 +524,7 @@ export class OptBlockRenderer extends BaseBlockRenderer {
     }
 
     renderModalFromControlType(type: BlockControlTypes.ADD | BlockControlTypes.EDIT, e: Event) {
-        let body: any = null
+        let formNode: any = null
 
         if (type === BlockControlTypes.ADD) {
             const template = this.getRender(
@@ -418,7 +538,7 @@ export class OptBlockRenderer extends BaseBlockRenderer {
                 ADD_BLOCK_TEMPLATE
             )
 
-            body = template
+            formNode = template
         }
 
         if (type === BlockControlTypes.EDIT) {
@@ -441,7 +561,7 @@ export class OptBlockRenderer extends BaseBlockRenderer {
                 FORM_TEMPLATE
             )
 
-            body = form
+            formNode = form
         }
 
         const modalHTMLElement: HTMLElement | null = this.getRender(
@@ -450,13 +570,13 @@ export class OptBlockRenderer extends BaseBlockRenderer {
                 type: `bb-modal-${type}`,
                 name: '',
                 props: {
-                    body: body
+                    body: formNode
                 }
             },
             MODAL_TEMPLATE
         )
 
-        this.createModal(modalHTMLElement)
+        const modal = this.createModal(modalHTMLElement)
 
         const items = modalHTMLElement?.querySelectorAll('[data-item]')
         items?.forEach(item => {
@@ -474,8 +594,8 @@ export class OptBlockRenderer extends BaseBlockRenderer {
                 // рендерим форму
                 const form = this.getRender(
                     {
-                        id: 'bb-form-edit',
-                        type: 'bb-form-edit',
+                        id: `bb-form-${type}`,
+                        type: `bb-form-${type}`,
                         props: {
                             title: registerBlock?.name,
                             fields
@@ -498,7 +618,6 @@ export class OptBlockRenderer extends BaseBlockRenderer {
 
                 this.createModal(modalHTMLElement)
             })
-
         });
     }
 
