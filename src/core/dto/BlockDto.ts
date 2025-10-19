@@ -18,7 +18,9 @@ export interface BlockDto {
     width: number;
     height: number;
   };
-  template: string;
+  template?: string; // Строковый шаблон (для HTML)
+  component?: string; // Имя Vue3 компонента
+  componentProps?: Record<string, any>; // Пропсы для Vue3 компонента
   children?: string[]; // IDs дочерних блоков
   parent?: string;
   visible?: boolean;
@@ -45,7 +47,9 @@ export interface CreateBlockDto {
     width: number;
     height: number;
   };
-  template: string;
+  template?: string; // Строковый шаблон (для HTML)
+  component?: string; // Имя Vue3 компонента
+  componentProps?: Record<string, any>; // Пропсы для Vue3 компонента
   parent?: string;
   visible?: boolean;
   locked?: boolean;
@@ -70,6 +74,9 @@ export interface UpdateBlockDto {
     width: number;
     height: number;
   };
+  template?: string; // Строковый шаблон (для HTML)
+  component?: string; // Имя Vue3 компонента
+  componentProps?: Record<string, any>; // Пропсы для Vue3 компонента
   visible?: boolean;
   locked?: boolean;
 }

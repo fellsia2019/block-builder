@@ -33,18 +33,22 @@ npm install naberika
 ```
 
 ### Использование
+
+#### HTML шаблоны
 ```typescript
 import { 
   BlockManagementUseCase,
   MemoryBlockRepositoryImpl,
+  MemoryComponentRegistry,
   CreateBlockDto
 } from 'naberika';
 
-// Создание use case (единственный вход в ядро)
+// Создание use case с поддержкой Vue3 компонентов
 const blockRepository = new MemoryBlockRepositoryImpl();
-const blockManagement = new BlockManagementUseCase(blockRepository);
+const componentRegistry = new MemoryComponentRegistry();
+const blockManagement = new BlockManagementUseCase(blockRepository, componentRegistry);
 
-// Создание блока
+// Создание блока с HTML шаблоном
 const createDto: CreateBlockDto = {
   type: 'text',
   settings: { fontSize: 16, color: '#333' },
@@ -55,6 +59,28 @@ const createDto: CreateBlockDto = {
 };
 
 const block = await blockManagement.createBlock(createDto);
+```
+
+#### Vue3 компоненты
+```typescript
+// Регистрация Vue3 компонента
+const CustomButton = {
+  name: 'CustomButton',
+  props: ['text', 'variant'],
+  template: '<button :class="`btn btn-${variant}`">{{ text }}</button>'
+};
+
+blockManagement.registerComponent('CustomButton', CustomButton);
+
+// Создание блока с Vue3 компонентом
+const vueBlock = await blockManagement.createVueBlock(
+  'button',
+  'CustomButton',
+  { text: 'Click me!', variant: 'primary' },
+  { backgroundColor: '#007bff' },
+  { x: 100, y: 100 },
+  { width: 150, height: 40 }
+);
 ```
 
 ## 🏗️ Архитектура
@@ -97,6 +123,11 @@ await blockManagement.deleteBlock(blockId);
 
 // Дублирование блока
 await blockManagement.duplicateBlock(blockId);
+
+// Vue3 компоненты
+await blockManagement.registerComponent(name, component);
+await blockManagement.createVueBlock(type, componentName, props, settings, position, size);
+await blockManagement.updateVueComponent(blockId, componentName, componentProps);
 ```
 
 ### DTO
@@ -105,7 +136,9 @@ interface CreateBlockDto {
   type: string;
   settings: Record<string, any>;
   props: Record<string, any>;
-  template: string;
+  template?: string; // HTML шаблон
+  component?: string; // Vue3 компонент
+  componentProps?: Record<string, any>; // Пропсы для Vue3
   position?: { x: number; y: number; z?: number };
   size?: { width: number; height: number };
   visible?: boolean;
@@ -145,7 +178,8 @@ npm run start
 ## 📚 Примеры
 
 Смотрите папку `src/examples/` для примеров использования:
-- `simple-example.ts` - базовый пример
+- `simple-example.ts` - базовый пример с Vue3 компонентами
+- `vue3-components-example.ts` - расширенный пример Vue3 компонентов
 - `index.html` - интерактивная демонстрация
 - `vue3-example.vue` - Vue3 компонент
 

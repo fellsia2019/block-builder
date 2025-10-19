@@ -1,4 +1,17 @@
-import { Block, BlockId, BlockSettings, BlockProps, BlockStyle } from '../domain/types';
+import { BlockDto } from '../core/dto/BlockDto';
+
+// Типы для валидации
+export type Block = BlockDto;
+export type BlockId = string;
+export interface BlockSettings {
+  [key: string]: any;
+}
+export interface BlockProps {
+  [key: string]: any;
+}
+export interface BlockStyle {
+  [key: string]: string | number;
+}
 
 /**
  * Валидация блоков и их свойств

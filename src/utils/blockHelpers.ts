@@ -1,4 +1,17 @@
-import { Block, BlockId, BlockPosition, BlockSize } from '../domain/types';
+import { BlockDto } from '../core/dto/BlockDto';
+
+// Типы для утилит
+export type Block = BlockDto;
+export type BlockId = string;
+export interface BlockPosition {
+  x: number;
+  y: number;
+  z?: number;
+}
+export interface BlockSize {
+  width: number;
+  height: number;
+}
 
 /**
  * Утилиты для работы с блоками

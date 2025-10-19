@@ -15,6 +15,7 @@ export * from './core/entities/Block';
 
 // Core - Ports (интерфейсы)
 export * from './core/ports/BlockRepository';
+export * from './core/ports/ComponentRegistry';
 
 // Core - Use Cases (единственный вход в ядро)
 export * from './core/use-cases/CreateBlockUseCase';
@@ -23,10 +24,12 @@ export * from './core/use-cases/DeleteBlockUseCase';
 export * from './core/use-cases/MoveBlockUseCase';
 export * from './core/use-cases/DuplicateBlockUseCase';
 export * from './core/use-cases/BlockManagementUseCase';
+export * from './core/use-cases/ComponentManagementUseCase';
 
 // Infrastructure - Реализации портов
 export * from './infrastructure/repositories/MemoryBlockRepositoryImpl';
 export * from './infrastructure/repositories/LocalStorageBlockRepositoryImpl';
+export * from './infrastructure/registries/MemoryComponentRegistry';
 
 // UI компоненты (только для Vue3 проектов)
 // export { default as BlockBuilder } from './ui/components/BlockBuilder.vue';

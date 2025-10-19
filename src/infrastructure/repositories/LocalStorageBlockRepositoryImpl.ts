@@ -86,6 +86,7 @@ export class LocalStorageBlockRepositoryImpl implements BlockRepository {
     const updatedBlock: BlockDto = {
       ...existingBlock,
       ...updates,
+      style: updates.style ? { ...existingBlock.style, ...updates.style } as Record<string, string | number> : existingBlock.style,
       metadata: {
         ...existingBlock.metadata!,
         updatedAt: new Date(),

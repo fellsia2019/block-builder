@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Naberika - Чистый JavaScript</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .demo-section {
+            margin-bottom: 40px;
+            padding: 25px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #4facfe;
+        }
+
+        .demo-section h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+
+        .btn-info {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            color: white;
+        }
+
+        .canvas {
+            width: 100%;
+            height: 400px;
+            border: 2px dashed #dee2e6;
+            border-radius: 8px;
+            background: #ffffff;
+            position: relative;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .block {
+            position: absolute;
+            border: 2px solid #007bff;
+            border-radius: 6px;
+            background: rgba(0, 123, 255, 0.1);
+            cursor: move;
+            user-select: none;
+            transition: all 0.3s ease;
+            min-width: 100px;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .block:hover {
+            background: rgba(0, 123, 255, 0.2);
+            transform: scale(1.02);
+        }
+
+        .block.selected {
+            border-color: #28a745;
+            background: rgba(40, 167, 69, 0.2);
+            box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.3);
+        }
+
+        .block.locked {
+            border-color: #dc3545;
+            background: rgba(220, 53, 69, 0.1);
+            cursor: not-allowed;
+        }
+
+        .block.hidden {
+            opacity: 0.3;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .stat-card .number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #4facfe;
+        }
+
+        .log {
+            background: #1e1e1e;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+
+        .log-entry {
+            margin-bottom: 8px;
+            padding: 4px 0;
+        }
+
+        .log-entry.success {
+            color: #50fa7b;
+        }
+
+        .log-entry.error {
+            color: #ff5555;
+        }
+
+        .log-entry.info {
+            color: #8be9fd;
+        }
+
+        .log-entry.warning {
+            color: #ffb86c;
+        }
+
+        .architecture-diagram {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 2px solid #e9ecef;
+        }
+
+        .architecture-diagram h3 {
+            color: #333;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .layer {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 6px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .layer-core {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .layer-infrastructure {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+
+        .layer-ui {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            color: white;
+        }
+
+        .arrow {
+            text-align: center;
+            font-size: 1.5rem;
+            color: #666;
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏗️ Naberika - Чистый JavaScript</h1>
+            <p>Блочный конструктор с чистой архитектурой</p>
+        </div>
+
+        <div class="content">
+            <!-- Архитектура -->
+            <div class="demo-section">
+                <h2>🎯 Чистая архитектура</h2>
+                <div class="architecture-diagram">
+                    <h3>Слои архитектуры</h3>
+                    <div class="layer layer-ui">🎨 UI Layer</div>
+                    <div class="arrow">⬇️</div>
+                    <div class="layer layer-core">🎯 Core Layer (Use Cases)</div>
+                    <div class="arrow">⬇️</div>
+                    <div class="layer layer-infrastructure">🔧 Infrastructure Layer</div>
+                </div>
+            </div>
+
+            <!-- Управление блоками -->
+            <div class="demo-section">
+                <h2>📦 Управление блоками</h2>
+                <div class="controls">
+                    <button class="btn btn-primary" onclick="addTextBlock()">
+                        📝 Добавить текст
+                    </button>
+                    <button class="btn btn-success" onclick="addImageBlock()">
+                        🖼️ Добавить изображение
+                    </button>
+                    <button class="btn btn-info" onclick="addButtonBlock()">
+                        🔘 Добавить кнопку
+                    </button>
+                    <button class="btn btn-warning" onclick="addContainerBlock()">
+                        📦 Добавить контейнер
+                    </button>
+                    <button class="btn btn-danger" onclick="clearAllBlocks()">
+                        🗑️ Очистить все
+                    </button>
+                </div>
+
+                <div class="canvas" id="canvas"></div>
+
+                <div class="stats">
+                    <div class="stat-card">
+                        <h3>Всего блоков</h3>
+                        <div class="number" id="totalBlocks">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Выбранный блок</h3>
+                        <div class="number" id="selectedBlock">-</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Заблокированные</h3>
+                        <div class="number" id="lockedBlocks">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Лог -->
+            <div class="demo-section">
+                <h2>📋 Лог операций</h2>
+                <div class="log" id="log"></div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Импорт Naberika (в реальном проекте)
+        // import { BlockManagementUseCase, MemoryBlockRepositoryImpl, MemoryComponentRegistry } from '../index.js';
+
+        // Имитация Naberika для демонстрации
+        class SimpleBlock {
+            constructor(data) {
+                this.id = `block_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                this.type = data.type;
+                this.settings = data.settings || {};
+                this.props = data.props || {};
+                this.template = data.template;
+                this.position = data.position || { x: 100, y: 100 };
+                this.size = data.size || { width: 150, height: 80 };
+                this.visible = data.visible !== false;
+                this.locked = data.locked || false;
+                this.selected = false;
+            }
+
+            updateSettings(newSettings) {
+                this.settings = { ...this.settings, ...newSettings };
+            }
+
+            updateProps(newProps) {
+                this.props = { ...this.props, ...newProps };
+            }
+
+            moveTo(newPosition) {
+                this.position = { ...this.position, ...newPosition };
+            }
+
+            setLocked(locked) {
+                this.locked = locked;
+            }
+
+            setVisible(visible) {
+                this.visible = visible;
+            }
+
+            setSelected(selected) {
+                this.selected = selected;
+            }
+        }
+
+        // Глобальные переменные
+        let blocks = [];
+        let selectedBlockId = null;
+
+        // Утилиты
+        function log(message, type = 'info') {
+            const logElement = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            entry.textContent = `[${timestamp}] ${message}`;
+            logElement.appendChild(entry);
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        function updateStats() {
+            document.getElementById('totalBlocks').textContent = blocks.length;
+            document.getElementById('selectedBlock').textContent = selectedBlockId || '-';
+            document.getElementById('lockedBlocks').textContent = blocks.filter(b => b.locked).length;
+        }
+
+        function renderBlocks() {
+            const canvas = document.getElementById('canvas');
+            canvas.innerHTML = '';
+
+            blocks.forEach(block => {
+                if (!block.visible) return;
+
+                const blockElement = document.createElement('div');
+                blockElement.className = 'block';
+                blockElement.id = block.id;
+                
+                if (block.selected) blockElement.classList.add('selected');
+                if (block.locked) blockElement.classList.add('locked');
+                if (!block.visible) blockElement.classList.add('hidden');
+
+                blockElement.style.left = block.position.x + 'px';
+                blockElement.style.top = block.position.y + 'px';
+                blockElement.style.width = block.size.width + 'px';
+                blockElement.style.height = block.size.height + 'px';
+
+                // Применяем стили из settings
+                Object.entries(block.settings).forEach(([key, value]) => {
+                    blockElement.style[key] = value;
+                });
+
+                // Рендерим содержимое из template
+                if (block.template) {
+                    let content = block.template;
+                    Object.entries(block.props).forEach(([key, value]) => {
+                        content = content.replace(new RegExp(`{{ props.${key} }}`, 'g'), value);
+                    });
+                    Object.entries(block.settings).forEach(([key, value]) => {
+                        content = content.replace(new RegExp(`{{ settings.${key} }}`, 'g'), value);
+                    });
+                    blockElement.innerHTML = content;
+                } else {
+                    blockElement.textContent = block.props.content || block.type;
+                }
+
+                // Обработчики событий
+                blockElement.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    selectBlock(block.id);
+                });
+
+                blockElement.addEventListener('mousedown', (e) => {
+                    if (block.locked) return;
+                    e.preventDefault();
+                    startDrag(block, e);
+                });
+
+                canvas.appendChild(blockElement);
+            });
+        }
+
+        function selectBlock(blockId) {
+            blocks.forEach(block => block.setSelected(block.id === blockId));
+            selectedBlockId = blockId;
+            updateStats();
+            renderBlocks();
+            
+            const block = blocks.find(b => b.id === blockId);
+            if (block) {
+                log(`Выбран блок: ${block.type} (${blockId})`, 'success');
+            }
+        }
+
+        function startDrag(block, e) {
+            if (block.locked) return;
+
+            const startX = e.clientX - block.position.x;
+            const startY = e.clientY - block.position.y;
+
+            function onMouseMove(e) {
+                block.moveTo({
+                    x: e.clientX - startX,
+                    y: e.clientY - startY
+                });
+                renderBlocks();
+            }
+
+            function onMouseUp() {
+                document.removeEventListener('mousemove', onMouseMove);
+                document.removeEventListener('mouseup', onMouseUp);
+                log(`Блок ${block.type} перемещен в позицию (${Math.round(block.position.x)}, ${Math.round(block.position.y)})`, 'info');
+            }
+
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+        }
+
+        // Функции для добавления блоков
+        window.addTextBlock = function() {
+            const block = new SimpleBlock({
+                type: 'text',
+                settings: {
+                    fontSize: '16px',
+                    color: '#333',
+                    backgroundColor: '#f8f9fa',
+                    padding: '10px',
+                    borderRadius: '4px',
+                    border: '1px solid #dee2e6'
+                },
+                props: {
+                    content: 'Текстовый блок',
+                    textAlign: 'center'
+                },
+                template: '<div style="text-align: {{ props.textAlign }}; font-size: {{ settings.fontSize }}; color: {{ settings.color }};">{{ props.content }}</div>',
+                position: { x: Math.random() * 300 + 50, y: Math.random() * 200 + 50 },
+                size: { width: 200, height: 60 }
+            });
+
+            blocks.push(block);
+            selectBlock(block.id);
+            updateStats();
+            renderBlocks();
+            log(`Добавлен текстовый блок: ${block.id}`, 'success');
+        };
+
+        window.addImageBlock = function() {
+            const block = new SimpleBlock({
+                type: 'image',
+                settings: {
+                    border: '2px solid #007bff',
+                    borderRadius: '8px',
+                    overflow: 'hidden'
+                },
+                props: {
+                    src: 'https://via.placeholder.com/200x150/007bff/ffffff?text=Image',
+                    alt: 'Placeholder Image'
+                },
+                template: '<img src="{{ props.src }}" alt="{{ props.alt }}" style="width: 100%; height: 100%; object-fit: cover;">',
+                position: { x: Math.random() * 300 + 50, y: Math.random() * 200 + 50 },
+                size: { width: 200, height: 150 }
+            });
+
+            blocks.push(block);
+            selectBlock(block.id);
+            updateStats();
+            renderBlocks();
+            log(`Добавлен блок изображения: ${block.id}`, 'success');
+        };
+
+        window.addButtonBlock = function() {
+            const block = new SimpleBlock({
+                type: 'button',
+                settings: {
+                    backgroundColor: '#007bff',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    fontSize: '14px',
+                    fontWeight: '600'
+                },
+                props: {
+                    text: 'Нажми меня!',
+                    variant: 'primary'
+                },
+                template: '<button style="width: 100%; height: 100%; background-color: {{ settings.backgroundColor }}; color: {{ settings.color }}; border: {{ settings.border }}; border-radius: {{ settings.borderRadius }}; cursor: {{ settings.cursor }}; font-size: {{ settings.fontSize }}; font-weight: {{ settings.fontWeight }};">{{ props.text }}</button>',
+                position: { x: Math.random() * 300 + 50, y: Math.random() * 200 + 50 },
+                size: { width: 150, height: 50 }
+            });
+
+            blocks.push(block);
+            selectBlock(block.id);
+            updateStats();
+            renderBlocks();
+            log(`Добавлена кнопка: ${block.id}`, 'success');
+        };
+
+        window.addContainerBlock = function() {
+            const block = new SimpleBlock({
+                type: 'container',
+                settings: {
+                    backgroundColor: '#f8f9fa',
+                    border: '2px dashed #6c757d',
+                    borderRadius: '8px',
+                    padding: '20px'
+                },
+                props: {
+                    title: 'Контейнер',
+                    content: 'Это контейнер для других блоков'
+                },
+                template: '<div style="text-align: center;"><h3 style="margin: 0 0 10px 0; color: #333;">{{ props.title }}</h3><p style="margin: 0; color: #666;">{{ props.content }}</p></div>',
+                position: { x: Math.random() * 300 + 50, y: Math.random() * 200 + 50 },
+                size: { width: 250, height: 120 }
+            });
+
+            blocks.push(block);
+            selectBlock(block.id);
+            updateStats();
+            renderBlocks();
+            log(`Добавлен контейнер: ${block.id}`, 'success');
+        };
+
+        window.clearAllBlocks = function() {
+            blocks = [];
+            selectedBlockId = null;
+            updateStats();
+            renderBlocks();
+            log('Все блоки удалены', 'warning');
+        };
+
+        // Обработчики клавиатуры
+        document.addEventListener('keydown', (e) => {
+            if (selectedBlockId) {
+                const block = blocks.find(b => b.id === selectedBlockId);
+                if (!block) return;
+
+                switch(e.key) {
+                    case 'Delete':
+                    case 'Backspace':
+                        blocks = blocks.filter(b => b.id !== selectedBlockId);
+                        selectedBlockId = null;
+                        updateStats();
+                        renderBlocks();
+                        log('Блок удален', 'error');
+                        break;
+                    case 'l':
+                    case 'L':
+                        block.setLocked(!block.locked);
+                        renderBlocks();
+                        log(`Блокировка изменена: ${block.locked}`, 'info');
+                        break;
+                    case 'h':
+                    case 'H':
+                        block.setVisible(!block.visible);
+                        renderBlocks();
+                        log(`Видимость изменена: ${block.visible}`, 'info');
+                        break;
+                }
+            }
+        });
+
+        // Инициализация
+        log('Naberika инициализирован - Чистый JavaScript', 'success');
+        log('Используйте кнопки для добавления блоков', 'info');
+        log('Кликните по блоку для выбора, перетащите для перемещения', 'info');
+        log('Клавиши: Delete - удалить, L - заблокировать, H - скрыть', 'info');
+        updateStats();
+    </script>
+</body>
+</html>
