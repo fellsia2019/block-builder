@@ -1,4 +1,5 @@
 import { BlockDto } from '../dto/BlockDto';
+import { FormGenerationConfig } from './ValidationRule';
 
 // Типы для сущности
 export type BlockId = string;
@@ -33,6 +34,7 @@ export interface Block {
   parent?: BlockId;
   visible?: boolean;
   locked?: boolean;
+  formConfig?: FormGenerationConfig; // Конфигурация для автогенерации форм
   metadata?: {
     createdAt: Date;
     updatedAt: Date;
@@ -104,6 +106,10 @@ export class BlockEntity {
     return this._block.metadata;
   }
 
+  get formConfig(): FormGenerationConfig | undefined {
+    return this._block.formConfig;
+  }
+
   /**
    * Обновляет настройки блока
    */
@@ -125,6 +131,14 @@ export class BlockEntity {
    */
   updateStyle(style: Partial<BlockStyle>): void {
     this._block.style = { ...this._block.style, ...style } as BlockStyle;
+    this._updateMetadata();
+  }
+
+  /**
+   * Обновляет конфигурацию формы
+   */
+  updateFormConfig(formConfig: FormGenerationConfig): void {
+    this._block.formConfig = { ...formConfig };
     this._updateMetadata();
   }
 

@@ -1,243 +1,547 @@
-import { BlockDto } from '../core/dto/BlockDto';
-
-// Типы для валидации
-export type Block = BlockDto;
-export type BlockId = string;
-export interface BlockSettings {
-  [key: string]: any;
-}
-export interface BlockProps {
-  [key: string]: any;
-}
-export interface BlockStyle {
-  [key: string]: string | number;
-}
+import { ValidationRule, ValidationResult, FormData } from '../core/entities/ValidationRule';
 
 /**
- * Валидация блоков и их свойств
+ * Валидатор для чистого JavaScript
+ * Обеспечивает валидацию форм без внешних зависимостей
  */
+export class JavaScriptValidator {
+  /**
+   * Валидирует данные формы по правилам
+   */
+  static async validate(data: FormData, rules: ValidationRule[]): Promise<ValidationResult> {
+    const errors: Record<string, string[]> = {};
+    let isValid = true;
 
-/**
- * Валидирует ID блока
- */
-export function validateBlockId(id: BlockId): boolean {
-  return id !== null && id !== undefined && id !== '';
-}
-
-/**
- * Валидирует настройки блока
- */
-export function validateBlockSettings(settings: BlockSettings): boolean {
-  if (typeof settings !== 'object' || settings === null) return false;
-  
-  // Проверяем, что все значения являются примитивами
-  return Object.values(settings).every(value => 
-    typeof value === 'string' || 
-    typeof value === 'number' || 
-    typeof value === 'boolean' ||
-    value === null
-  );
-}
-
-/**
- * Валидирует свойства блока
- */
-export function validateBlockProps(props: BlockProps): boolean {
-  if (typeof props !== 'object' || props === null) return false;
-  
-  // Проверяем, что все значения являются примитивами
-  return Object.values(props).every(value => 
-    typeof value === 'string' || 
-    typeof value === 'number' || 
-    typeof value === 'boolean' ||
-    value === null
-  );
-}
-
-/**
- * Валидирует стили блока
- */
-export function validateBlockStyle(style: BlockStyle): boolean {
-  if (typeof style !== 'object' || style === null) return false;
-  
-  // Проверяем, что все значения являются строками или числами
-  return Object.values(style).every(value => 
-    typeof value === 'string' || 
-    typeof value === 'number'
-  );
-}
-
-/**
- * Валидирует позицию блока
- */
-export function validateBlockPosition(position: { x: number; y: number; z?: number }): boolean {
-  return (
-    typeof position.x === 'number' && 
-    typeof position.y === 'number' && 
-    !isNaN(position.x) && 
-    !isNaN(position.y) &&
-    (position.z === undefined || (typeof position.z === 'number' && !isNaN(position.z)))
-  );
-}
-
-/**
- * Валидирует размер блока
- */
-export function validateBlockSize(size: { width: number; height: number }): boolean {
-  return (
-    typeof size.width === 'number' && 
-    typeof size.height === 'number' && 
-    !isNaN(size.width) && 
-    !isNaN(size.height) &&
-    size.width > 0 &&
-    size.height > 0
-  );
-}
-
-/**
- * Валидирует шаблон блока
- */
-export function validateBlockTemplate(template: string | HTMLElement): boolean {
-  if (typeof template === 'string') {
-    return template.length > 0;
-  }
-  
-  if (template instanceof HTMLElement) {
-    return true;
-  }
-  
-  return false;
-}
-
-/**
- * Валидирует весь блок
- */
-export function validateBlock(block: Block): { isValid: boolean; errors: string[] } {
-  const errors: string[] = [];
-  
-  if (!validateBlockId(block.id)) {
-    errors.push('Invalid block ID');
-  }
-  
-  if (!block.type || typeof block.type !== 'string') {
-    errors.push('Block type is required and must be a string');
-  }
-  
-  if (!validateBlockSettings(block.settings)) {
-    errors.push('Invalid block settings');
-  }
-  
-  if (!validateBlockProps(block.props)) {
-    errors.push('Invalid block props');
-  }
-  
-  if (block.style && !validateBlockStyle(block.style)) {
-    errors.push('Invalid block style');
-  }
-  
-  if (block.position && !validateBlockPosition(block.position)) {
-    errors.push('Invalid block position');
-  }
-  
-  if (block.size && !validateBlockSize(block.size)) {
-    errors.push('Invalid block size');
-  }
-  
-  if (!validateBlockTemplate(block.template)) {
-    errors.push('Invalid block template');
-  }
-  
-  if (block.children && !Array.isArray(block.children)) {
-    errors.push('Block children must be an array');
-  }
-  
-  if (block.parent && !validateBlockId(block.parent)) {
-    errors.push('Invalid parent block ID');
-  }
-  
-  if (block.visible !== undefined && typeof block.visible !== 'boolean') {
-    errors.push('Block visible property must be a boolean');
-  }
-  
-  if (block.locked !== undefined && typeof block.locked !== 'boolean') {
-    errors.push('Block locked property must be a boolean');
-  }
-  
-  return {
-    isValid: errors.length === 0,
-    errors
-  };
-}
-
-/**
- * Валидирует массив блоков
- */
-export function validateBlocks(blocks: Block[]): { isValid: boolean; errors: string[] } {
-  const errors: string[] = [];
-  
-  if (!Array.isArray(blocks)) {
-    errors.push('Blocks must be an array');
-    return { isValid: false, errors };
-  }
-  
-  blocks.forEach((block, index) => {
-    const validation = validateBlock(block);
-    if (!validation.isValid) {
-      errors.push(`Block at index ${index}: ${validation.errors.join(', ')}`);
-    }
-  });
-  
-  // Проверяем уникальность ID
-  const ids = blocks.map(block => block.id);
-  const uniqueIds = new Set(ids);
-  if (ids.length !== uniqueIds.size) {
-    errors.push('Block IDs must be unique');
-  }
-  
-  return {
-    isValid: errors.length === 0,
-    errors
-  };
-}
-
-/**
- * Санитизирует настройки блока
- */
-export function sanitizeBlockSettings(settings: any): BlockSettings {
-  if (typeof settings !== 'object' || settings === null) {
-    return {};
-  }
-  
-  const sanitized: BlockSettings = {};
-  
-  Object.entries(settings).forEach(([key, value]) => {
-    if (typeof key === 'string' && key.length > 0) {
-      if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
-        sanitized[key] = value;
+    for (const rule of rules) {
+      const fieldErrors = await this.validateField(data[rule.field], rule);
+      
+      if (fieldErrors.length > 0) {
+        if (!errors[rule.field]) {
+          errors[rule.field] = [];
+        }
+        errors[rule.field].push(...fieldErrors);
+        isValid = false;
       }
     }
-  });
-  
-  return sanitized;
+
+    return { isValid, errors };
+  }
+
+  /**
+   * Валидирует одно поле по правилу
+   */
+  private static async validateField(value: any, rule: ValidationRule): Promise<string[]> {
+    const errors: string[] = [];
+
+    switch (rule.type) {
+      case 'required':
+        if (this.isEmpty(value)) {
+          errors.push(rule.message);
+        }
+        break;
+
+      case 'email':
+        if (!this.isEmpty(value) && !this.isValidEmail(value)) {
+          errors.push(rule.message);
+        }
+        break;
+
+      case 'url':
+        if (!this.isEmpty(value) && !this.isValidUrl(value)) {
+          errors.push(rule.message);
+        }
+        break;
+
+      case 'min':
+        if (!this.isEmpty(value) && typeof value === 'number' && value < rule.value) {
+          errors.push(rule.message);
+        }
+        break;
+
+      case 'max':
+        if (!this.isEmpty(value) && typeof value === 'number' && value > rule.value) {
+          errors.push(rule.message);
+        }
+        break;
+
+      case 'minLength':
+        if (!this.isEmpty(value) && typeof value === 'string' && value.length < rule.value) {
+          errors.push(rule.message);
+        }
+        break;
+
+      case 'maxLength':
+        if (!this.isEmpty(value) && typeof value === 'string' && value.length > rule.value) {
+          errors.push(rule.message);
+        }
+        break;
+
+      case 'pattern':
+        if (!this.isEmpty(value) && typeof value === 'string' && !rule.value.test(value)) {
+          errors.push(rule.message);
+        }
+        break;
+
+      case 'custom':
+        try {
+          const result = await rule.validator(value);
+          if (!result) {
+            errors.push(rule.message);
+          }
+        } catch (error) {
+          errors.push(rule.message);
+        }
+        break;
+    }
+
+    return errors;
+  }
+
+  /**
+   * Проверяет, пустое ли значение
+   */
+  private static isEmpty(value: any): boolean {
+    return value === null || value === undefined || value === '';
+  }
+
+  /**
+   * Проверяет валидность email
+   */
+  private static isValidEmail(email: string): boolean {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  }
+
+  /**
+   * Проверяет валидность URL
+   */
+  private static isValidUrl(url: string): boolean {
+    try {
+      new URL(url);
+      return true;
+    } catch {
+      return false;
+  }
 }
 
 /**
- * Санитизирует свойства блока
+ * Генератор форм для чистого JavaScript
  */
-export function sanitizeBlockProps(props: any): BlockProps {
-  if (typeof props !== 'object' || props === null) {
-    return {};
-  }
-  
-  const sanitized: BlockProps = {};
-  
-  Object.entries(props).forEach(([key, value]) => {
-    if (typeof key === 'string' && key.length > 0) {
-      if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
-        sanitized[key] = value;
-      }
+export class JavaScriptFormGenerator {
+  /**
+   * Генерирует HTML форму
+   */
+  static generateForm(config: any, onSubmit: (data: FormData) => void): string {
+    const formId = `form_${Date.now()}`;
+    
+    let html = `
+      <form id="${formId}" class="naberika-form">
+        <div class="form-header">
+          <h3>${config.title}</h3>
+          ${config.description ? `<p>${config.description}</p>` : ''}
+        </div>
+        <div class="form-fields">
+    `;
+
+    for (const field of config.fields) {
+      html += this.generateField(field);
     }
-  });
-  
-  return sanitized;
+
+    html += `
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">
+            ${config.submitButtonText || 'Сохранить'}
+          </button>
+          <button type="button" class="btn btn-secondary" onclick="this.closest('form').reset()">
+            ${config.cancelButtonText || 'Отмена'}
+          </button>
+        </div>
+      </form>
+    `;
+
+    // Добавляем стили
+    html += this.generateStyles();
+    
+    // Добавляем JavaScript для валидации
+    html += this.generateValidationScript(formId, config.fields, onSubmit);
+
+    return html;
+  }
+
+  /**
+   * Генерирует HTML для одного поля
+   */
+  private static generateField(field: any): string {
+    const fieldId = `field_${field.field}`;
+    
+    switch (field.type) {
+      case 'textarea':
+        return `
+          <div class="form-group">
+            <label for="${fieldId}">${field.label}</label>
+            <textarea 
+              id="${fieldId}" 
+              name="${field.field}" 
+              placeholder="${field.placeholder || ''}"
+              class="form-control"
+            >${field.defaultValue || ''}</textarea>
+            <div class="field-errors" id="errors_${field.field}"></div>
+          </div>
+        `;
+
+      case 'select':
+        const options = field.options?.map(opt => 
+          `<option value="${opt.value}">${opt.label}</option>`
+        ).join('') || '';
+        return `
+          <div class="form-group">
+            <label for="${fieldId}">${field.label}</label>
+            <select id="${fieldId}" name="${field.field}" class="form-control">
+              <option value="">Выберите...</option>
+              ${options}
+            </select>
+            <div class="field-errors" id="errors_${field.field}"></div>
+          </div>
+        `;
+
+      case 'checkbox':
+        return `
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input 
+                type="checkbox" 
+                id="${fieldId}" 
+                name="${field.field}" 
+                ${field.defaultValue ? 'checked' : ''}
+                class="form-checkbox"
+              />
+              ${field.label}
+            </label>
+            <div class="field-errors" id="errors_${field.field}"></div>
+          </div>
+        `;
+
+      case 'color':
+        return `
+          <div class="form-group">
+            <label for="${fieldId}">${field.label}</label>
+            <input 
+              type="color" 
+              id="${fieldId}" 
+              name="${field.field}" 
+              value="${field.defaultValue || '#000000'}"
+              class="form-control"
+            />
+            <div class="field-errors" id="errors_${field.field}"></div>
+          </div>
+        `;
+
+      case 'file':
+        return `
+          <div class="form-group">
+            <label for="${fieldId}">${field.label}</label>
+            <input 
+              type="file" 
+              id="${fieldId}" 
+              name="${field.field}" 
+              class="form-control"
+            />
+            <div class="field-errors" id="errors_${field.field}"></div>
+          </div>
+        `;
+
+      default: // text, number, email, url
+        return `
+          <div class="form-group">
+            <label for="${fieldId}">${field.label}</label>
+            <input 
+              type="${field.type}" 
+              id="${fieldId}" 
+              name="${field.field}" 
+              placeholder="${field.placeholder || ''}"
+              value="${field.defaultValue || ''}"
+              class="form-control"
+            />
+            <div class="field-errors" id="errors_${field.field}"></div>
+          </div>
+        `;
+    }
+  }
+
+  /**
+   * Генерирует CSS стили для формы
+   */
+  private static generateStyles(): string {
+    return `
+      <style>
+        .naberika-form {
+          max-width: 500px;
+          margin: 0 auto;
+          padding: 20px;
+          background: white;
+          border-radius: 8px;
+          box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .form-header h3 {
+          margin: 0 0 10px 0;
+          color: #333;
+        }
+        
+        .form-header p {
+          margin: 0 0 20px 0;
+          color: #666;
+          font-size: 14px;
+        }
+        
+        .form-group {
+          margin-bottom: 20px;
+        }
+        
+        .form-group label {
+          display: block;
+          margin-bottom: 5px;
+          font-weight: 600;
+          color: #333;
+        }
+        
+        .checkbox-label {
+          display: flex;
+          align-items: center;
+          cursor: pointer;
+        }
+        
+        .checkbox-label input {
+          margin-right: 8px;
+        }
+        
+        .form-control {
+          width: 100%;
+          padding: 10px;
+          border: 1px solid #ddd;
+          border-radius: 4px;
+          font-size: 14px;
+          transition: border-color 0.2s;
+        }
+        
+        .form-control:focus {
+          outline: none;
+          border-color: #007bff;
+          box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+        }
+        
+        .form-control.error {
+          border-color: #dc3545;
+        }
+        
+        .field-errors {
+          margin-top: 5px;
+          font-size: 12px;
+          color: #dc3545;
+        }
+        
+        .field-errors .error {
+          display: block;
+          margin-bottom: 2px;
+        }
+        
+        .form-actions {
+          display: flex;
+          gap: 10px;
+          justify-content: flex-end;
+          margin-top: 20px;
+        }
+        
+        .btn {
+          padding: 10px 20px;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+          font-size: 14px;
+          font-weight: 600;
+          transition: all 0.2s;
+        }
+        
+        .btn-primary {
+          background: #007bff;
+          color: white;
+        }
+        
+        .btn-primary:hover {
+          background: #0056b3;
+        }
+        
+        .btn-secondary {
+          background: #6c757d;
+          color: white;
+        }
+        
+        .btn-secondary:hover {
+          background: #545b62;
+        }
+      </style>
+    `;
+  }
+
+  /**
+   * Генерирует JavaScript для валидации
+   */
+  private static generateValidationScript(formId: string, fields: any[], onSubmit: (data: FormData) => void): string {
+    return `
+      <script>
+        (function() {
+          const form = document.getElementById('${formId}');
+          if (!form) return;
+
+          // Правила валидации
+          const rules = ${JSON.stringify(fields.map(f => f.rules).flat())};
+
+          // Валидация поля
+          function validateField(fieldName, value) {
+            const fieldRules = rules.filter(rule => rule.field === fieldName);
+            const errors = [];
+
+            for (const rule of fieldRules) {
+              switch (rule.type) {
+                case 'required':
+                  if (!value || value === '') {
+                    errors.push(rule.message);
+                  }
+                  break;
+                case 'email':
+                  if (value && !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(value)) {
+                    errors.push(rule.message);
+                  }
+                  break;
+                case 'url':
+                  if (value) {
+                    try {
+                      new URL(value);
+                    } catch {
+                      errors.push(rule.message);
+                    }
+                  }
+                  break;
+                case 'min':
+                  if (value && parseFloat(value) < rule.value) {
+                    errors.push(rule.message);
+                  }
+                  break;
+                case 'max':
+                  if (value && parseFloat(value) > rule.value) {
+                    errors.push(rule.message);
+                  }
+                  break;
+                case 'minLength':
+                  if (value && value.length < rule.value) {
+                    errors.push(rule.message);
+                  }
+                  break;
+                case 'maxLength':
+                  if (value && value.length > rule.value) {
+                    errors.push(rule.message);
+                  }
+                  break;
+                case 'pattern':
+                  if (value && !rule.value.test(value)) {
+                    errors.push(rule.message);
+                  }
+                  break;
+              }
+            }
+
+            return errors;
+          }
+
+          // Показать ошибки
+          function showErrors(fieldName, errors) {
+            const errorContainer = document.getElementById('errors_' + fieldName);
+            if (errorContainer) {
+              errorContainer.innerHTML = errors.map(error => 
+                '<div class="error">' + error + '</div>'
+              ).join('');
+            }
+            
+            const field = form.querySelector('[name="' + fieldName + '"]');
+            if (field) {
+              field.classList.toggle('error', errors.length > 0);
+            }
+          }
+
+          // Очистить ошибки
+          function clearErrors(fieldName) {
+            const errorContainer = document.getElementById('errors_' + fieldName);
+            if (errorContainer) {
+              errorContainer.innerHTML = '';
+            }
+            
+            const field = form.querySelector('[name="' + fieldName + '"]');
+            if (field) {
+              field.classList.remove('error');
+            }
+          }
+
+          // Валидация всей формы
+          function validateForm() {
+            let isValid = true;
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+
+            for (const field of ${JSON.stringify(fields)}) {
+              const value = data[field.field];
+              const errors = validateField(field.field, value);
+              
+              if (errors.length > 0) {
+                showErrors(field.field, errors);
+                isValid = false;
+              } else {
+                clearErrors(field.field);
+              }
+            }
+
+            return { isValid, data };
+          }
+
+          // Обработчик отправки формы
+          form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const { isValid, data } = validateForm();
+            
+            if (isValid) {
+              // Преобразуем данные
+              const processedData = {};
+              for (const [key, value] of Object.entries(data)) {
+                const field = ${JSON.stringify(fields)}.find(f => f.field === key);
+                if (field) {
+                  if (field.type === 'number') {
+                    processedData[key] = parseFloat(value) || 0;
+                  } else if (field.type === 'checkbox') {
+                    processedData[key] = !!value;
+                  } else {
+                    processedData[key] = value;
+                  }
+                }
+              }
+              
+              ${onSubmit.toString()}(processedData);
+            }
+          });
+
+          // Валидация в реальном времени
+          form.addEventListener('input', function(e) {
+            if (e.target.name) {
+              const errors = validateField(e.target.name, e.target.value);
+              if (errors.length > 0) {
+                showErrors(e.target.name, errors);
+              } else {
+                clearErrors(e.target.name);
+              }
+            }
+          });
+        })();
+      </script>
+    `;
+  }
 }

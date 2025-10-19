@@ -3,6 +3,8 @@
  * Содержит только данные, без бизнес-логики
  */
 
+import { FormGenerationConfig } from '../entities/ValidationRule';
+
 export interface BlockDto {
   id: string;
   type: string;
@@ -25,6 +27,7 @@ export interface BlockDto {
   parent?: string;
   visible?: boolean;
   locked?: boolean;
+  formConfig?: FormGenerationConfig; // Конфигурация для автогенерации форм
   metadata?: {
     createdAt: Date;
     updatedAt: Date;
@@ -53,6 +56,7 @@ export interface CreateBlockDto {
   parent?: string;
   visible?: boolean;
   locked?: boolean;
+  formConfig?: FormGenerationConfig; // Конфигурация для автогенерации форм
   metadata?: {
     createdAt: Date;
     updatedAt: Date;
@@ -79,6 +83,7 @@ export interface UpdateBlockDto {
   componentProps?: Record<string, any>; // Пропсы для Vue3 компонента
   visible?: boolean;
   locked?: boolean;
+  formConfig?: FormGenerationConfig; // Конфигурация для автогенерации форм
 }
 
 export interface BlockListDto {

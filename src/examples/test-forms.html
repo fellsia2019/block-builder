@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест форм Naberika</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .btn {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-info { background: #17a2b8; color: white; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Тест форм Naberika</h1>
+        <p>Проверка работы модальных окон и валидации</p>
+        
+        <div>
+            <button class="btn btn-primary" onclick="testCreateForm('text')">
+                📝 Тест создания текста
+            </button>
+            <button class="btn btn-success" onclick="testCreateForm('image')">
+                🖼️ Тест создания изображения
+            </button>
+            <button class="btn btn-info" onclick="testCreateForm('button')">
+                🔘 Тест создания кнопки
+            </button>
+        </div>
+        
+        <div id="result" style="margin-top: 20px; padding: 10px; background: #f8f9fa; border-radius: 4px;">
+            <h3>Результат:</h3>
+            <div id="result-content">Нажмите кнопку для тестирования</div>
+        </div>
+    </div>
+
+    <script>
+        // Простая функция для тестирования форм
+        function testCreateForm(blockType) {
+            const formConfigs = {
+                'text': {
+                    title: 'Создание текстового блока',
+                    description: 'Настройте параметры текстового блока',
+                    fields: [
+                        {
+                            field: 'content',
+                            label: 'Текст',
+                            type: 'textarea',
+                            placeholder: 'Введите текст...',
+                            rules: [
+                                { type: 'required', field: 'content', message: 'Текст обязателен для заполнения' },
+                                { type: 'minLength', field: 'content', value: 1, message: 'Текст не может быть пустым' }
+                            ],
+                            defaultValue: ''
+                        },
+                        {
+                            field: 'fontSize',
+                            label: 'Размер шрифта',
+                            type: 'number',
+                            rules: [
+                                { type: 'required', field: 'fontSize', message: 'Размер шрифта обязателен' },
+                                { type: 'min', field: 'fontSize', value: 8, message: 'Минимальный размер шрифта: 8px' },
+                                { type: 'max', field: 'fontSize', value: 72, message: 'Максимальный размер шрифта: 72px' }
+                            ],
+                            defaultValue: 16
+                        },
+                        {
+                            field: 'color',
+                            label: 'Цвет текста',
+                            type: 'color',
+                            rules: [
+                                { type: 'required', field: 'color', message: 'Цвет обязателен' }
+                            ],
+                            defaultValue: '#333333'
+                        }
+                    ],
+                    submitButtonText: 'Создать блок',
+                    cancelButtonText: 'Отмена'
+                },
+                'image': {
+                    title: 'Создание блока изображения',
+                    description: 'Настройте параметры блока изображения',
+                    fields: [
+                        {
+                            field: 'src',
+                            label: 'URL изображения',
+                            type: 'url',
+                            placeholder: 'https://example.com/image.jpg',
+                            rules: [
+                                { type: 'required', field: 'src', message: 'URL изображения обязателен' },
+                                { type: 'url', field: 'src', message: 'Введите корректный URL' }
+                            ],
+                            defaultValue: ''
+                        },
+                        {
+                            field: 'alt',
+                            label: 'Альтернативный текст',
+                            type: 'text',
+                            placeholder: 'Описание изображения',
+                            rules: [
+                                { type: 'required', field: 'alt', message: 'Альтернативный текст обязателен' }
+                            ],
+                            defaultValue: ''
+                        }
+                    ],
+                    submitButtonText: 'Создать блок',
+                    cancelButtonText: 'Отмена'
+                },
+                'button': {
+                    title: 'Создание кнопки',
+                    description: 'Настройте параметры кнопки',
+                    fields: [
+                        {
+                            field: 'text',
+                            label: 'Текст кнопки',
+                            type: 'text',
+                            placeholder: 'Нажми меня',
+                            rules: [
+                                { type: 'required', field: 'text', message: 'Текст кнопки обязателен' },
+                                { type: 'minLength', field: 'text', value: 1, message: 'Текст не может быть пустым' }
+                            ],
+                            defaultValue: 'Кнопка'
+                        },
+                        {
+                            field: 'backgroundColor',
+                            label: 'Цвет фона',
+                            type: 'color',
+                            rules: [
+                                { type: 'required', field: 'backgroundColor', message: 'Цвет фона обязателен' }
+                            ],
+                            defaultValue: '#007bff'
+                        }
+                    ],
+                    submitButtonText: 'Создать кнопку',
+                    cancelButtonText: 'Отмена'
+                }
+            };
+
+            const config = formConfigs[blockType];
+            if (!config) {
+                document.getElementById('result-content').innerHTML = 'Неизвестный тип блока';
+                return;
+            }
+
+            // Создаем модальное окно
+            const modal = document.createElement('div');
+            modal.className = 'form-modal';
+            modal.innerHTML = `
+                <div class="form-dialog-overlay">
+                    <div class="form-dialog">
+                        <div class="form-dialog-header">
+                            <h3>${config.title}</h3>
+                            <button class="close-btn" onclick="this.closest('.form-dialog-overlay').remove()">×</button>
+                        </div>
+                        <div class="form-dialog-content">
+                            <p class="form-description">${config.description}</p>
+                            <div id="form-container"></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(modal);
+
+            // Генерируем форму
+            const formContainer = modal.querySelector('#form-container');
+            const formHtml = generateFormHTML(config, (data) => {
+                document.getElementById('result-content').innerHTML = `
+                    <strong>Создан блок ${blockType}:</strong><br>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+                modal.remove();
+            });
+            formContainer.innerHTML = formHtml;
+        }
+
+        function generateFormHTML(config, onSubmit) {
+            const formId = `form_${Date.now()}`;
+            
+            let html = `
+                <form id="${formId}" class="naberika-form">
+                    <div class="form-fields">
+            `;
+
+            for (const field of config.fields) {
+                html += generateFieldHTML(field);
+            }
+
+            html += `
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">${config.submitButtonText}</button>
+                        <button type="button" class="btn btn-secondary" onclick="this.closest('.form-dialog-overlay').remove()">${config.cancelButtonText}</button>
+                    </div>
+                </form>
+            `;
+
+            // Добавляем обработчик формы
+            setTimeout(() => {
+                const form = document.getElementById(formId);
+                if (form) {
+                    form.addEventListener('submit', function(e) {
+                        e.preventDefault();
+                        handleFormSubmit(e, config.fields, onSubmit);
+                    });
+                }
+            }, 0);
+
+            return html;
+        }
+
+        function generateFieldHTML(field) {
+            const fieldId = `field_${field.field}`;
+            
+            switch (field.type) {
+                case 'textarea':
+                    return `
+                        <div class="form-group">
+                            <label for="${fieldId}">${field.label}</label>
+                            <textarea id="${fieldId}" name="${field.field}" placeholder="${field.placeholder || ''}" class="form-control">${field.defaultValue || ''}</textarea>
+                            <div class="field-errors" id="errors_${field.field}"></div>
+                        </div>
+                    `;
+                case 'select':
+                    const options = field.options?.map(opt => `<option value="${opt.value}">${opt.label}</option>`).join('') || '';
+                    return `
+                        <div class="form-group">
+                            <label for="${fieldId}">${field.label}</label>
+                            <select id="${fieldId}" name="${field.field}" class="form-control">
+                                <option value="">Выберите...</option>
+                                ${options}
+                            </select>
+                            <div class="field-errors" id="errors_${field.field}"></div>
+                        </div>
+                    `;
+                case 'checkbox':
+                    return `
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="${fieldId}" name="${field.field}" ${field.defaultValue ? 'checked' : ''} class="form-checkbox" />
+                                ${field.label}
+                            </label>
+                            <div class="field-errors" id="errors_${field.field}"></div>
+                        </div>
+                    `;
+                case 'color':
+                    return `
+                        <div class="form-group">
+                            <label for="${fieldId}">${field.label}</label>
+                            <input type="color" id="${fieldId}" name="${field.field}" value="${field.defaultValue || '#000000'}" class="form-control" />
+                            <div class="field-errors" id="errors_${field.field}"></div>
+                        </div>
+                    `;
+                default:
+                    return `
+                        <div class="form-group">
+                            <label for="${fieldId}">${field.label}</label>
+                            <input type="${field.type}" id="${fieldId}" name="${field.field}" placeholder="${field.placeholder || ''}" value="${field.defaultValue || ''}" class="form-control" />
+                            <div class="field-errors" id="errors_${field.field}"></div>
+                        </div>
+                    `;
+            }
+        }
+
+        function handleFormSubmit(event, fields, onSubmit) {
+            const form = event.target;
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+            
+            // Валидация
+            let isValid = true;
+            for (const field of fields) {
+                const value = data[field.field];
+                const errors = validateField(field, value);
+                
+                if (errors.length > 0) {
+                    showFieldErrors(field.field, errors);
+                    isValid = false;
+                } else {
+                    clearFieldErrors(field.field);
+                }
+            }
+            
+            if (isValid) {
+                onSubmit(data);
+            }
+        }
+
+        function validateField(field, value) {
+            const errors = [];
+            
+            for (const rule of field.rules) {
+                switch (rule.type) {
+                    case 'required':
+                        if (!value || value === '') {
+                            errors.push(rule.message);
+                        }
+                        break;
+                    case 'email':
+                        if (value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+                            errors.push(rule.message);
+                        }
+                        break;
+                    case 'url':
+                        if (value) {
+                            try {
+                                new URL(value);
+                            } catch {
+                                errors.push(rule.message);
+                            }
+                        }
+                        break;
+                    case 'min':
+                        if (value && parseFloat(value) < rule.value) {
+                            errors.push(rule.message);
+                        }
+                        break;
+                    case 'max':
+                        if (value && parseFloat(value) > rule.value) {
+                            errors.push(rule.message);
+                        }
+                        break;
+                    case 'minLength':
+                        if (value && value.length < rule.value) {
+                            errors.push(rule.message);
+                        }
+                        break;
+                    case 'maxLength':
+                        if (value && value.length > rule.value) {
+                            errors.push(rule.message);
+                        }
+                        break;
+                }
+            }
+            
+            return errors;
+        }
+
+        function showFieldErrors(fieldName, errors) {
+            const errorContainer = document.getElementById('errors_' + fieldName);
+            if (errorContainer) {
+                errorContainer.innerHTML = errors.map(error => `<div class="error">${error}</div>`).join('');
+            }
+            
+            const field = document.querySelector(`[name="${fieldName}"]`);
+            if (field) {
+                field.classList.add('error');
+            }
+        }
+
+        function clearFieldErrors(fieldName) {
+            const errorContainer = document.getElementById('errors_' + fieldName);
+            if (errorContainer) {
+                errorContainer.innerHTML = '';
+            }
+            
+            const field = document.querySelector(`[name="${fieldName}"]`);
+            if (field) {
+                field.classList.remove('error');
+            }
+        }
+    </script>
+
+    <style>
+        /* Стили для модальных окон */
+        .form-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 1000;
+        }
+
+        .form-dialog-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .form-dialog {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .form-dialog-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .form-dialog-header h3 {
+            margin: 0;
+            color: #333;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.2s;
+        }
+
+        .close-btn:hover {
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .form-dialog-content {
+            padding: 20px;
+        }
+
+        .form-description {
+            margin: 0 0 20px 0;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .checkbox-label input {
+            margin-right: 8px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+        }
+
+        .form-control.error {
+            border-color: #dc3545;
+        }
+
+        .field-errors {
+            margin-top: 5px;
+            font-size: 12px;
+            color: #dc3545;
+        }
+
+        .field-errors .error {
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+    </style>
+</body>
+</html>

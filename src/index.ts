@@ -12,6 +12,7 @@ export * from './core/dto/BlockDto';
 
 // Core - Entities
 export * from './core/entities/Block';
+export * from './core/entities/ValidationRule';
 
 // Core - Ports (интерфейсы)
 export * from './core/ports/BlockRepository';
@@ -25,6 +26,7 @@ export * from './core/use-cases/MoveBlockUseCase';
 export * from './core/use-cases/DuplicateBlockUseCase';
 export * from './core/use-cases/BlockManagementUseCase';
 export * from './core/use-cases/ComponentManagementUseCase';
+export * from './core/use-cases/FormGenerationUseCase';
 
 // Infrastructure - Реализации портов
 export * from './infrastructure/repositories/MemoryBlockRepositoryImpl';
@@ -35,6 +37,9 @@ export * from './infrastructure/registries/MemoryComponentRegistry';
 // export { default as BlockBuilder } from './ui/components/BlockBuilder.vue';
 // export { default as BlockComponent } from './ui/components/BlockComponent.vue';
 // export { default as BlockProperties } from './ui/components/BlockProperties.vue';
+
+// Универсальная валидация
+export * from './utils/universalValidation';
 
 // Утилиты
 export * from './utils/blockHelpers';
