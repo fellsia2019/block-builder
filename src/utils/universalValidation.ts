@@ -384,6 +384,231 @@ export class BlockFormConfigs {
     };
   }
 
+  static getCardListBlockConfig(): FormGenerationConfig {
+    return {
+      title: 'Настройка списка карточек',
+      description: 'Настройте параметры списка карточек',
+      fields: [
+        {
+          field: 'title',
+          label: 'Заголовок списка',
+          type: 'text',
+          placeholder: 'Наши услуги',
+          rules: [
+            { type: 'required', field: 'title', message: 'Заголовок обязателен' },
+            { type: 'minLength', field: 'title', value: 1, message: 'Заголовок не может быть пустым' }
+          ],
+          defaultValue: 'Наши услуги'
+        },
+        {
+          field: 'card1_title',
+          label: 'Карточка 1 - Заголовок',
+          type: 'text',
+          placeholder: 'Веб-разработка',
+          rules: [
+            { type: 'required', field: 'card1_title', message: 'Заголовок карточки обязателен' }
+          ],
+          defaultValue: 'Веб-разработка'
+        },
+        {
+          field: 'card1_text',
+          label: 'Карточка 1 - Описание',
+          type: 'textarea',
+          placeholder: 'Создание современных веб-приложений',
+          rules: [
+            { type: 'required', field: 'card1_text', message: 'Описание карточки обязательно' }
+          ],
+          defaultValue: 'Создание современных веб-приложений'
+        },
+        {
+          field: 'card1_button',
+          label: 'Карточка 1 - Текст кнопки',
+          type: 'text',
+          placeholder: 'Подробнее',
+          rules: [
+            { type: 'required', field: 'card1_button', message: 'Текст кнопки обязателен' }
+          ],
+          defaultValue: 'Подробнее'
+        },
+        {
+          field: 'card1_link',
+          label: 'Карточка 1 - Ссылка',
+          type: 'url',
+          placeholder: 'https://example.com',
+          rules: [
+            { type: 'required', field: 'card1_link', message: 'Ссылка обязательна' }
+          ],
+          defaultValue: 'https://example.com'
+        },
+        {
+          field: 'card1_image',
+          label: 'Карточка 1 - Изображение',
+          type: 'url',
+          placeholder: 'https://i.pinimg.com/736x/ca/9a/12/ca9a123b7269fba0574726629bad42b9.jpg',
+          rules: [
+            { type: 'required', field: 'card1_image', message: 'Изображение обязательно' }
+          ],
+          defaultValue: 'https://i.pinimg.com/736x/ca/9a/12/ca9a123b7269fba0574726629bad42b9.jpg'
+        },
+        {
+          field: 'card2_title',
+          label: 'Карточка 2 - Заголовок',
+          type: 'text',
+          placeholder: 'Мобильные приложения',
+          rules: [
+            { type: 'required', field: 'card2_title', message: 'Заголовок карточки обязателен' }
+          ],
+          defaultValue: 'Мобильные приложения'
+        },
+        {
+          field: 'card2_text',
+          label: 'Карточка 2 - Описание',
+          type: 'textarea',
+          placeholder: 'Разработка мобильных приложений для iOS и Android',
+          rules: [
+            { type: 'required', field: 'card2_text', message: 'Описание карточки обязательно' }
+          ],
+          defaultValue: 'Разработка мобильных приложений для iOS и Android'
+        },
+        {
+          field: 'card2_button',
+          label: 'Карточка 2 - Текст кнопки',
+          type: 'text',
+          placeholder: 'Узнать больше',
+          rules: [
+            { type: 'required', field: 'card2_button', message: 'Текст кнопки обязателен' }
+          ],
+          defaultValue: 'Узнать больше'
+        },
+        {
+          field: 'card2_link',
+          label: 'Карточка 2 - Ссылка',
+          type: 'url',
+          placeholder: 'https://example.com',
+          rules: [
+            { type: 'required', field: 'card2_link', message: 'Ссылка обязательна' }
+          ],
+          defaultValue: 'https://example.com'
+        },
+        {
+          field: 'card2_image',
+          label: 'Карточка 2 - Изображение',
+          type: 'url',
+          placeholder: 'https://i.pinimg.com/736x/ca/9a/12/ca9a123b7269fba0574726629bad42b9.jpg',
+          rules: [
+            { type: 'required', field: 'card2_image', message: 'Изображение обязательно' }
+          ],
+          defaultValue: 'https://i.pinimg.com/736x/ca/9a/12/ca9a123b7269fba0574726629bad42b9.jpg'
+        },
+        {
+          field: 'card3_title',
+          label: 'Карточка 3 - Заголовок',
+          type: 'text',
+          placeholder: 'Дизайн',
+          rules: [
+            { type: 'required', field: 'card3_title', message: 'Заголовок карточки обязателен' }
+          ],
+          defaultValue: 'Дизайн'
+        },
+        {
+          field: 'card3_text',
+          label: 'Карточка 3 - Описание',
+          type: 'textarea',
+          placeholder: 'Создание уникального дизайна для вашего бренда',
+          rules: [
+            { type: 'required', field: 'card3_text', message: 'Описание карточки обязательно' }
+          ],
+          defaultValue: 'Создание уникального дизайна для вашего бренда'
+        },
+        {
+          field: 'card3_button',
+          label: 'Карточка 3 - Текст кнопки',
+          type: 'text',
+          placeholder: 'Посмотреть работы',
+          rules: [
+            { type: 'required', field: 'card3_button', message: 'Текст кнопки обязателен' }
+          ],
+          defaultValue: 'Посмотреть работы'
+        },
+        {
+          field: 'card3_link',
+          label: 'Карточка 3 - Ссылка',
+          type: 'url',
+          placeholder: 'https://example.com',
+          rules: [
+            { type: 'required', field: 'card3_link', message: 'Ссылка обязательна' }
+          ],
+          defaultValue: 'https://example.com'
+        },
+        {
+          field: 'card3_image',
+          label: 'Карточка 3 - Изображение',
+          type: 'url',
+          placeholder: 'https://i.pinimg.com/736x/ca/9a/12/ca9a123b7269fba0574726629bad42b9.jpg',
+          rules: [
+            { type: 'required', field: 'card3_image', message: 'Изображение обязательно' }
+          ],
+          defaultValue: 'https://i.pinimg.com/736x/ca/9a/12/ca9a123b7269fba0574726629bad42b9.jpg'
+        },
+        {
+          field: 'cardBackground',
+          label: 'Цвет фона карточек',
+          type: 'color',
+          rules: [
+            { type: 'required', field: 'cardBackground', message: 'Цвет фона обязателен' }
+          ],
+          defaultValue: '#ffffff'
+        },
+        {
+          field: 'cardTextColor',
+          label: 'Цвет текста карточек',
+          type: 'color',
+          rules: [
+            { type: 'required', field: 'cardTextColor', message: 'Цвет текста обязателен' }
+          ],
+          defaultValue: '#333333'
+        },
+        {
+          field: 'cardBorderRadius',
+          label: 'Скругление карточек',
+          type: 'number',
+          rules: [
+            { type: 'min', field: 'cardBorderRadius', value: 0, message: 'Скругление не может быть отрицательным' },
+            { type: 'max', field: 'cardBorderRadius', value: 50, message: 'Максимальное скругление: 50px' }
+          ],
+          defaultValue: 8
+        },
+        {
+          field: 'columns',
+          label: 'Количество колонок',
+          type: 'select',
+          options: [
+            { value: '1', label: '1 колонка' },
+            { value: '2', label: '2 колонки' },
+            { value: '3', label: '3 колонки' },
+            { value: '4', label: '4 колонки' }
+          ],
+          rules: [
+            { type: 'required', field: 'columns', message: 'Количество колонок обязательно' }
+          ],
+          defaultValue: '3'
+        },
+        {
+          field: 'gap',
+          label: 'Отступ между карточками',
+          type: 'number',
+          rules: [
+            { type: 'min', field: 'gap', value: 0, message: 'Отступ не может быть отрицательным' },
+            { type: 'max', field: 'gap', value: 50, message: 'Максимальный отступ: 50px' }
+          ],
+          defaultValue: 16
+        }
+      ],
+      submitButtonText: 'Создать список карточек',
+      cancelButtonText: 'Отмена'
+    };
+  }
+
   /**
    * Получить конфигурацию для типа блока
    */
@@ -395,6 +620,8 @@ export class BlockFormConfigs {
         return this.getImageBlockConfig();
       case 'button':
         return this.getButtonBlockConfig();
+      case 'cardlist':
+        return this.getCardListBlockConfig();
       default:
         throw new Error(`Неизвестный тип блока: ${blockType}`);
     }

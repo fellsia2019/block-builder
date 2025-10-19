@@ -453,6 +453,23 @@
             align-items: center;
         }
 
+        .card-section {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card-section h4 {
+            margin: 0 0 15px 0;
+            color: #495057;
+            font-size: 16px;
+            font-weight: 600;
+            border-bottom: 2px solid #dee2e6;
+            padding-bottom: 8px;
+        }
+
         .control-btn {
             background: none;
             border: none;
@@ -528,6 +545,9 @@
                     </button>
                     <button class="btn btn-info" onclick="showCreateForm('button')">
                         🔘 Добавить кнопку
+                    </button>
+                    <button class="btn btn-warning" onclick="showCreateForm('cardlist')">
+                        🃏 Добавить карточки
                     </button>
                     <button class="btn btn-warning" onclick="addContainerBlock()">
                         📦 Добавить контейнер
@@ -885,6 +905,228 @@
                     ],
                     submitButtonText: 'Сохранить изменения',
                     cancelButtonText: 'Отмена'
+                },
+                'cardlist': {
+                    title: 'Редактирование списка карточек',
+                    description: 'Измените параметры списка карточек',
+                    fields: [
+                        {
+                            field: 'title',
+                            label: 'Заголовок списка',
+                            type: 'text',
+                            placeholder: 'Наши услуги',
+                            rules: [
+                                { type: 'required', field: 'title', message: 'Заголовок обязателен' },
+                                { type: 'minLength', field: 'title', value: 1, message: 'Заголовок не может быть пустым' }
+                            ],
+                            defaultValue: block.props.title || 'Наши услуги'
+                        },
+                        {
+                            field: 'card1_title',
+                            label: 'Карточка 1 - Заголовок',
+                            type: 'text',
+                            placeholder: 'Веб-разработка',
+                            rules: [
+                                { type: 'required', field: 'card1_title', message: 'Заголовок карточки обязателен' }
+                            ],
+                            defaultValue: block.props.cards && block.props.cards[0] ? block.props.cards[0].title : 'Веб-разработка'
+                        },
+                        {
+                            field: 'card1_text',
+                            label: 'Карточка 1 - Описание',
+                            type: 'textarea',
+                            placeholder: 'Создание современных веб-приложений',
+                            rules: [
+                                { type: 'required', field: 'card1_text', message: 'Описание карточки обязательно' }
+                            ],
+                            defaultValue: block.props.cards && block.props.cards[0] ? block.props.cards[0].text : 'Создание современных веб-приложений'
+                        },
+                        {
+                            field: 'card1_button',
+                            label: 'Карточка 1 - Текст кнопки',
+                            type: 'text',
+                            placeholder: 'Подробнее',
+                            rules: [
+                                { type: 'required', field: 'card1_button', message: 'Текст кнопки обязателен' }
+                            ],
+                            defaultValue: block.props.cards && block.props.cards[0] ? block.props.cards[0].button : 'Подробнее'
+                        },
+                        {
+                            field: 'card1_link',
+                            label: 'Карточка 1 - Ссылка',
+                            type: 'url',
+                            placeholder: 'https://example.com',
+                            rules: [
+                                { type: 'required', field: 'card1_link', message: 'Ссылка обязательна' }
+                            ],
+                            defaultValue: block.props.cards && block.props.cards[0] ? block.props.cards[0].link : 'https://example.com'
+                        },
+                        {
+                            field: 'card1_image',
+                            label: 'Карточка 1 - Изображение',
+                            type: 'url',
+                            placeholder: 'https://i.pinimg.com/736x/ca/9a/12/ca9a123b7269fba0574726629bad42b9.jpg',
+                            rules: [
+                                { type: 'required', field: 'card1_image', message: 'Изображение обязательно' }
+                            ],
+                            defaultValue: block.props.cards && block.props.cards[0] ? block.props.cards[0].image : 'https://i.pinimg.com/736x/ca/9a/12/ca9a123b7269fba0574726629bad42b9.jpg'
+                        },
+                        {
+                            field: 'card2_title',
+                            label: 'Карточка 2 - Заголовок',
+                            type: 'text',
+                            placeholder: 'Мобильные приложения',
+                            rules: [
+                                { type: 'required', field: 'card2_title', message: 'Заголовок карточки обязателен' }
+                            ],
+                            defaultValue: block.props.cards && block.props.cards[1] ? block.props.cards[1].title : 'Мобильные приложения'
+                        },
+                        {
+                            field: 'card2_text',
+                            label: 'Карточка 2 - Описание',
+                            type: 'textarea',
+                            placeholder: 'Разработка мобильных приложений для iOS и Android',
+                            rules: [
+                                { type: 'required', field: 'card2_text', message: 'Описание карточки обязательно' }
+                            ],
+                            defaultValue: block.props.cards && block.props.cards[1] ? block.props.cards[1].text : 'Разработка мобильных приложений для iOS и Android'
+                        },
+                        {
+                            field: 'card2_button',
+                            label: 'Карточка 2 - Текст кнопки',
+                            type: 'text',
+                            placeholder: 'Узнать больше',
+                            rules: [
+                                { type: 'required', field: 'card2_button', message: 'Текст кнопки обязателен' }
+                            ],
+                            defaultValue: block.props.cards && block.props.cards[1] ? block.props.cards[1].button : 'Узнать больше'
+                        },
+                        {
+                            field: 'card2_link',
+                            label: 'Карточка 2 - Ссылка',
+                            type: 'url',
+                            placeholder: 'https://example.com',
+                            rules: [
+                                { type: 'required', field: 'card2_link', message: 'Ссылка обязательна' }
+                            ],
+                            defaultValue: block.props.cards && block.props.cards[1] ? block.props.cards[1].link : 'https://example.com'
+                        },
+                        {
+                            field: 'card2_image',
+                            label: 'Карточка 2 - Изображение',
+                            type: 'url',
+                            placeholder: 'https://i.pinimg.com/736x/ca/9a/12/ca9a123b7269fba0574726629bad42b9.jpg',
+                            rules: [
+                                { type: 'required', field: 'card2_image', message: 'Изображение обязательно' }
+                            ],
+                            defaultValue: block.props.cards && block.props.cards[1] ? block.props.cards[1].image : 'https://i.pinimg.com/736x/ca/9a/12/ca9a123b7269fba0574726629bad42b9.jpg'
+                        },
+                        {
+                            field: 'card3_title',
+                            label: 'Карточка 3 - Заголовок',
+                            type: 'text',
+                            placeholder: 'Дизайн',
+                            rules: [
+                                { type: 'required', field: 'card3_title', message: 'Заголовок карточки обязателен' }
+                            ],
+                            defaultValue: block.props.cards && block.props.cards[2] ? block.props.cards[2].title : 'Дизайн'
+                        },
+                        {
+                            field: 'card3_text',
+                            label: 'Карточка 3 - Описание',
+                            type: 'textarea',
+                            placeholder: 'Создание уникального дизайна для вашего бренда',
+                            rules: [
+                                { type: 'required', field: 'card3_text', message: 'Описание карточки обязательно' }
+                            ],
+                            defaultValue: block.props.cards && block.props.cards[2] ? block.props.cards[2].text : 'Создание уникального дизайна для вашего бренда'
+                        },
+                        {
+                            field: 'card3_button',
+                            label: 'Карточка 3 - Текст кнопки',
+                            type: 'text',
+                            placeholder: 'Посмотреть работы',
+                            rules: [
+                                { type: 'required', field: 'card3_button', message: 'Текст кнопки обязателен' }
+                            ],
+                            defaultValue: block.props.cards && block.props.cards[2] ? block.props.cards[2].button : 'Посмотреть работы'
+                        },
+                        {
+                            field: 'card3_link',
+                            label: 'Карточка 3 - Ссылка',
+                            type: 'url',
+                            placeholder: 'https://example.com',
+                            rules: [
+                                { type: 'required', field: 'card3_link', message: 'Ссылка обязательна' }
+                            ],
+                            defaultValue: block.props.cards && block.props.cards[2] ? block.props.cards[2].link : 'https://example.com'
+                        },
+                        {
+                            field: 'card3_image',
+                            label: 'Карточка 3 - Изображение',
+                            type: 'url',
+                            placeholder: 'https://i.pinimg.com/736x/ca/9a/12/ca9a123b7269fba0574726629bad42b9.jpg',
+                            rules: [
+                                { type: 'required', field: 'card3_image', message: 'Изображение обязательно' }
+                            ],
+                            defaultValue: block.props.cards && block.props.cards[2] ? block.props.cards[2].image : 'https://i.pinimg.com/736x/ca/9a/12/ca9a123b7269fba0574726629bad42b9.jpg'
+                        },
+                        {
+                            field: 'cardBackground',
+                            label: 'Цвет фона карточек',
+                            type: 'color',
+                            rules: [
+                                { type: 'required', field: 'cardBackground', message: 'Цвет фона обязателен' }
+                            ],
+                            defaultValue: block.settings.cardBackground || '#ffffff'
+                        },
+                        {
+                            field: 'cardTextColor',
+                            label: 'Цвет текста карточек',
+                            type: 'color',
+                            rules: [
+                                { type: 'required', field: 'cardTextColor', message: 'Цвет текста обязателен' }
+                            ],
+                            defaultValue: block.settings.cardTextColor || '#333333'
+                        },
+                        {
+                            field: 'cardBorderRadius',
+                            label: 'Скругление карточек',
+                            type: 'number',
+                            rules: [
+                                { type: 'min', field: 'cardBorderRadius', value: 0, message: 'Скругление не может быть отрицательным' },
+                                { type: 'max', field: 'cardBorderRadius', value: 50, message: 'Максимальное скругление: 50px' }
+                            ],
+                            defaultValue: parseInt(block.settings.cardBorderRadius) || 8
+                        },
+                        {
+                            field: 'columns',
+                            label: 'Количество колонок',
+                            type: 'select',
+                            options: [
+                                { value: '1', label: '1 колонка' },
+                                { value: '2', label: '2 колонки' },
+                                { value: '3', label: '3 колонки' },
+                                { value: '4', label: '4 колонки' }
+                            ],
+                            rules: [
+                                { type: 'required', field: 'columns', message: 'Количество колонок обязательно' }
+                            ],
+                            defaultValue: String(block.settings.columns || '3')
+                        },
+                        {
+                            field: 'gap',
+                            label: 'Отступ между карточками',
+                            type: 'number',
+                            rules: [
+                                { type: 'min', field: 'gap', value: 0, message: 'Отступ не может быть отрицательным' },
+                                { type: 'max', field: 'gap', value: 50, message: 'Максимальный отступ: 50px' }
+                            ],
+                            defaultValue: parseInt(block.settings.gap) || 16
+                        }
+                    ],
+                    submitButtonText: 'Сохранить изменения',
+                    cancelButtonText: 'Отмена'
                 }
             };
 
@@ -1011,6 +1253,62 @@
                         onClick: data.onClick
                     };
                     block.template = `<button onclick="${data.onClick}" style="background-color: ${data.backgroundColor}; color: ${data.color}; border-radius: ${data.borderRadius}px; padding: ${data.padding}; border: none; cursor: pointer; transition: all 0.2s;">${data.text}</button>`;
+                    break;
+                case 'cardlist':
+                    const cards = [
+                        {
+                            title: data.card1_title,
+                            text: data.card1_text,
+                            button: data.card1_button,
+                            link: data.card1_link,
+                            image: data.card1_image
+                        },
+                        {
+                            title: data.card2_title,
+                            text: data.card2_text,
+                            button: data.card2_button,
+                            link: data.card2_link,
+                            image: data.card2_image
+                        },
+                        {
+                            title: data.card3_title,
+                            text: data.card3_text,
+                            button: data.card3_button,
+                            link: data.card3_link,
+                            image: data.card3_image
+                        }
+                    ];
+                    
+                    const cardsHtml = cards.map(card => 
+                        `<div class="card-item" style="background: ${data.cardBackground}; color: ${data.cardTextColor}; border-radius: ${data.cardBorderRadius}px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: transform 0.2s; border: 2px solid #e9ecef;">
+                            <div class="card-image" style="margin-bottom: 15px;">
+                                <img src="${card.image}" alt="${card.title}" style="width: 100%; height: 150px; object-fit: cover; border-radius: 4px;" />
+                            </div>
+                            <h3 style="margin: 0 0 10px 0; font-size: 18px; font-weight: 600;">${card.title}</h3>
+                            <p style="margin: 0 0 15px 0; opacity: 0.8; line-height: 1.5;">${card.text}</p>
+                            <a href="${card.link}" target="_blank" style="display: inline-block; background: #007bff; color: white; padding: 8px 16px; text-decoration: none; border-radius: 4px; font-size: 14px; transition: background 0.2s;">${card.button}</a>
+                        </div>`
+                    ).join('');
+                    
+                    block.settings = {
+                        cardBackground: data.cardBackground,
+                        cardTextColor: data.cardTextColor,
+                        cardBorderRadius: data.cardBorderRadius + 'px',
+                        columns: parseInt(data.columns),
+                        gap: data.gap + 'px'
+                    };
+                    block.props = {
+                        title: data.title,
+                        cards: cards
+                    };
+                    block.template = `
+                        <div class="card-list-container" style="margin: 20px 0;">
+                            <h2 style="text-align: center; margin-bottom: 30px; color: #333; font-size: 28px; font-weight: 700;">${data.title}</h2>
+                            <div class="card-grid" style="display: grid; grid-template-columns: repeat(${parseInt(data.columns)}, 1fr); gap: ${data.gap}px;">
+                                ${cardsHtml}
+                            </div>
+                        </div>
+                    `;
                     break;
             }
 
@@ -1212,6 +1510,228 @@
                     ],
                     submitButtonText: 'Создать кнопку',
                     cancelButtonText: 'Отмена'
+                },
+                'cardlist': {
+                    title: 'Настройка списка карточек',
+                    description: 'Настройте параметры списка карточек',
+                    fields: [
+                        {
+                            field: 'title',
+                            label: 'Заголовок списка',
+                            type: 'text',
+                            placeholder: 'Наши услуги',
+                            rules: [
+                                { type: 'required', field: 'title', message: 'Заголовок обязателен' },
+                                { type: 'minLength', field: 'title', value: 1, message: 'Заголовок не может быть пустым' }
+                            ],
+                            defaultValue: 'Наши услуги'
+                        },
+                        {
+                            field: 'card1_title',
+                            label: 'Карточка 1 - Заголовок',
+                            type: 'text',
+                            placeholder: 'Веб-разработка',
+                            rules: [
+                                { type: 'required', field: 'card1_title', message: 'Заголовок карточки обязателен' }
+                            ],
+                            defaultValue: 'Веб-разработка'
+                        },
+                        {
+                            field: 'card1_text',
+                            label: 'Карточка 1 - Описание',
+                            type: 'textarea',
+                            placeholder: 'Создание современных веб-приложений',
+                            rules: [
+                                { type: 'required', field: 'card1_text', message: 'Описание карточки обязательно' }
+                            ],
+                            defaultValue: 'Создание современных веб-приложений'
+                        },
+                        {
+                            field: 'card1_button',
+                            label: 'Карточка 1 - Текст кнопки',
+                            type: 'text',
+                            placeholder: 'Подробнее',
+                            rules: [
+                                { type: 'required', field: 'card1_button', message: 'Текст кнопки обязателен' }
+                            ],
+                            defaultValue: 'Подробнее'
+                        },
+                        {
+                            field: 'card1_link',
+                            label: 'Карточка 1 - Ссылка',
+                            type: 'url',
+                            placeholder: 'https://example.com',
+                            rules: [
+                                { type: 'required', field: 'card1_link', message: 'Ссылка обязательна' }
+                            ],
+                            defaultValue: 'https://example.com'
+                        },
+                        {
+                            field: 'card1_image',
+                            label: 'Карточка 1 - Изображение',
+                            type: 'url',
+                            placeholder: 'https://i.pinimg.com/736x/ca/9a/12/ca9a123b7269fba0574726629bad42b9.jpg',
+                            rules: [
+                                { type: 'required', field: 'card1_image', message: 'Изображение обязательно' }
+                            ],
+                            defaultValue: 'https://i.pinimg.com/736x/ca/9a/12/ca9a123b7269fba0574726629bad42b9.jpg'
+                        },
+                        {
+                            field: 'card2_title',
+                            label: 'Карточка 2 - Заголовок',
+                            type: 'text',
+                            placeholder: 'Мобильные приложения',
+                            rules: [
+                                { type: 'required', field: 'card2_title', message: 'Заголовок карточки обязателен' }
+                            ],
+                            defaultValue: 'Мобильные приложения'
+                        },
+                        {
+                            field: 'card2_text',
+                            label: 'Карточка 2 - Описание',
+                            type: 'textarea',
+                            placeholder: 'Разработка мобильных приложений для iOS и Android',
+                            rules: [
+                                { type: 'required', field: 'card2_text', message: 'Описание карточки обязательно' }
+                            ],
+                            defaultValue: 'Разработка мобильных приложений для iOS и Android'
+                        },
+                        {
+                            field: 'card2_button',
+                            label: 'Карточка 2 - Текст кнопки',
+                            type: 'text',
+                            placeholder: 'Узнать больше',
+                            rules: [
+                                { type: 'required', field: 'card2_button', message: 'Текст кнопки обязателен' }
+                            ],
+                            defaultValue: 'Узнать больше'
+                        },
+                        {
+                            field: 'card2_link',
+                            label: 'Карточка 2 - Ссылка',
+                            type: 'url',
+                            placeholder: 'https://example.com',
+                            rules: [
+                                { type: 'required', field: 'card2_link', message: 'Ссылка обязательна' }
+                            ],
+                            defaultValue: 'https://example.com'
+                        },
+                        {
+                            field: 'card2_image',
+                            label: 'Карточка 2 - Изображение',
+                            type: 'url',
+                            placeholder: 'https://i.pinimg.com/736x/ca/9a/12/ca9a123b7269fba0574726629bad42b9.jpg',
+                            rules: [
+                                { type: 'required', field: 'card2_image', message: 'Изображение обязательно' }
+                            ],
+                            defaultValue: 'https://i.pinimg.com/736x/ca/9a/12/ca9a123b7269fba0574726629bad42b9.jpg'
+                        },
+                        {
+                            field: 'card3_title',
+                            label: 'Карточка 3 - Заголовок',
+                            type: 'text',
+                            placeholder: 'Дизайн',
+                            rules: [
+                                { type: 'required', field: 'card3_title', message: 'Заголовок карточки обязателен' }
+                            ],
+                            defaultValue: 'Дизайн'
+                        },
+                        {
+                            field: 'card3_text',
+                            label: 'Карточка 3 - Описание',
+                            type: 'textarea',
+                            placeholder: 'Создание уникального дизайна для вашего бренда',
+                            rules: [
+                                { type: 'required', field: 'card3_text', message: 'Описание карточки обязательно' }
+                            ],
+                            defaultValue: 'Создание уникального дизайна для вашего бренда'
+                        },
+                        {
+                            field: 'card3_button',
+                            label: 'Карточка 3 - Текст кнопки',
+                            type: 'text',
+                            placeholder: 'Посмотреть работы',
+                            rules: [
+                                { type: 'required', field: 'card3_button', message: 'Текст кнопки обязателен' }
+                            ],
+                            defaultValue: 'Посмотреть работы'
+                        },
+                        {
+                            field: 'card3_link',
+                            label: 'Карточка 3 - Ссылка',
+                            type: 'url',
+                            placeholder: 'https://example.com',
+                            rules: [
+                                { type: 'required', field: 'card3_link', message: 'Ссылка обязательна' }
+                            ],
+                            defaultValue: 'https://example.com'
+                        },
+                        {
+                            field: 'card3_image',
+                            label: 'Карточка 3 - Изображение',
+                            type: 'url',
+                            placeholder: 'https://i.pinimg.com/736x/ca/9a/12/ca9a123b7269fba0574726629bad42b9.jpg',
+                            rules: [
+                                { type: 'required', field: 'card3_image', message: 'Изображение обязательно' }
+                            ],
+                            defaultValue: 'https://i.pinimg.com/736x/ca/9a/12/ca9a123b7269fba0574726629bad42b9.jpg'
+                        },
+                        {
+                            field: 'cardBackground',
+                            label: 'Цвет фона карточек',
+                            type: 'color',
+                            rules: [
+                                { type: 'required', field: 'cardBackground', message: 'Цвет фона обязателен' }
+                            ],
+                            defaultValue: '#ffffff'
+                        },
+                        {
+                            field: 'cardTextColor',
+                            label: 'Цвет текста карточек',
+                            type: 'color',
+                            rules: [
+                                { type: 'required', field: 'cardTextColor', message: 'Цвет текста обязателен' }
+                            ],
+                            defaultValue: '#333333'
+                        },
+                        {
+                            field: 'cardBorderRadius',
+                            label: 'Скругление карточек',
+                            type: 'number',
+                            rules: [
+                                { type: 'min', field: 'cardBorderRadius', value: 0, message: 'Скругление не может быть отрицательным' },
+                                { type: 'max', field: 'cardBorderRadius', value: 50, message: 'Максимальное скругление: 50px' }
+                            ],
+                            defaultValue: 8
+                        },
+                        {
+                            field: 'columns',
+                            label: 'Количество колонок',
+                            type: 'select',
+                            options: [
+                                { value: '1', label: '1 колонка' },
+                                { value: '2', label: '2 колонки' },
+                                { value: '3', label: '3 колонки' },
+                                { value: '4', label: '4 колонки' }
+                            ],
+                            rules: [
+                                { type: 'required', field: 'columns', message: 'Количество колонок обязательно' }
+                            ],
+                            defaultValue: '3'
+                        },
+                        {
+                            field: 'gap',
+                            label: 'Отступ между карточками',
+                            type: 'number',
+                            rules: [
+                                { type: 'min', field: 'gap', value: 0, message: 'Отступ не может быть отрицательным' },
+                                { type: 'max', field: 'gap', value: 50, message: 'Максимальный отступ: 50px' }
+                            ],
+                            defaultValue: 16
+                        }
+                    ],
+                    submitButtonText: 'Создать список карточек',
+                    cancelButtonText: 'Отмена'
                 }
             };
 
@@ -1270,8 +1790,40 @@
                     <div class="form-fields">
             `;
 
+            let currentCard = null;
+            let cardSectionOpen = false;
+
             for (const field of config.fields) {
+                // Проверяем, начинается ли новая карточка
+                const cardMatch = field.field.match(/^card(\d+)_/);
+                
+                if (cardMatch) {
+                    const cardNumber = cardMatch[1];
+                    
+                    // Если это новая карточка, закрываем предыдущую секцию и открываем новую
+                    if (currentCard !== cardNumber) {
+                        if (cardSectionOpen) {
+                            html += `</div>`;
+                        }
+                        html += `<div class="card-section"><h4>Карточка ${cardNumber}</h4>`;
+                        currentCard = cardNumber;
+                        cardSectionOpen = true;
+                    }
+                } else {
+                    // Если это не поле карточки, закрываем секцию карточки если она открыта
+                    if (cardSectionOpen) {
+                        html += `</div>`;
+                        cardSectionOpen = false;
+                        currentCard = null;
+                    }
+                }
+                
                 html += generateFieldHTML(field);
+            }
+
+            // Закрываем последнюю секцию карточки если она осталась открытой
+            if (cardSectionOpen) {
+                html += `</div>`;
             }
 
             html += `
@@ -1504,6 +2056,62 @@
                         onClick: data.onClick
                     };
                     block.template = `<button onclick="${data.onClick}" style="background-color: ${data.backgroundColor}; color: ${data.color}; border-radius: ${data.borderRadius}px; padding: ${data.padding}; border: none; cursor: pointer; transition: all 0.2s;">${data.text}</button>`;
+                    break;
+                case 'cardlist':
+                    const cards = [
+                        {
+                            title: data.card1_title,
+                            text: data.card1_text,
+                            button: data.card1_button,
+                            link: data.card1_link,
+                            image: data.card1_image
+                        },
+                        {
+                            title: data.card2_title,
+                            text: data.card2_text,
+                            button: data.card2_button,
+                            link: data.card2_link,
+                            image: data.card2_image
+                        },
+                        {
+                            title: data.card3_title,
+                            text: data.card3_text,
+                            button: data.card3_button,
+                            link: data.card3_link,
+                            image: data.card3_image
+                        }
+                    ];
+                    
+                    const cardsHtml = cards.map(card => 
+                        `<div class="card-item" style="background: ${data.cardBackground}; color: ${data.cardTextColor}; border-radius: ${data.cardBorderRadius}px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: transform 0.2s; border: 2px solid #e9ecef;">
+                            <div class="card-image" style="margin-bottom: 15px;">
+                                <img src="${card.image}" alt="${card.title}" style="width: 100%; height: 150px; object-fit: cover; border-radius: 4px;" />
+                            </div>
+                            <h3 style="margin: 0 0 10px 0; font-size: 18px; font-weight: 600;">${card.title}</h3>
+                            <p style="margin: 0 0 15px 0; opacity: 0.8; line-height: 1.5;">${card.text}</p>
+                            <a href="${card.link}" target="_blank" style="display: inline-block; background: #007bff; color: white; padding: 8px 16px; text-decoration: none; border-radius: 4px; font-size: 14px; transition: background 0.2s;">${card.button}</a>
+                        </div>`
+                    ).join('');
+                    
+                    block.settings = {
+                        cardBackground: data.cardBackground,
+                        cardTextColor: data.cardTextColor,
+                        cardBorderRadius: data.cardBorderRadius + 'px',
+                        columns: parseInt(data.columns),
+                        gap: data.gap + 'px'
+                    };
+                    block.props = {
+                        title: data.title,
+                        cards: cards
+                    };
+                    block.template = `
+                        <div class="card-list-container" style="margin: 20px 0;">
+                            <h2 style="text-align: center; margin-bottom: 30px; color: #333; font-size: 28px; font-weight: 700;">${data.title}</h2>
+                            <div class="card-grid" style="display: grid; grid-template-columns: repeat(${parseInt(data.columns)}, 1fr); gap: ${data.gap}px;">
+                                ${cardsHtml}
+                            </div>
+                        </div>
+                    `;
                     break;
             }
 
