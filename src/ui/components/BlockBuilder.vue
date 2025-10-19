@@ -27,6 +27,7 @@
         @delete="deleteBlock"
         @drag-start="handleDragStart"
         @drag-end="handleDragEnd"
+        @card-click="handleCardClick"
       />
     </div>
     
@@ -37,6 +38,14 @@
         @update="updateBlockProperties"
       />
     </div>
+    
+    <!-- Модальное окно для детальной информации карточки -->
+    <CardDetailModal
+      :card="selectedCard"
+      :is-visible="showCardModal"
+      @close="closeCardModal"
+      @link-click="handleLinkClick"
+    />
   </div>
 </template>
 
@@ -47,6 +56,7 @@ import { BlockService } from '../../application/services/BlockService';
 import { MemoryBlockRepository } from '../../infrastructure/repositories/MemoryBlockRepository';
 import BlockComponent from './BlockComponent.vue';
 import BlockProperties from './BlockProperties.vue';
+import CardDetailModal from './CardDetailModal.vue';
 
 interface BlockType {
   type: string;
@@ -87,6 +97,8 @@ const blocks = ref<Block[]>([]);
 const selectedBlocks = ref<BlockId[]>([]);
 const isDragging = ref(false);
 const dragStartPosition = ref<{ x: number; y: number } | null>(null);
+const showCardModal = ref(false);
+const selectedCard = ref<any>(null);
 
 // Доступные типы блоков
 const availableBlockTypes = ref<BlockType[]>([
@@ -227,6 +239,22 @@ const handleCanvasClick = (event: MouseEvent) => {
   if (event.target === event.currentTarget) {
     selectedBlocks.value = [];
   }
+};
+
+// Обработчики для модального окна карточки
+const handleCardClick = (card: any) => {
+  selectedCard.value = card;
+  showCardModal.value = true;
+};
+
+const closeCardModal = () => {
+  showCardModal.value = false;
+  selectedCard.value = null;
+};
+
+const handleLinkClick = (link: string) => {
+  // Открываем ссылку в новой вкладке
+  window.open(link, '_blank');
 };
 
 // Обработка клавиатуры

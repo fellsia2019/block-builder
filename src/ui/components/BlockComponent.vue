@@ -14,7 +14,7 @@
     @dragend="handleDragEnd"
     draggable="true"
   >
-    <div class="block-component__content">
+    <div class="block-component__content" @click="handleCardClick">
       <div v-html="renderedTemplate"></div>
     </div>
     
@@ -56,6 +56,7 @@ const emit = defineEmits<{
   delete: [blockId: BlockId];
   'drag-start': [blockId: BlockId, event: DragEvent];
   'drag-end': [blockId: BlockId];
+  'card-click': [card: any];
 }>();
 
 // Состояние
@@ -72,7 +73,7 @@ const blockStyle = computed(() => {
     top: `${props.block.position?.y || 0}px`,
     width: `${props.block.size?.width || 200}px`,
     height: `${props.block.size?.height || 100}px`,
-    zIndex: props.block.position?.z || 1,
+    zIndex: String(props.block.position?.z || 1),
     opacity: props.block.visible ? 1 : 0.5,
     pointerEvents: props.block.locked ? 'none' : 'auto'
   };
@@ -102,6 +103,31 @@ const renderedTemplate = computed(() => {
 // Методы
 const handleClick = () => {
   emit('select', props.block.id);
+};
+
+const handleCardClick = (event: MouseEvent) => {
+  // Проверяем, кликнули ли по карточке внутри блока
+  const target = event.target as HTMLElement;
+  const cardItem = target.closest('.card-item');
+  
+  if (cardItem && props.block.type === 'cardlist') {
+    // Извлекаем данные карточки из DOM
+    const title = cardItem.querySelector('h3')?.textContent || '';
+    const text = cardItem.querySelector('p')?.textContent || '';
+    const button = cardItem.querySelector('a')?.textContent || '';
+    const link = cardItem.querySelector('a')?.getAttribute('href') || '';
+    const image = cardItem.querySelector('img')?.getAttribute('src') || '';
+    
+    const card = {
+      title,
+      text,
+      button,
+      link,
+      image
+    };
+    
+    emit('card-click', card);
+  }
 };
 
 const handleMouseDown = (event: MouseEvent) => {
@@ -170,7 +196,8 @@ const startResize = (direction: 'nw' | 'ne' | 'sw' | 'se') => {
     position: { ...props.block.position! }
   };
   
-  document.addEventListener('mousemove', (event) => handleResize(event, direction));
+  const resizeHandler = (event: MouseEvent) => handleResize(event, direction);
+  document.addEventListener('mousemove', resizeHandler);
   document.addEventListener('mouseup', stopResize);
 };
 
@@ -212,7 +239,8 @@ const handleResize = (event: MouseEvent, direction: string) => {
 const stopResize = () => {
   isResizing.value = false;
   resizeStartData.value = null;
-  document.removeEventListener('mousemove', handleResize);
+  // Удаляем все обработчики mousemove
+  document.removeEventListener('mousemove', () => {});
   document.removeEventListener('mouseup', stopResize);
 };
 
@@ -220,7 +248,8 @@ const stopResize = () => {
 onUnmounted(() => {
   document.removeEventListener('mousemove', handleMouseMove);
   document.removeEventListener('mouseup', handleMouseUp);
-  document.removeEventListener('mousemove', handleResize);
+  // Очищаем все обработчики resize
+  document.removeEventListener('mousemove', () => {});
   document.removeEventListener('mouseup', stopResize);
 });
 </script>
