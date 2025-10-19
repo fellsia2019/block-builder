@@ -113,49 +113,56 @@
             color: white;
         }
 
-        .canvas {
+        .blocks-container {
             width: 100%;
-            height: 500px;
-            border: 2px dashed #dee2e6;
-            border-radius: 8px;
-            background: #ffffff;
-            position: relative;
-            overflow: hidden;
             margin: 20px 0;
         }
 
         .vue-block {
-            position: absolute;
+            width: 100%;
+            margin-bottom: 30px;
             border: 2px solid #42b883;
-            border-radius: 6px;
-            background: rgba(66, 184, 131, 0.1);
-            cursor: move;
-            user-select: none;
+            border-radius: 8px;
+            background: rgba(66, 184, 131, 0.05);
             transition: all 0.3s ease;
-            min-width: 100px;
-            min-height: 50px;
             overflow: hidden;
+            position: relative;
         }
 
         .vue-block:hover {
-            background: rgba(66, 184, 131, 0.2);
-            transform: scale(1.02);
+            background: rgba(66, 184, 131, 0.1);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(66, 184, 131, 0.2);
         }
 
         .vue-block.selected {
             border-color: #28a745;
-            background: rgba(40, 167, 69, 0.2);
-            box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.3);
+            background: rgba(40, 167, 69, 0.1);
+            box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.2);
         }
 
         .vue-block.locked {
             border-color: #dc3545;
-            background: rgba(220, 53, 69, 0.1);
-            cursor: not-allowed;
+            background: rgba(220, 53, 69, 0.05);
         }
 
         .vue-block.hidden {
             opacity: 0.3;
+        }
+
+        .block-header {
+            background: rgba(66, 184, 131, 0.1);
+            padding: 10px 15px;
+            border-bottom: 1px solid #42b883;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+            color: #2c3e50;
+        }
+
+        .block-content {
+            padding: 20px;
         }
 
         .stats {
@@ -252,7 +259,7 @@
         /* Vue3 компоненты стили */
         .custom-button {
             width: 100%;
-            height: 100%;
+            min-height: 50px;
             border: none;
             border-radius: 6px;
             cursor: pointer;
@@ -261,75 +268,87 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-size: 16px;
         }
 
         .custom-button:hover {
-            transform: scale(1.05);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
         }
 
         .custom-card {
             width: 100%;
-            height: 100%;
             border-radius: 8px;
             overflow: hidden;
             display: flex;
             flex-direction: column;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
 
         .custom-card-image {
-            flex: 1;
+            height: 200px;
             background-size: cover;
             background-position: center;
         }
 
         .custom-card-content {
-            padding: 15px;
-            background: white;
+            padding: 20px;
         }
 
         .custom-card-title {
-            font-size: 1.1rem;
+            font-size: 1.3rem;
             font-weight: bold;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             color: #333;
         }
 
         .custom-card-text {
             color: #666;
-            font-size: 0.9rem;
+            font-size: 1rem;
+            line-height: 1.5;
         }
 
         .custom-form {
             width: 100%;
-            height: 100%;
             padding: 20px;
             background: white;
             border-radius: 8px;
         }
 
         .form-field {
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
 
         .form-field label {
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
             font-weight: 600;
             color: #333;
+            font-size: 14px;
         }
 
         .form-field input,
         .form-field textarea {
             width: 100%;
-            padding: 8px 12px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+            padding: 12px 16px;
+            border: 2px solid #e1e5e9;
+            border-radius: 6px;
             font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-field input:focus,
+        .form-field textarea:focus {
+            outline: none;
+            border-color: #42b883;
         }
 
         .form-field textarea {
             resize: vertical;
-            min-height: 60px;
+            min-height: 80px;
         }
     </style>
 </head>
@@ -374,14 +393,13 @@
                         </button>
                     </div>
 
-                    <div class="canvas" @click="deselectAll">
+                    <div class="blocks-container" @click="deselectAll">
                         <vue-block
                             v-for="block in blocks"
                             :key="block.id"
                             :block="block"
                             :selected="selectedBlockId === block.id"
                             @select="selectBlock"
-                            @update="updateBlock"
                             @log="log"
                         />
                     </div>
@@ -525,54 +543,29 @@
         // Vue3 блок компонент
         const VueBlock = {
             props: ['block', 'selected'],
-            emits: ['select', 'update', 'log'],
+            emits: ['select', 'log'],
             template: `
                 <div 
                     class="vue-block"
                     :class="{ selected, locked: block.locked, hidden: !block.visible }"
-                    :style="{
-                        left: block.position.x + 'px',
-                        top: block.position.y + 'px',
-                        width: block.size.width + 'px',
-                        height: block.size.height + 'px'
-                    }"
                     @click.stop="$emit('select', block.id)"
-                    @mousedown="startDrag"
                 >
-                    <component 
-                        :is="block.component" 
-                        v-bind="block.componentProps"
-                        @click="handleComponentClick"
-                        @submit="handleComponentSubmit"
-                        @change="handleComponentChange"
-                    />
+                    <div class="block-header">
+                        <span><strong>{{ block.type }}</strong> - {{ block.id }}</span>
+                        <span v-if="block.locked">🔒</span>
+                    </div>
+                    <div class="block-content">
+                        <component 
+                            :is="block.component" 
+                            v-bind="block.componentProps"
+                            @click="handleComponentClick"
+                            @submit="handleComponentSubmit"
+                            @change="handleComponentChange"
+                        />
+                    </div>
                 </div>
             `,
             methods: {
-                startDrag(e) {
-                    if (this.block.locked) return;
-                    e.preventDefault();
-                    
-                    const startX = e.clientX - this.block.position.x;
-                    const startY = e.clientY - this.block.position.y;
-
-                    const onMouseMove = (e) => {
-                        this.$emit('update', this.block.id, {
-                            position: {
-                                x: e.clientX - startX,
-                                y: e.clientY - startY
-                            }
-                        });
-                    };
-
-                    const onMouseUp = () => {
-                        document.removeEventListener('mousemove', onMouseMove);
-                        document.removeEventListener('mouseup', onMouseUp);
-                    };
-
-                    document.addEventListener('mousemove', onMouseMove);
-                    document.addEventListener('mouseup', onMouseUp);
-                },
                 handleComponentClick(data) {
                     this.$emit('log', `Vue3 кнопка нажата: ${JSON.stringify(data)}`, 'success');
                 },
@@ -625,6 +618,7 @@
                     const block = blocks.value.find(b => b.id === blockId);
                     if (block) {
                         Object.assign(block, updates);
+                        log(`Блок обновлен: ${blockId}`, 'info');
                     }
                 };
 
@@ -638,8 +632,6 @@
                             variant: 'primary',
                             size: 'large'
                         },
-                        position: { x: Math.random() * 300 + 50, y: Math.random() * 200 + 50 },
-                        size: { width: 150, height: 50 },
                         visible: true,
                         locked: false
                     };
@@ -658,8 +650,6 @@
                             content: 'Это Vue3 компонент в блоке!',
                             image: 'https://via.placeholder.com/300x200/42b883/ffffff?text=Vue3'
                         },
-                        position: { x: Math.random() * 300 + 50, y: Math.random() * 200 + 50 },
-                        size: { width: 250, height: 200 },
                         visible: true,
                         locked: false
                     };
@@ -681,8 +671,6 @@
                             ],
                             submitText: 'Отправить'
                         },
-                        position: { x: Math.random() * 300 + 50, y: Math.random() * 200 + 50 },
-                        size: { width: 300, height: 250 },
                         visible: true,
                         locked: false
                     };
@@ -700,8 +688,6 @@
                             initialValue: 0,
                             step: 1
                         },
-                        position: { x: Math.random() * 300 + 50, y: Math.random() * 200 + 50 },
-                        size: { width: 200, height: 150 },
                         visible: true,
                         locked: false
                     };
@@ -719,7 +705,7 @@
                 onMounted(() => {
                     log('Naberika инициализирован - Vue3 компоненты', 'success');
                     log('Используйте кнопки для добавления Vue3 блоков', 'info');
-                    log('Кликните по блоку для выбора, перетащите для перемещения', 'info');
+                    log('Кликните по блоку для выбора', 'info');
                 });
 
                 return {

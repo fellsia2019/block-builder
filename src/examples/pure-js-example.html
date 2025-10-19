@@ -112,49 +112,58 @@
             color: white;
         }
 
-        .canvas {
+        .blocks-container {
             width: 100%;
-            height: 400px;
-            border: 2px dashed #dee2e6;
-            border-radius: 8px;
-            background: #ffffff;
-            position: relative;
-            overflow: hidden;
             margin: 20px 0;
         }
 
         .block {
-            position: absolute;
+            width: 100%;
+            margin-bottom: 30px;
             border: 2px solid #007bff;
-            border-radius: 6px;
-            background: rgba(0, 123, 255, 0.1);
-            cursor: move;
-            user-select: none;
+            border-radius: 8px;
+            background: rgba(0, 123, 255, 0.05);
             transition: all 0.3s ease;
-            min-width: 100px;
-            min-height: 50px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .block:hover {
+            background: rgba(0, 123, 255, 0.1);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.2);
+        }
+
+        .block.selected {
+            border-color: #28a745;
+            background: rgba(40, 167, 69, 0.1);
+            box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.2);
+        }
+
+        .block.locked {
+            border-color: #dc3545;
+            background: rgba(220, 53, 69, 0.05);
+        }
+
+        .block-header {
+            background: rgba(0, 123, 255, 0.1);
+            padding: 10px 15px;
+            border-bottom: 1px solid #007bff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+            color: #2c3e50;
+        }
+
+        .block-content {
+            padding: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 600;
             color: #333;
-        }
-
-        .block:hover {
-            background: rgba(0, 123, 255, 0.2);
-            transform: scale(1.02);
-        }
-
-        .block.selected {
-            border-color: #28a745;
-            background: rgba(40, 167, 69, 0.2);
-            box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.3);
-        }
-
-        .block.locked {
-            border-color: #dc3545;
-            background: rgba(220, 53, 69, 0.1);
-            cursor: not-allowed;
+            min-height: 60px;
         }
 
         .block.hidden {
@@ -307,7 +316,7 @@
                     </button>
                 </div>
 
-                <div class="canvas" id="canvas"></div>
+                <div class="blocks-container" id="blocks-container"></div>
 
                 <div class="stats">
                     <div class="stat-card">
@@ -345,8 +354,6 @@
                 this.settings = data.settings || {};
                 this.props = data.props || {};
                 this.template = data.template;
-                this.position = data.position || { x: 100, y: 100 };
-                this.size = data.size || { width: 150, height: 80 };
                 this.visible = data.visible !== false;
                 this.locked = data.locked || false;
                 this.selected = false;
@@ -358,10 +365,6 @@
 
             updateProps(newProps) {
                 this.props = { ...this.props, ...newProps };
-            }
-
-            moveTo(newPosition) {
-                this.position = { ...this.position, ...newPosition };
             }
 
             setLocked(locked) {
@@ -399,8 +402,8 @@
         }
 
         function renderBlocks() {
-            const canvas = document.getElementById('canvas');
-            canvas.innerHTML = '';
+            const container = document.getElementById('blocks-container');
+            container.innerHTML = '';
 
             blocks.forEach(block => {
                 if (!block.visible) return;
@@ -413,14 +416,21 @@
                 if (block.locked) blockElement.classList.add('locked');
                 if (!block.visible) blockElement.classList.add('hidden');
 
-                blockElement.style.left = block.position.x + 'px';
-                blockElement.style.top = block.position.y + 'px';
-                blockElement.style.width = block.size.width + 'px';
-                blockElement.style.height = block.size.height + 'px';
+                // Создаем заголовок блока
+                const headerElement = document.createElement('div');
+                headerElement.className = 'block-header';
+                headerElement.innerHTML = `
+                    <span><strong>${block.type}</strong> - ${block.id}</span>
+                    ${block.locked ? '<span>🔒</span>' : ''}
+                `;
+
+                // Создаем контент блока
+                const contentElement = document.createElement('div');
+                contentElement.className = 'block-content';
 
                 // Применяем стили из settings
                 Object.entries(block.settings).forEach(([key, value]) => {
-                    blockElement.style[key] = value;
+                    contentElement.style[key] = value;
                 });
 
                 // Рендерим содержимое из template
@@ -432,10 +442,13 @@
                     Object.entries(block.settings).forEach(([key, value]) => {
                         content = content.replace(new RegExp(`{{ settings.${key} }}`, 'g'), value);
                     });
-                    blockElement.innerHTML = content;
+                    contentElement.innerHTML = content;
                 } else {
-                    blockElement.textContent = block.props.content || block.type;
+                    contentElement.textContent = block.props.content || block.type;
                 }
+
+                blockElement.appendChild(headerElement);
+                blockElement.appendChild(contentElement);
 
                 // Обработчики событий
                 blockElement.addEventListener('click', (e) => {
@@ -443,13 +456,7 @@
                     selectBlock(block.id);
                 });
 
-                blockElement.addEventListener('mousedown', (e) => {
-                    if (block.locked) return;
-                    e.preventDefault();
-                    startDrag(block, e);
-                });
-
-                canvas.appendChild(blockElement);
+                container.appendChild(blockElement);
             });
         }
 
@@ -465,29 +472,7 @@
             }
         }
 
-        function startDrag(block, e) {
-            if (block.locked) return;
-
-            const startX = e.clientX - block.position.x;
-            const startY = e.clientY - block.position.y;
-
-            function onMouseMove(e) {
-                block.moveTo({
-                    x: e.clientX - startX,
-                    y: e.clientY - startY
-                });
-                renderBlocks();
-            }
-
-            function onMouseUp() {
-                document.removeEventListener('mousemove', onMouseMove);
-                document.removeEventListener('mouseup', onMouseUp);
-                log(`Блок ${block.type} перемещен в позицию (${Math.round(block.position.x)}, ${Math.round(block.position.y)})`, 'info');
-            }
-
-            document.addEventListener('mousemove', onMouseMove);
-            document.addEventListener('mouseup', onMouseUp);
-        }
+        // Функция drag & drop удалена - блоки теперь располагаются как секции сайта
 
         // Функции для добавления блоков
         window.addTextBlock = function() {
@@ -506,8 +491,6 @@
                     textAlign: 'center'
                 },
                 template: '<div style="text-align: {{ props.textAlign }}; font-size: {{ settings.fontSize }}; color: {{ settings.color }};">{{ props.content }}</div>',
-                position: { x: Math.random() * 300 + 50, y: Math.random() * 200 + 50 },
-                size: { width: 200, height: 60 }
             });
 
             blocks.push(block);
@@ -530,8 +513,6 @@
                     alt: 'Placeholder Image'
                 },
                 template: '<img src="{{ props.src }}" alt="{{ props.alt }}" style="width: 100%; height: 100%; object-fit: cover;">',
-                position: { x: Math.random() * 300 + 50, y: Math.random() * 200 + 50 },
-                size: { width: 200, height: 150 }
             });
 
             blocks.push(block);
@@ -558,8 +539,6 @@
                     variant: 'primary'
                 },
                 template: '<button style="width: 100%; height: 100%; background-color: {{ settings.backgroundColor }}; color: {{ settings.color }}; border: {{ settings.border }}; border-radius: {{ settings.borderRadius }}; cursor: {{ settings.cursor }}; font-size: {{ settings.fontSize }}; font-weight: {{ settings.fontWeight }};">{{ props.text }}</button>',
-                position: { x: Math.random() * 300 + 50, y: Math.random() * 200 + 50 },
-                size: { width: 150, height: 50 }
             });
 
             blocks.push(block);
@@ -583,8 +562,6 @@
                     content: 'Это контейнер для других блоков'
                 },
                 template: '<div style="text-align: center;"><h3 style="margin: 0 0 10px 0; color: #333;">{{ props.title }}</h3><p style="margin: 0; color: #666;">{{ props.content }}</p></div>',
-                position: { x: Math.random() * 300 + 50, y: Math.random() * 200 + 50 },
-                size: { width: 250, height: 120 }
             });
 
             blocks.push(block);
