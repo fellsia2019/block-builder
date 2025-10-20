@@ -103,11 +103,11 @@
 <script setup lang="ts">
 import { IBlock, TBlockId } from '../../core/types';
 
-interface Props {
+interface IProps {
   block: IBlock | null;
 }
 
-const props = defineProps<Props>();
+const props = defineProps<IProps>();
 
 const emit = defineEmits<{
   update: [blockId: TBlockId, updates: Partial<IBlock>];

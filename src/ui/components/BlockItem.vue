@@ -71,11 +71,11 @@ import { computed } from 'vue';
 import { IBlock } from '../../core/types';
 import { getHtmlTemplate } from '../../utils/renderHelpers';
 
-interface Props {
+interface IProps {
   block: IBlock;
 }
 
-interface Emits {
+interface IEmits {
   (e: 'edit', block: IBlock): void;
   (e: 'delete', blockId: string): void;
   (e: 'move-up', blockId: string): void;
@@ -84,8 +84,8 @@ interface Emits {
   (e: 'toggle-lock', blockId: string): void;
 }
 
-const props = defineProps<Props>();
-const emit = defineEmits<Emits>();
+const props = defineProps<IProps>();
+const emit = defineEmits<IEmits>();
 
 // Рендерим контент блока
 const renderedContent = computed(() => {

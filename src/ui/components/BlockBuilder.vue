@@ -45,12 +45,13 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { IBlock, TBlockId, IBlockSettings, IBlockProps, IBlockStyle, TRenderRef } from '../../core/types';
 import { BlockManagementUseCase } from '../../core/use-cases/BlockManagementUseCase';
-import { MemoryBlockRepositoryImpl } from '../../infrastructure/repositories/MemoryBlockRepositoryImpl';
+import { IBlockRepository } from '../../core/ports/BlockRepository';
+import { IComponentRegistry } from '../../core/ports/ComponentRegistry';
 import BlockComponent from './BlockComponent.vue';
 import BlockProperties from './BlockProperties.vue';
 import CardDetailModal from './CardDetailModal.vue';
 
-interface BlockType {
+interface IBlockType {
   type: string;
   label: string;
   template?: string; // Deprecated
@@ -59,15 +60,17 @@ interface BlockType {
   defaultProps: IBlockProps;
 }
 
-interface Props {
+interface IProps {
   config?: {
-    availableBlockTypes?: BlockType[];
+    availableBlockTypes?: IBlockType[];
     allowNesting?: boolean;
     maxDepth?: number;
   };
+  blockRepository?: IBlockRepository;
+  componentRegistry?: IComponentRegistry;
 }
 
-const props = withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<IProps>(), {
   config: () => ({
     allowNesting: true,
     maxDepth: 5
@@ -81,9 +84,17 @@ const emit = defineEmits<{
   'blocks-reordered': [blocks: IBlock[]];
 }>();
 
-// Инициализация сервисов
-const blockRepository = new MemoryBlockRepositoryImpl();
-const blockService = new BlockManagementUseCase(blockRepository, {} as any);
+// Инициализация сервисов через dependency injection
+const blockRepository = props.blockRepository || (() => {
+  // Fallback для демо - в реальном приложении зависимости должны передаваться через props
+  console.warn('BlockBuilder: blockRepository not provided, using fallback');
+  return {} as IBlockRepository;
+})();
+const componentRegistry = props.componentRegistry || (() => {
+  console.warn('BlockBuilder: componentRegistry not provided, using fallback');
+  return {} as IComponentRegistry;
+})();
+const blockService = new BlockManagementUseCase(blockRepository, componentRegistry);
 
 // Состояние
 const blocks = ref<IBlock[]>([]);
@@ -93,7 +104,7 @@ const showCardModal = ref(false);
 const selectedCard = ref<any>(null);
 
 // Доступные типы блоков
-const availableBlockTypes = ref<BlockType[]>([
+const availableBlockTypes = ref<IBlockType[]>([
   {
     type: 'text',
     label: 'Text',
@@ -135,7 +146,7 @@ const loadBlocks = async () => {
 };
 
 const addBlock = async (type: string) => {
-  const blockType = availableBlockTypes.value.find((bt: BlockType) => bt.type === type);
+  const blockType = availableBlockTypes.value.find((bt: IBlockType) => bt.type === type);
   if (!blockType) return;
 
   const createData: any = {

@@ -12,11 +12,8 @@ export class CreateBlockUseCase {
     // Валидация входных данных
     this.validateBlockData(blockData);
 
-    // Генерация уникального ID
-    const blockId = this.generateBlockId();
-
-    // Создание блока с метаданными
-    const blockDataWithId: ICreateBlockDto = {
+    // Создание блока с метаданными (ID генерируется в репозитории)
+    const blockDataWithMetadata: ICreateBlockDto = {
       ...blockData,
       metadata: {
         createdAt: new Date(),
@@ -25,8 +22,8 @@ export class CreateBlockUseCase {
       }
     };
 
-    // Сохранение в репозитории
-    const createdBlock = await this.blockRepository.create(blockDataWithId);
+    // Сохранение в репозитории (репозиторий генерирует ID)
+    const createdBlock = await this.blockRepository.create(blockDataWithMetadata);
 
     return createdBlock;
   }
@@ -44,7 +41,4 @@ export class CreateBlockUseCase {
 
   }
 
-  private generateBlockId(): string {
-    return `block_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-  }
 }

@@ -56,11 +56,11 @@ const getVueComponent = (render?: any) => {
   return render.component;
 };
 
-interface Props {
+interface IProps {
   block: IBlock;
 }
 
-const props = defineProps<Props>();
+const props = defineProps<IProps>();
 
 const emit = defineEmits<{
   update: [blockId: TBlockId, updates: Partial<IBlock>];

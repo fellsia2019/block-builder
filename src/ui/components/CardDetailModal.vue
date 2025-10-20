@@ -5,20 +5,20 @@
         <h3>{{ card.title }}</h3>
         <button class="close-btn" @click="closeModal">×</button>
       </div>
-      
+
       <div class="modal-body">
         <div class="card-image">
           <img :src="card.image" :alt="card.title" />
         </div>
-        
+
         <div class="card-details">
           <h4>{{ card.title }}</h4>
           <p class="card-description">{{ card.text }}</p>
-          
+
           <div class="card-actions">
-            <a 
-              :href="card.link" 
-              target="_blank" 
+            <a
+              :href="card.link"
+              target="_blank"
               class="detail-button"
               @click="handleLinkClick"
             >
@@ -34,7 +34,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 
-interface Card {
+interface ICard {
   title: string;
   text: string;
   button: string;
@@ -42,12 +42,12 @@ interface Card {
   image: string;
 }
 
-interface Props {
-  card: Card | null;
+interface IProps {
+  card: ICard | null;
   isVisible: boolean;
 }
 
-const props = defineProps<Props>();
+const props = defineProps<IProps>();
 
 const emit = defineEmits<{
   close: [];
@@ -214,19 +214,19 @@ const handleLinkClick = (event: MouseEvent) => {
     width: 95%;
     margin: 20px;
   }
-  
+
   .modal-header {
     padding: 16px 20px;
   }
-  
+
   .modal-header h3 {
     font-size: 1.25rem;
   }
-  
+
   .modal-body {
     padding: 20px;
   }
-  
+
   .card-image img {
     height: 150px;
   }
