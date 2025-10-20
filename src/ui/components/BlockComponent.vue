@@ -29,17 +29,17 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { Block, BlockId } from '../../core/entities/Block';
+import { IBlock, TBlockId } from '../../core/entities/Block';
 
 interface Props {
-  block: Block;
+  block: IBlock;
 }
 
 const props = defineProps<Props>();
 
 const emit = defineEmits<{
-  update: [blockId: BlockId, updates: Partial<Block>];
-  delete: [blockId: BlockId];
+  update: [blockId: TBlockId, updates: Partial<IBlock>];
+  delete: [blockId: TBlockId];
   'card-click': [card: any];
 }>();
 

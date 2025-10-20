@@ -1,17 +1,17 @@
-import { Component } from '../ports/ComponentRegistry';
-import { ComponentRegistry } from '../ports/ComponentRegistry';
+import { TComponent } from '../ports/ComponentRegistry';
+import { IComponentRegistry } from '../ports/ComponentRegistry';
 
 /**
  * Use Case для управления Vue3 компонентами
  * Инкапсулирует бизнес-логику регистрации и управления компонентами
  */
 export class ComponentManagementUseCase {
-  constructor(private componentRegistry: ComponentRegistry) {}
+  constructor(private componentRegistry: IComponentRegistry) {}
 
   /**
    * Регистрация Vue3 компонента
    */
-  registerComponent(name: string, component: Component): void {
+  registerComponent(name: string, component: TComponent): void {
     // Валидация имени компонента
     this.validateComponentName(name);
     
@@ -25,7 +25,7 @@ export class ComponentManagementUseCase {
   /**
    * Получение компонента по имени
    */
-  getComponent(name: string): Component | null {
+  getComponent(name: string): TComponent | null {
     return this.componentRegistry.get(name);
   }
 
@@ -39,7 +39,7 @@ export class ComponentManagementUseCase {
   /**
    * Получение всех компонентов
    */
-  getAllComponents(): Record<string, Component> {
+  getAllComponents(): Record<string, TComponent> {
     return this.componentRegistry.getAll();
   }
 
@@ -60,7 +60,7 @@ export class ComponentManagementUseCase {
   /**
    * Массовая регистрация компонентов
    */
-  registerComponents(components: Record<string, Component>): void {
+  registerComponents(components: Record<string, TComponent>): void {
     Object.entries(components).forEach(([name, component]) => {
       this.registerComponent(name, component);
     });
@@ -80,7 +80,7 @@ export class ComponentManagementUseCase {
     }
   }
 
-  private validateComponent(component: Component): void {
+  private validateComponent(component: TComponent): void {
     if (!component) {
       throw new Error('Component must be provided');
     }

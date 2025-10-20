@@ -1,7 +1,29 @@
 const express = require('express');
 const path = require('path');
 const app = express();
-const PORT = 3000;
+const DEFAULT_PORT = 3000;
+
+function startServer(port) {
+  const server = app.listen(port, () => {
+    console.log(`🚀 Сервер разработки запущен на http://localhost:${port}`);
+    console.log(`📁 Примеры доступны в папке src/examples/`);
+    console.log(`🔧 Для сборки используйте: npm run build`);
+    console.log(`📋 Доступные примеры:`);
+    console.log(`   - http://localhost:${port}/examples/pure-js/index.html`);
+    console.log(`   - http://localhost:${port}/examples/vue3/index.html`);
+  });
+
+  server.on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+      const nextPort = port + 1;
+      console.warn(`⚠️  Порт ${port} занят. Пробую порт ${nextPort}...`);
+      startServer(nextPort);
+    } else {
+      console.error('Server error:', err);
+      process.exit(1);
+    }
+  });
+}
 
 // Статические файлы
 app.use(express.static('dist'));
@@ -122,11 +144,4 @@ app.get('/api/blocks', (req, res) => {
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`🚀 Сервер разработки запущен на http://localhost:${PORT}`);
-  console.log(`📁 Примеры доступны в папке src/examples/`);
-  console.log(`🔧 Для сборки используйте: npm run build`);
-  console.log(`📋 Доступные примеры:`);
-  console.log(`   - http://localhost:${PORT}/examples/pure-js/index.html`);
-  console.log(`   - http://localhost:${PORT}/examples/vue3/index.html`);
-});
+startServer(DEFAULT_PORT);

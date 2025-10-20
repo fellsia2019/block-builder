@@ -3,7 +3,7 @@
  * Поддерживает как Vue3 (vuelidate), так и чистый JavaScript
  */
 
-export type ValidationRuleType = 
+export type TValidationRuleType = 
   | 'required'
   | 'email'
   | 'url'
@@ -14,88 +14,88 @@ export type ValidationRuleType =
   | 'pattern'
   | 'custom';
 
-export interface BaseValidationRule {
-  type: ValidationRuleType;
+export interface IBaseValidationRule {
+  type: TValidationRuleType;
   message: string;
   field: string;
 }
 
-export interface RequiredRule extends BaseValidationRule {
+export interface IRequiredRule extends IBaseValidationRule {
   type: 'required';
 }
 
-export interface EmailRule extends BaseValidationRule {
+export interface IEmailRule extends IBaseValidationRule {
   type: 'email';
 }
 
-export interface UrlRule extends BaseValidationRule {
+export interface IUrlRule extends IBaseValidationRule {
   type: 'url';
 }
 
-export interface MinRule extends BaseValidationRule {
+export interface IMinRule extends IBaseValidationRule {
   type: 'min';
   value: number;
 }
 
-export interface MaxRule extends BaseValidationRule {
+export interface IMaxRule extends IBaseValidationRule {
   type: 'max';
   value: number;
 }
 
-export interface MinLengthRule extends BaseValidationRule {
+export interface IMinLengthRule extends IBaseValidationRule {
   type: 'minLength';
   value: number;
 }
 
-export interface MaxLengthRule extends BaseValidationRule {
+export interface IMaxLengthRule extends IBaseValidationRule {
   type: 'maxLength';
   value: number;
 }
 
-export interface PatternRule extends BaseValidationRule {
+export interface IPatternRule extends IBaseValidationRule {
   type: 'pattern';
   value: RegExp;
 }
 
-export interface CustomRule extends BaseValidationRule {
+export interface ICustomRule extends IBaseValidationRule {
   type: 'custom';
   validator: (value: any) => boolean | Promise<boolean>;
 }
 
-export type ValidationRule = 
-  | RequiredRule
-  | EmailRule
-  | UrlRule
-  | MinRule
-  | MaxRule
-  | MinLengthRule
-  | MaxLengthRule
-  | PatternRule
-  | CustomRule;
+export type TValidationRule = 
+  | IRequiredRule
+  | IEmailRule
+  | IUrlRule
+  | IMinRule
+  | IMaxRule
+  | IMinLengthRule
+  | IMaxLengthRule
+  | IPatternRule
+  | ICustomRule;
 
-export interface FieldValidationConfig {
+export interface IFieldValidationConfig {
   field: string;
   label: string;
   type: 'text' | 'number' | 'email' | 'url' | 'textarea' | 'select' | 'checkbox' | 'color' | 'file';
   placeholder?: string;
   options?: Array<{ value: any; label: string }>; // Для select
-  rules: ValidationRule[];
+  rules: TValidationRule[];
   defaultValue?: any;
 }
 
-export interface FormGenerationConfig {
+export interface IFormGenerationConfig {
   title: string;
   description?: string;
-  fields: FieldValidationConfig[];
+  fields: IFieldValidationConfig[];
   submitButtonText?: string;
   cancelButtonText?: string;
 }
 
-export interface ValidationResult {
+export interface IValidationResult {
   isValid: boolean;
   errors: Record<string, string[]>;
 }
 
-export interface FormData {
+export interface IFormData {
   [key: string]: any;
 }

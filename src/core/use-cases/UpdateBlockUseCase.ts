@@ -1,17 +1,17 @@
-import { BlockDto, UpdateBlockDto } from '../dto/BlockDto';
-import { BlockRepository } from '../ports/BlockRepository';
+import { IBlockDto, IUpdateBlockDto } from '../dto/BlockDto';
+import { IBlockRepository } from '../ports/BlockRepository';
 
 /**
  * Use Case: Обновление блока
  * Инкапсулирует бизнес-логику обновления блока
  */
 export class UpdateBlockUseCase {
-  constructor(private blockRepository: BlockRepository) {}
+  constructor(private blockRepository: IBlockRepository) {}
 
   async execute(
     blockId: string, 
-    updates: UpdateBlockDto
-  ): Promise<BlockDto | null> {
+    updates: IUpdateBlockDto
+  ): Promise<IBlockDto | null> {
     // Получение существующего блока
     const existingBlock = await this.blockRepository.getById(blockId);
     if (!existingBlock) {
@@ -27,7 +27,7 @@ export class UpdateBlockUseCase {
     return updatedBlock;
   }
 
-  private validateUpdates(updates: UpdateBlockDto): void {
+  private validateUpdates(updates: IUpdateBlockDto): void {
     if (updates.settings) {
       this.validateSettings(updates.settings);
     }

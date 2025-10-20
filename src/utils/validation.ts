@@ -1,4 +1,4 @@
-import { ValidationRule, ValidationResult, FormData } from '../core/entities/ValidationRule';
+import { TValidationRule, IValidationResult, IFormData } from '../core/entities/ValidationRule';
 
 /**
  * Валидатор для чистого JavaScript
@@ -8,7 +8,7 @@ export class JavaScriptValidator {
   /**
    * Валидирует данные формы по правилам
    */
-  static async validate(data: FormData, rules: ValidationRule[]): Promise<ValidationResult> {
+  static async validate(data: IFormData, rules: TValidationRule[]): Promise<IValidationResult> {
     const errors: Record<string, string[]> = {};
     let isValid = true;
 
@@ -30,7 +30,7 @@ export class JavaScriptValidator {
   /**
    * Валидирует одно поле по правилу
    */
-  private static async validateField(value: any, rule: ValidationRule): Promise<string[]> {
+  private static async validateField(value: any, rule: TValidationRule): Promise<string[]> {
     const errors: string[] = [];
 
     switch (rule.type) {

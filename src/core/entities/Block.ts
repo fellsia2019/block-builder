@@ -1,29 +1,29 @@
-import { BlockDto } from '../dto/BlockDto';
-import { FormGenerationConfig } from './ValidationRule';
+import { IBlockDto } from '../dto/BlockDto';
+import { IFormGenerationConfig } from './ValidationRule';
 
 // Типы для сущности
-export type BlockId = string;
-export interface BlockSettings {
+export type TBlockId = string;
+export interface IBlockSettings {
   [key: string]: any;
 }
-export interface BlockProps {
+export interface IBlockProps {
   [key: string]: any;
 }
-export interface BlockStyle {
+export interface IBlockStyle {
   [key: string]: string | number;
 }
-export interface Block {
-  id: BlockId;
+export interface IBlock {
+  id: TBlockId;
   type: string;
-  settings: BlockSettings;
-  props: BlockProps;
-  style?: BlockStyle;
+  settings: IBlockSettings;
+  props: IBlockProps;
+  style?: IBlockStyle;
   template: string;
-  children?: Block[];
-  parent?: BlockId;
+  children?: IBlock[];
+  parent?: TBlockId;
   visible?: boolean;
   locked?: boolean;
-  formConfig?: FormGenerationConfig; // Конфигурация для автогенерации форм
+  formConfig?: IFormGenerationConfig; // Конфигурация для автогенерации форм
   metadata?: {
     createdAt: Date;
     updatedAt: Date;
@@ -37,13 +37,13 @@ export interface Block {
  * Содержит бизнес-логику для работы с блоками
  */
 export class BlockEntity {
-  private _block: Block;
+  private _block: IBlock;
 
-  constructor(block: Block) {
+  constructor(block: IBlock) {
     this._block = { ...block };
   }
 
-  get id(): BlockId {
+  get id(): TBlockId {
     return this._block.id;
   }
 
@@ -51,15 +51,15 @@ export class BlockEntity {
     return this._block.type;
   }
 
-  get settings(): BlockSettings {
+  get settings(): IBlockSettings {
     return { ...this._block.settings };
   }
 
-  get props(): BlockProps {
+  get props(): IBlockProps {
     return { ...this._block.props };
   }
 
-  get style(): BlockStyle | undefined {
+  get style(): IBlockStyle | undefined {
     return this._block.style ? { ...this._block.style } : undefined;
   }
 
@@ -68,11 +68,11 @@ export class BlockEntity {
     return this._block.template;
   }
 
-  get children(): Block[] {
+  get children(): IBlock[] {
     return this._block.children ? [...this._block.children] : [];
   }
 
-  get parent(): BlockId | undefined {
+  get parent(): TBlockId | undefined {
     return this._block.parent;
   }
 
@@ -88,14 +88,14 @@ export class BlockEntity {
     return this._block.metadata;
   }
 
-  get formConfig(): FormGenerationConfig | undefined {
+  get formConfig(): IFormGenerationConfig | undefined {
     return this._block.formConfig;
   }
 
   /**
    * Обновляет настройки блока
    */
-  updateSettings(settings: Partial<BlockSettings>): void {
+  updateSettings(settings: Partial<IBlockSettings>): void {
     this._block.settings = { ...this._block.settings, ...settings };
     this._updateMetadata();
   }
@@ -103,7 +103,7 @@ export class BlockEntity {
   /**
    * Обновляет свойства блока
    */
-  updateProps(props: Partial<BlockProps>): void {
+  updateProps(props: Partial<IBlockProps>): void {
     this._block.props = { ...this._block.props, ...props };
     this._updateMetadata();
   }
@@ -111,15 +111,15 @@ export class BlockEntity {
   /**
    * Обновляет стили блока
    */
-  updateStyle(style: Partial<BlockStyle>): void {
-    this._block.style = { ...this._block.style, ...style } as BlockStyle;
+  updateStyle(style: Partial<IBlockStyle>): void {
+    this._block.style = { ...this._block.style, ...style } as IBlockStyle;
     this._updateMetadata();
   }
 
   /**
    * Обновляет конфигурацию формы
    */
-  updateFormConfig(formConfig: FormGenerationConfig): void {
+  updateFormConfig(formConfig: IFormGenerationConfig): void {
     this._block.formConfig = { ...formConfig };
     this._updateMetadata();
   }
@@ -144,7 +144,7 @@ export class BlockEntity {
   /**
    * Добавляет дочерний блок
    */
-  addChild(child: Block): void {
+  addChild(child: IBlock): void {
     if (!this._block.children) {
       this._block.children = [];
     }
@@ -155,7 +155,7 @@ export class BlockEntity {
   /**
    * Удаляет дочерний блок
    */
-  removeChild(childId: BlockId): boolean {
+  removeChild(childId: TBlockId): boolean {
     if (!this._block.children) return false;
     
     const index = this._block.children.findIndex(child => child.id === childId);
@@ -169,7 +169,7 @@ export class BlockEntity {
   /**
    * Проверяет, является ли блок дочерним для данного
    */
-  hasChild(childId: BlockId): boolean {
+  hasChild(childId: TBlockId): boolean {
     return this._block.children?.some(child => child.id === childId) ?? false;
   }
 
@@ -190,8 +190,8 @@ export class BlockEntity {
   /**
    * Клонирует блок с новым ID
    */
-  clone(newId: BlockId): BlockEntity {
-    const clonedBlock: Block = {
+  clone(newId: TBlockId): BlockEntity {
+    const clonedBlock: IBlock = {
       ...this._block,
       id: newId,
       children: this._block.children?.map(child => ({ ...child })),
@@ -209,7 +209,7 @@ export class BlockEntity {
   /**
    * Возвращает сериализованный блок
    */
-  toJSON(): Block {
+  toJSON(): IBlock {
     return { ...this._block };
   }
 

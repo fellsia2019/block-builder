@@ -1,14 +1,14 @@
-import { BlockDto, CreateBlockDto } from '../dto/BlockDto';
-import { BlockRepository } from '../ports/BlockRepository';
+import { IBlockDto, ICreateBlockDto } from '../dto/BlockDto';
+import { IBlockRepository } from '../ports/BlockRepository';
 
 /**
  * Use Case: Создание нового блока
  * Инкапсулирует бизнес-логику создания блока
  */
 export class CreateBlockUseCase {
-  constructor(private blockRepository: BlockRepository) {}
+  constructor(private blockRepository: IBlockRepository) {}
 
-  async execute(blockData: CreateBlockDto): Promise<BlockDto> {
+  async execute(blockData: ICreateBlockDto): Promise<IBlockDto> {
     // Валидация входных данных
     this.validateBlockData(blockData);
 
@@ -16,7 +16,7 @@ export class CreateBlockUseCase {
     const blockId = this.generateBlockId();
 
     // Создание блока с метаданными
-    const blockDataWithId: CreateBlockDto = {
+    const blockDataWithId: ICreateBlockDto = {
       ...blockData,
       metadata: {
         createdAt: new Date(),
@@ -31,7 +31,7 @@ export class CreateBlockUseCase {
     return createdBlock;
   }
 
-  private validateBlockData(blockData: CreateBlockDto): void {
+  private validateBlockData(blockData: ICreateBlockDto): void {
     if (!blockData.type || typeof blockData.type !== 'string') {
       throw new Error('Block type is required and must be a string');
     }

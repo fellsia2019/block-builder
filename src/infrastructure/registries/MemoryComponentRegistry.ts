@@ -1,14 +1,14 @@
-import { Component } from '../../core/ports/ComponentRegistry';
-import { ComponentRegistry } from '../../core/ports/ComponentRegistry';
+import { TComponent } from '../../core/ports/ComponentRegistry';
+import { IComponentRegistry } from '../../core/ports/ComponentRegistry';
 
 /**
  * Реализация реестра компонентов в памяти
  * Реализует порт ComponentRegistry
  */
-export class MemoryComponentRegistry implements ComponentRegistry {
-  private components: Map<string, Component> = new Map();
+export class MemoryComponentRegistry implements IComponentRegistry {
+  private components: Map<string, TComponent> = new Map();
 
-  register(name: string, component: Component): void {
+  register(name: string, component: TComponent): void {
     if (!name || typeof name !== 'string') {
       throw new Error('Component name must be a non-empty string');
     }
@@ -20,7 +20,7 @@ export class MemoryComponentRegistry implements ComponentRegistry {
     this.components.set(name, component);
   }
 
-  get(name: string): Component | null {
+  get(name: string): TComponent | null {
     return this.components.get(name) || null;
   }
 
@@ -28,8 +28,8 @@ export class MemoryComponentRegistry implements ComponentRegistry {
     return this.components.has(name);
   }
 
-  getAll(): Record<string, Component> {
-    const result: Record<string, Component> = {};
+  getAll(): Record<string, TComponent> {
+    const result: Record<string, TComponent> = {};
     this.components.forEach((component, name) => {
       result[name] = component;
     });

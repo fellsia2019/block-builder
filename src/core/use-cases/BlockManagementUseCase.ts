@@ -1,6 +1,6 @@
-import { BlockDto, CreateBlockDto, UpdateBlockDto } from '../dto/BlockDto';
-import { BlockRepository } from '../ports/BlockRepository';
-import { ComponentRegistry } from '../ports/ComponentRegistry';
+import { IBlockDto, ICreateBlockDto, IUpdateBlockDto } from '../dto/BlockDto';
+import { IBlockRepository } from '../ports/BlockRepository';
+import { IComponentRegistry } from '../ports/ComponentRegistry';
 import { CreateBlockUseCase } from './CreateBlockUseCase';
 import { UpdateBlockUseCase } from './UpdateBlockUseCase';
 import { DeleteBlockUseCase } from './DeleteBlockUseCase';
@@ -19,8 +19,8 @@ export class BlockManagementUseCase {
   private componentManagementUseCase: ComponentManagementUseCase;
 
   constructor(
-    private blockRepository: BlockRepository,
-    private componentRegistry: ComponentRegistry
+    private blockRepository: IBlockRepository,
+    private componentRegistry: IComponentRegistry
   ) {
     this.createBlockUseCase = new CreateBlockUseCase(blockRepository);
     this.updateBlockUseCase = new UpdateBlockUseCase(blockRepository);
@@ -32,28 +32,28 @@ export class BlockManagementUseCase {
   /**
    * Создание нового блока
    */
-  async createBlock(blockData: CreateBlockDto): Promise<BlockDto> {
+  async createBlock(blockData: ICreateBlockDto): Promise<IBlockDto> {
     return this.createBlockUseCase.execute(blockData);
   }
 
   /**
    * Получение блока по ID
    */
-  async getBlock(blockId: string): Promise<BlockDto | null> {
+  async getBlock(blockId: string): Promise<IBlockDto | null> {
     return this.blockRepository.getById(blockId);
   }
 
   /**
    * Получение всех блоков
    */
-  async getAllBlocks(): Promise<BlockDto[]> {
+  async getAllBlocks(): Promise<IBlockDto[]> {
     return this.blockRepository.getAll();
   }
 
   /**
    * Обновление блока
    */
-  async updateBlock(blockId: string, updates: UpdateBlockDto): Promise<BlockDto | null> {
+  async updateBlock(blockId: string, updates: IUpdateBlockDto): Promise<IBlockDto | null> {
     return this.updateBlockUseCase.execute(blockId, updates);
   }
 
@@ -68,35 +68,35 @@ export class BlockManagementUseCase {
   /**
    * Дублирование блока
    */
-  async duplicateBlock(blockId: string): Promise<BlockDto | null> {
+  async duplicateBlock(blockId: string): Promise<IBlockDto | null> {
     return this.duplicateBlockUseCase.execute(blockId);
   }
 
   /**
    * Блокировка/разблокировка блока
    */
-  async setBlockLocked(blockId: string, locked: boolean): Promise<BlockDto | null> {
+  async setBlockLocked(blockId: string, locked: boolean): Promise<IBlockDto | null> {
     return this.updateBlockUseCase.execute(blockId, { locked });
   }
 
   /**
    * Показ/скрытие блока
    */
-  async setBlockVisible(blockId: string, visible: boolean): Promise<BlockDto | null> {
+  async setBlockVisible(blockId: string, visible: boolean): Promise<IBlockDto | null> {
     return this.updateBlockUseCase.execute(blockId, { visible });
   }
 
   /**
    * Получение блоков по типу
    */
-  async getBlocksByType(type: string): Promise<BlockDto[]> {
+  async getBlocksByType(type: string): Promise<IBlockDto[]> {
     return this.blockRepository.getByType(type);
   }
 
   /**
    * Получение дочерних блоков
    */
-  async getChildBlocks(parentId: string): Promise<BlockDto[]> {
+  async getChildBlocks(parentId: string): Promise<IBlockDto[]> {
     return this.blockRepository.getChildren(parentId);
   }
 
@@ -170,13 +170,13 @@ export class BlockManagementUseCase {
     componentName: string,
     componentProps: Record<string, any> = {},
     settings: Record<string, any> = {},
-  ): Promise<BlockDto> {
+  ): Promise<IBlockDto> {
     // Проверяем существование компонента
     if (!this.hasComponent(componentName)) {
       throw new Error(`Component '${componentName}' is not registered`);
     }
 
-    const createDto: CreateBlockDto = {
+    const createDto: ICreateBlockDto = {
       type,
       settings,
       props: componentProps,
@@ -192,7 +192,7 @@ export class BlockManagementUseCase {
   /**
    * Обновление Vue3 компонента блока
    */
-  async updateVueComponent(blockId: string, componentName: string, componentProps: Record<string, any>): Promise<BlockDto | null> {
+  async updateVueComponent(blockId: string, componentName: string, componentProps: Record<string, any>): Promise<IBlockDto | null> {
     // Проверяем существование компонента
     if (!this.hasComponent(componentName)) {
       throw new Error(`Component '${componentName}' is not registered`);

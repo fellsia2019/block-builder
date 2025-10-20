@@ -38,11 +38,11 @@ export * from './infrastructure/registries/MemoryComponentRegistry';
 // export { default as BlockProperties } from './ui/components/BlockProperties.vue';
 
 // Универсальная валидация (избегаем конфликтов имен)
-export type { ValidationRuleType as UV_ValidationRuleType, ValidationRule as UV_ValidationRule, FormGenerationConfig as UV_FormGenerationConfig, ValidationResult as UV_ValidationResult, FormData as UV_FormData } from './utils/universalValidation';
+export type { TValidationRuleType as UV_ValidationRuleType, IValidationRule as UV_ValidationRule, IFormGenerationConfig as UV_FormGenerationConfig, IValidationResult as UV_ValidationResult, IFormData as UV_FormData } from './utils/universalValidation';
 export { UniversalValidator as UV_UniversalValidator, FormUtils as UV_FormUtils, BlockFormConfigs as UV_BlockFormConfigs } from './utils/universalValidation';
 
 // Утилиты (избегаем конфликтов имен с Block entity)
-export type { Block as UtilsBlock, BlockId as UtilsBlockId } from './utils/blockHelpers';
+export type { TBlock as UtilsBlock, TBlockId as UtilsBlockId } from './utils/blockHelpers';
 export { buildBlockHierarchy, cloneBlock, getAllChildren, isChildOf } from './utils/blockHelpers';
 
 // Экспорт генератора/валидатора форм под уникальными именами

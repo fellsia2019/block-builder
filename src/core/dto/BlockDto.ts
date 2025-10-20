@@ -3,9 +3,9 @@
  * Содержит только данные, без бизнес-логики
  */
 
-import { FormGenerationConfig } from '../entities/ValidationRule';
+import { IFormGenerationConfig } from '../entities/ValidationRule';
 
-export interface BlockDto {
+export interface IBlockDto {
   id: string;
   type: string;
   settings: Record<string, any>;
@@ -19,7 +19,7 @@ export interface BlockDto {
   parent?: string;
   visible?: boolean;
   locked?: boolean;
-  formConfig?: FormGenerationConfig; // Конфигурация для автогенерации форм
+  formConfig?: IFormGenerationConfig; // Конфигурация для автогенерации форм
   metadata?: {
     createdAt: Date;
     updatedAt: Date;
@@ -28,7 +28,7 @@ export interface BlockDto {
   };
 }
 
-export interface CreateBlockDto {
+export interface ICreateBlockDto {
   type: string;
   settings: Record<string, any>;
   props: Record<string, any>;
@@ -40,7 +40,7 @@ export interface CreateBlockDto {
   parent?: string;
   visible?: boolean;
   locked?: boolean;
-  formConfig?: FormGenerationConfig; // Конфигурация для автогенерации форм
+  formConfig?: IFormGenerationConfig; // Конфигурация для автогенерации форм
   metadata?: {
     createdAt: Date;
     updatedAt: Date;
@@ -49,7 +49,7 @@ export interface CreateBlockDto {
   };
 }
 
-export interface UpdateBlockDto {
+export interface IUpdateBlockDto {
   settings?: Partial<Record<string, any>>;
   props?: Partial<Record<string, any>>;
   style?: Partial<Record<string, string | number>>;
@@ -59,11 +59,11 @@ export interface UpdateBlockDto {
   componentProps?: Record<string, any>; // Пропсы для Vue3 компонента
   visible?: boolean;
   locked?: boolean;
-  formConfig?: FormGenerationConfig; // Конфигурация для автогенерации форм
+  formConfig?: IFormGenerationConfig; // Конфигурация для автогенерации форм
 }
 
-export interface BlockListDto {
-  blocks: BlockDto[];
+export interface IBlockListDto {
+  blocks: IBlockDto[];
   total: number;
   page?: number;
   limit?: number;

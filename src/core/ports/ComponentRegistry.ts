@@ -1,20 +1,20 @@
 // Vue3 Component type (без импорта Vue для совместимости)
-export type Component = any;
+export type TComponent = any;
 
 /**
  * Port для регистрации Vue3 компонентов
  * Позволяет регистрировать пользовательские компоненты для блоков
  */
-export interface ComponentRegistry {
+export interface IComponentRegistry {
   /**
    * Регистрация компонента
    */
-  register(name: string, component: Component): void;
+  register(name: string, component: TComponent): void;
 
   /**
    * Получение компонента по имени
    */
-  get(name: string): Component | null;
+  get(name: string): TComponent | null;
 
   /**
    * Проверка существования компонента
@@ -24,7 +24,7 @@ export interface ComponentRegistry {
   /**
    * Получение всех зарегистрированных компонентов
    */
-  getAll(): Record<string, Component>;
+  getAll(): Record<string, TComponent>;
 
   /**
    * Удаление компонента

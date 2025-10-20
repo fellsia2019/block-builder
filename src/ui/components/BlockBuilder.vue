@@ -43,9 +43,9 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue';
-import { Block, BlockId, BlockSettings, BlockProps, BlockStyle, BlockPosition } from '../../domain/types';
-import { BlockService } from '../../application/services/BlockService';
-import { MemoryBlockRepository } from '../../infrastructure/repositories/MemoryBlockRepository';
+import { IBlock, TBlockId, IBlockSettings, IBlockProps, IBlockStyle } from '../../core/entities/Block';
+import { BlockManagementUseCase } from '../../core/use-cases/BlockManagementUseCase';
+import { MemoryBlockRepositoryImpl } from '../../infrastructure/repositories/MemoryBlockRepositoryImpl';
 import BlockComponent from './BlockComponent.vue';
 import BlockProperties from './BlockProperties.vue';
 import CardDetailModal from './CardDetailModal.vue';
@@ -54,8 +54,8 @@ interface BlockType {
   type: string;
   label: string;
   template: string;
-  defaultSettings: BlockSettings;
-  defaultProps: BlockProps;
+  defaultSettings: IBlockSettings;
+  defaultProps: IBlockProps;
 }
 
 interface Props {
@@ -74,18 +74,18 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const emit = defineEmits<{
-  'block-added': [block: Block];
-  'block-updated': [block: Block];
-  'block-deleted': [blockId: BlockId];
-  'blocks-reordered': [blocks: Block[]];
+  'block-added': [block: IBlock];
+  'block-updated': [block: IBlock];
+  'block-deleted': [blockId: TBlockId];
+  'blocks-reordered': [blocks: IBlock[]];
 }>();
 
 // Инициализация сервисов
-const blockRepository = new MemoryBlockRepository();
-const blockService = new BlockService(blockRepository);
+const blockRepository = new MemoryBlockRepositoryImpl();
+const blockService = new BlockManagementUseCase(blockRepository, {} as any);
 
 // Состояние
-const blocks = ref<Block[]>([]);
+const blocks = ref<IBlock[]>([]);
 const isDragging = ref(false);
 const dragStartPosition = ref<{ x: number; y: number } | null>(null);
 const showCardModal = ref(false);
@@ -120,51 +120,41 @@ const availableBlockTypes = ref<BlockType[]>([
 
 // Методы
 const loadBlocks = async () => {
-  const blockEntities = await blockService.getAllBlocks();
-  blocks.value = blockEntities.map(entity => entity.toJSON());
+  const list = await blockService.getAllBlocks();
+  blocks.value = list as any;
 };
 
 const addBlock = async (type: string) => {
   const blockType = availableBlockTypes.value.find(bt => bt.type === type);
   if (!blockType) return;
 
-  const blockEntity = await blockService.createBlock({
+  const block = await blockService.createBlock({
     type: blockType.type,
     settings: { ...blockType.defaultSettings },
     props: { ...blockType.defaultProps },
     template: blockType.template
   });
 
-  blocks.value.push(blockEntity.toJSON());
-  emit('block-added', blockEntity.toJSON());
+  blocks.value.push(block as any);
+  emit('block-added', block as any);
 };
 
 // Удалено: логика выбора блоков
 
-const updateBlock = async (blockId: BlockId, updates: Partial<Block>) => {
-  const blockEntity = await blockService.getBlock(blockId);
-  if (!blockEntity) return;
-
-  // Обновляем блок через сервис
-  if (updates.settings) {
-    await blockService.updateBlockSettings(blockId, updates.settings);
-  }
-  if (updates.props) {
-    await blockService.updateBlockProps(blockId, updates.props);
-  }
-  if (updates.style) {
-    await blockService.updateBlockStyle(blockId, updates.style);
-  }
+const updateBlock = async (blockId: TBlockId, updates: Partial<IBlock>) => {
+  // Обновляем блок через юзкейс
+  const updated = await blockService.updateBlock(blockId, updates as any);
+  if (!updated) return;
 
   // Обновляем локальное состояние
   const index = blocks.value.findIndex(block => block.id === blockId);
   if (index !== -1) {
-    blocks.value[index] = { ...blocks.value[index], ...updates };
+    blocks.value[index] = updated as any;
     emit('block-updated', blocks.value[index]);
   }
 };
 
-const deleteBlock = async (blockId: BlockId) => {
+const deleteBlock = async (blockId: TBlockId) => {
   const success = await blockService.deleteBlock(blockId);
   if (success) {
     blocks.value = blocks.value.filter(block => block.id !== blockId);
@@ -172,11 +162,11 @@ const deleteBlock = async (blockId: BlockId) => {
   }
 };
 
-const updateBlockProperties = (blockId: BlockId, properties: Partial<BlockSettings & BlockProps & BlockStyle>) => {
-  updateBlock(blockId, properties);
+const updateBlockProperties = (blockId: TBlockId, properties: Partial<IBlockSettings & IBlockProps & IBlockStyle>) => {
+  updateBlock(blockId, properties as any);
 };
 
-const handleDragStart = (blockId: BlockId, event: DragEvent) => {
+const handleDragStart = (blockId: TBlockId, event: DragEvent) => {
   isDragging.value = true;
   dragStartPosition.value = { x: event.clientX, y: event.clientY };
   event.dataTransfer?.setData('text/plain', blockId.toString());
@@ -197,7 +187,7 @@ const handleDrop = (event: DragEvent) => {
   const x = event.clientX - rect.left;
   const y = event.clientY - rect.top;
 
-  updateBlock(blockId, { position: { x, y } });
+  updateBlock(blockId as any, { position: { x, y } } as any);
 };
 
 const handleDragOver = (event: DragEvent) => {

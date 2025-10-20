@@ -1,14 +1,14 @@
-import { BlockDto, CreateBlockDto } from '../dto/BlockDto';
-import { BlockRepository } from '../ports/BlockRepository';
+import { IBlockDto, ICreateBlockDto } from '../dto/BlockDto';
+import { IBlockRepository } from '../ports/BlockRepository';
 
 /**
  * Use Case: Дублирование блока
  * Инкапсулирует бизнес-логику дублирования блока
  */
 export class DuplicateBlockUseCase {
-  constructor(private blockRepository: BlockRepository) {}
+  constructor(private blockRepository: IBlockRepository) {}
 
-  async execute(blockId: string): Promise<BlockDto | null> {
+  async execute(blockId: string): Promise<IBlockDto | null> {
     // Получение исходного блока
     const originalBlock = await this.blockRepository.getById(blockId);
     if (!originalBlock) {
@@ -27,7 +27,7 @@ export class DuplicateBlockUseCase {
     return createdBlock;
   }
 
-  private createDuplicate(originalBlock: BlockDto): CreateBlockDto {
+  private createDuplicate(originalBlock: IBlockDto): ICreateBlockDto {
     return {
       type: originalBlock.type,
       settings: { ...originalBlock.settings },

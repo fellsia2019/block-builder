@@ -3,41 +3,41 @@
  * Поддерживает: Pure JS, Vue3, React, Angular и другие
  */
 
-export type ValidationRuleType = 'required' | 'email' | 'url' | 'min' | 'max' | 'minLength' | 'maxLength' | 'pattern' | 'custom';
+export type TValidationRuleType = 'required' | 'email' | 'url' | 'min' | 'max' | 'minLength' | 'maxLength' | 'pattern' | 'custom';
 
-export interface ValidationRule {
-  type: ValidationRuleType;
+export interface IValidationRule {
+  type: TValidationRuleType;
   field: string;
   value?: any;
   message: string;
   validator?: (value: any) => boolean; // Для кастомных правил
 }
 
-export type FieldType = 'text' | 'number' | 'email' | 'url' | 'textarea' | 'select' | 'checkbox' | 'color' | 'file';
+export type TFieldType = 'text' | 'number' | 'email' | 'url' | 'textarea' | 'select' | 'checkbox' | 'color' | 'file';
 
-export interface FormFieldConfig {
+export interface IFormFieldConfig {
   field: string;
   label: string;
-  type: FieldType;
+  type: TFieldType;
   placeholder?: string;
   defaultValue?: any;
   options?: { value: string; label: string }[]; // Для типа 'select'
-  rules?: ValidationRule[];
+  rules?: IValidationRule[];
 }
 
-export interface FormGenerationConfig {
+export interface IFormGenerationConfig {
   title: string;
   description?: string;
-  fields: FormFieldConfig[];
+  fields: IFormFieldConfig[];
   submitButtonText?: string;
   cancelButtonText?: string;
 }
 
-export interface FormData {
+export interface IFormData {
   [key: string]: any;
 }
 
-export interface ValidationResult {
+export interface IValidationResult {
   isValid: boolean;
   errors: Record<string, string[]>;
 }
@@ -49,7 +49,7 @@ export class UniversalValidator {
   /**
    * Валидация одного поля
    */
-  static validateField(value: any, rules: ValidationRule[]): string[] {
+  static validateField(value: any, rules: IValidationRule[]): string[] {
     const errors: string[] = [];
     
     for (const rule of rules) {
@@ -120,7 +120,7 @@ export class UniversalValidator {
   /**
    * Валидация всей формы
    */
-  static validateForm(formData: FormData, formFields: FormFieldConfig[]): ValidationResult {
+  static validateForm(formData: IFormData, formFields: IFormFieldConfig[]): IValidationResult {
     const formErrors: Record<string, string[]> = {};
     let isValid = true;
 
@@ -143,15 +143,15 @@ export class UniversalValidator {
   /**
    * Создание валидатора для конкретного поля
    */
-  static createFieldValidator(rules: ValidationRule[]) {
+  static createFieldValidator(rules: IValidationRule[]) {
     return (value: any) => this.validateField(value, rules);
   }
 
   /**
    * Создание валидатора для всей формы
    */
-  static createFormValidator(formFields: FormFieldConfig[]) {
-    return (formData: FormData) => this.validateForm(formData, formFields);
+  static createFormValidator(formFields: IFormFieldConfig[]) {
+    return (formData: IFormData) => this.validateForm(formData, formFields);
   }
 }
 
@@ -162,8 +162,8 @@ export class FormUtils {
   /**
    * Инициализация данных формы из конфигурации
    */
-  static initializeFormData(fields: FormFieldConfig[]): FormData {
-    const formData: FormData = {};
+  static initializeFormData(fields: IFormFieldConfig[]): IFormData {
+    const formData: IFormData = {};
     
     fields.forEach(field => {
       if (field.defaultValue !== undefined) {
@@ -215,7 +215,7 @@ export class FormUtils {
  * Предустановленные конфигурации форм для блоков
  */
 export class BlockFormConfigs {
-  static getTextBlockConfig(): FormGenerationConfig {
+  static getTextBlockConfig(): IFormGenerationConfig {
     return {
       title: 'Настройка текстового блока',
       description: 'Настройте параметры текстового блока',
@@ -272,7 +272,7 @@ export class BlockFormConfigs {
     };
   }
 
-  static getImageBlockConfig(): FormGenerationConfig {
+  static getImageBlockConfig(): IFormGenerationConfig {
     return {
       title: 'Настройка блока изображения',
       description: 'Настройте параметры блока изображения',
@@ -314,7 +314,7 @@ export class BlockFormConfigs {
     };
   }
 
-  static getButtonBlockConfig(): FormGenerationConfig {
+  static getButtonBlockConfig(): IFormGenerationConfig {
     return {
       title: 'Настройка кнопки',
       description: 'Настройте параметры кнопки',
@@ -384,7 +384,7 @@ export class BlockFormConfigs {
     };
   }
 
-  static getCardListBlockConfig(): FormGenerationConfig {
+  static getCardListBlockConfig(): IFormGenerationConfig {
     return {
       title: 'Настройка списка карточек',
       description: 'Настройте параметры списка карточек',
@@ -612,7 +612,7 @@ export class BlockFormConfigs {
   /**
    * Получить конфигурацию для типа блока
    */
-  static getConfigForBlockType(blockType: string): FormGenerationConfig {
+  static getConfigForBlockType(blockType: string): IFormGenerationConfig {
     switch (blockType) {
       case 'text':
         return this.getTextBlockConfig();
@@ -630,7 +630,7 @@ export class BlockFormConfigs {
   /**
    * Создать конфигурацию для редактирования блока
    */
-  static createEditConfig(blockType: string, blockData: FormData): FormGenerationConfig {
+  static createEditConfig(blockType: string, blockData: IFormData): IFormGenerationConfig {
     const config = this.getConfigForBlockType(blockType);
     
     // Обновляем заголовок и кнопку

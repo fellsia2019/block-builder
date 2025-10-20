@@ -1,16 +1,16 @@
-import { BlockDto, CreateBlockDto, UpdateBlockDto } from '../../core/dto/BlockDto';
-import { BlockRepository } from '../../core/ports/BlockRepository';
+import { IBlockDto, ICreateBlockDto, IUpdateBlockDto } from '../../core/dto/BlockDto';
+import { IBlockRepository } from '../../core/ports/BlockRepository';
 
 /**
  * Реализация репозитория блоков в памяти
  * Реализует порт BlockRepository
  */
-export class MemoryBlockRepositoryImpl implements BlockRepository {
-  private blocks: Map<string, BlockDto> = new Map();
+export class MemoryBlockRepositoryImpl implements IBlockRepository {
+  private blocks: Map<string, IBlockDto> = new Map();
 
-  async create(blockData: CreateBlockDto): Promise<BlockDto> {
+  async create(blockData: ICreateBlockDto): Promise<IBlockDto> {
     const id = this.generateId();
-    const block: BlockDto = {
+    const block: IBlockDto = {
       id,
       ...blockData,
       metadata: {
@@ -25,12 +25,12 @@ export class MemoryBlockRepositoryImpl implements BlockRepository {
     return { ...block };
   }
 
-  async getById(id: string): Promise<BlockDto | null> {
+  async getById(id: string): Promise<IBlockDto | null> {
     const block = this.blocks.get(id);
     return block ? { ...block } : null;
   }
 
-  async getAll(): Promise<BlockDto[]> {
+  async getAll(): Promise<IBlockDto[]> {
     return Array.from(this.blocks.values())
       .sort((a, b) => {
         // Сортируем по полю order, если оно есть, иначе по дате создания
@@ -44,25 +44,25 @@ export class MemoryBlockRepositoryImpl implements BlockRepository {
       .map(block => ({ ...block }));
   }
 
-  async getByType(type: string): Promise<BlockDto[]> {
+  async getByType(type: string): Promise<IBlockDto[]> {
     return Array.from(this.blocks.values())
       .filter(block => block.type === type)
       .map(block => ({ ...block }));
   }
 
-  async getChildren(parentId: string): Promise<BlockDto[]> {
+  async getChildren(parentId: string): Promise<IBlockDto[]> {
     return Array.from(this.blocks.values())
       .filter(block => block.parent === parentId)
       .map(block => ({ ...block }));
   }
 
-  async update(id: string, updates: UpdateBlockDto): Promise<BlockDto> {
+  async update(id: string, updates: IUpdateBlockDto): Promise<IBlockDto> {
     const existingBlock = this.blocks.get(id);
     if (!existingBlock) {
       throw new Error(`Block with id ${id} not found`);
     }
 
-    const updatedBlock: BlockDto = {
+    const updatedBlock: IBlockDto = {
       ...existingBlock,
       ...updates,
       style: updates.style ? { ...existingBlock.style, ...updates.style } as Record<string, string | number> : existingBlock.style,

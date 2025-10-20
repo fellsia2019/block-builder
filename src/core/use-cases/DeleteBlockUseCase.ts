@@ -1,11 +1,11 @@
-import { BlockRepository } from '../ports/BlockRepository';
+import { IBlockRepository } from '../ports/BlockRepository';
 
 /**
  * Use Case: Удаление блока
  * Инкапсулирует бизнес-логику удаления блока
  */
 export class DeleteBlockUseCase {
-  constructor(private blockRepository: BlockRepository) {}
+  constructor(private blockRepository: IBlockRepository) {}
 
   async execute(blockId: string): Promise<boolean> {
     // Проверка существования блока

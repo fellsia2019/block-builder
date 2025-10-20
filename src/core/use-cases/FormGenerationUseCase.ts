@@ -1,5 +1,5 @@
 import { BlockEntity } from '../entities/Block';
-import { FormGenerationConfig, ValidationResult, FormData } from '../entities/ValidationRule';
+import { IFormGenerationConfig, IValidationResult, IFormData } from '../entities/ValidationRule';
 import { JavaScriptFormGenerator } from '../../utils/validation';
 // import { VueFormGenerator } from '../../utils/vueValidation';
 
@@ -12,8 +12,8 @@ export class FormGenerationUseCase {
    */
   generateJavaScriptForm(
     blockType: string, 
-    config: FormGenerationConfig, 
-    onSubmit: (data: FormData) => void
+    config: IFormGenerationConfig, 
+    onSubmit: (data: IFormData) => void
   ): string {
     return JavaScriptFormGenerator.generateForm(config, onSubmit);
   }
@@ -28,8 +28,8 @@ export class FormGenerationUseCase {
   /**
    * Создает конфигурацию формы для блока на основе его типа
    */
-  createFormConfigForBlockType(blockType: string): FormGenerationConfig {
-    const configs: Record<string, FormGenerationConfig> = {
+  createFormConfigForBlockType(blockType: string): IFormGenerationConfig {
+    const configs: Record<string, IFormGenerationConfig> = {
       'text': {
         title: 'Настройка текстового блока',
         description: 'Настройте параметры текстового блока',
@@ -342,7 +342,7 @@ export class FormGenerationUseCase {
   /**
    * Создает конфигурацию формы для редактирования существующего блока
    */
-  createEditFormConfig(block: BlockEntity): FormGenerationConfig {
+  createEditFormConfig(block: BlockEntity): IFormGenerationConfig {
     const baseConfig = this.createFormConfigForBlockType(block.type);
     
     // Заполняем значения по умолчанию из существующего блока
@@ -364,7 +364,7 @@ export class FormGenerationUseCase {
   /**
    * Валидирует данные формы
    */
-  async validateFormData(data: FormData, config: FormGenerationConfig): Promise<ValidationResult> {
+  async validateFormData(data: IFormData, config: IFormGenerationConfig): Promise<IValidationResult> {
     const { JavaScriptValidator } = await import('../../utils/validation');
     const allRules = config.fields.flatMap(field => field.rules);
     return JavaScriptValidator.validate(data, allRules);

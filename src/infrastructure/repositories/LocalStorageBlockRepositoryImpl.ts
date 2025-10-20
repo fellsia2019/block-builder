@@ -1,19 +1,19 @@
-import { BlockDto, CreateBlockDto, UpdateBlockDto } from '../../core/dto/BlockDto';
-import { BlockRepository } from '../../core/ports/BlockRepository';
+import { IBlockDto, ICreateBlockDto, IUpdateBlockDto } from '../../core/dto/BlockDto';
+import { IBlockRepository } from '../../core/ports/BlockRepository';
 
 /**
  * Реализация репозитория блоков с использованием LocalStorage
  * Реализует порт BlockRepository
  */
-export class LocalStorageBlockRepositoryImpl implements BlockRepository {
+export class LocalStorageBlockRepositoryImpl implements IBlockRepository {
   private readonly storageKey = 'naberika_blocks';
 
-  private getBlocksFromStorage(): Map<string, BlockDto> {
+  private getBlocksFromStorage(): Map<string, IBlockDto> {
     try {
       const stored = localStorage.getItem(this.storageKey);
       if (!stored) return new Map();
       
-      const blocksArray = JSON.parse(stored) as BlockDto[];
+      const blocksArray = JSON.parse(stored) as IBlockDto[];
       return new Map(blocksArray.map(block => [block.id, block]));
     } catch (error) {
       console.error('Error loading blocks from localStorage:', error);
@@ -21,7 +21,7 @@ export class LocalStorageBlockRepositoryImpl implements BlockRepository {
     }
   }
 
-  private saveBlocksToStorage(blocks: Map<string, BlockDto>): void {
+  private saveBlocksToStorage(blocks: Map<string, IBlockDto>): void {
     try {
       const blocksArray = Array.from(blocks.values());
       localStorage.setItem(this.storageKey, JSON.stringify(blocksArray));
@@ -30,9 +30,9 @@ export class LocalStorageBlockRepositoryImpl implements BlockRepository {
     }
   }
 
-  async create(blockData: CreateBlockDto): Promise<BlockDto> {
+  async create(blockData: ICreateBlockDto): Promise<IBlockDto> {
     const id = this.generateId();
-    const block: BlockDto = {
+    const block: IBlockDto = {
       id,
       ...blockData,
       metadata: {
@@ -50,13 +50,13 @@ export class LocalStorageBlockRepositoryImpl implements BlockRepository {
     return { ...block };
   }
 
-  async getById(id: string): Promise<BlockDto | null> {
+  async getById(id: string): Promise<IBlockDto | null> {
     const blocks = this.getBlocksFromStorage();
     const block = blocks.get(id);
     return block ? { ...block } : null;
   }
 
-  async getAll(): Promise<BlockDto[]> {
+  async getAll(): Promise<IBlockDto[]> {
     const blocks = this.getBlocksFromStorage();
     return Array.from(blocks.values())
       .sort((a, b) => {
@@ -71,21 +71,21 @@ export class LocalStorageBlockRepositoryImpl implements BlockRepository {
       .map(block => ({ ...block }));
   }
 
-  async getByType(type: string): Promise<BlockDto[]> {
+  async getByType(type: string): Promise<IBlockDto[]> {
     const blocks = this.getBlocksFromStorage();
     return Array.from(blocks.values())
       .filter(block => block.type === type)
       .map(block => ({ ...block }));
   }
 
-  async getChildren(parentId: string): Promise<BlockDto[]> {
+  async getChildren(parentId: string): Promise<IBlockDto[]> {
     const blocks = this.getBlocksFromStorage();
     return Array.from(blocks.values())
       .filter(block => block.parent === parentId)
       .map(block => ({ ...block }));
   }
 
-  async update(id: string, updates: UpdateBlockDto): Promise<BlockDto> {
+  async update(id: string, updates: IUpdateBlockDto): Promise<IBlockDto> {
     const blocks = this.getBlocksFromStorage();
     const existingBlock = blocks.get(id);
     
@@ -93,7 +93,7 @@ export class LocalStorageBlockRepositoryImpl implements BlockRepository {
       throw new Error(`Block with id ${id} not found`);
     }
 
-    const updatedBlock: BlockDto = {
+    const updatedBlock: IBlockDto = {
       ...existingBlock,
       ...updates,
       style: updates.style ? { ...existingBlock.style, ...updates.style } as Record<string, string | number> : existingBlock.style,

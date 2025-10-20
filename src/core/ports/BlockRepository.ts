@@ -1,39 +1,39 @@
-import { BlockDto, CreateBlockDto, UpdateBlockDto, BlockListDto } from '../dto/BlockDto';
+import { IBlockDto, ICreateBlockDto, IUpdateBlockDto, IBlockListDto } from '../dto/BlockDto';
 
 /**
  * Port (интерфейс) для работы с блоками
  * Определяет контракт для внешнего мира
  */
-export interface BlockRepository {
+export interface IBlockRepository {
   /**
    * Создать блок
    */
-  create(blockData: CreateBlockDto): Promise<BlockDto>;
+  create(blockData: ICreateBlockDto): Promise<IBlockDto>;
 
   /**
    * Получить блок по ID
    */
-  getById(id: string): Promise<BlockDto | null>;
+  getById(id: string): Promise<IBlockDto | null>;
 
   /**
    * Получить все блоки
    */
-  getAll(): Promise<BlockDto[]>;
+  getAll(): Promise<IBlockDto[]>;
 
   /**
    * Получить блоки по типу
    */
-  getByType(type: string): Promise<BlockDto[]>;
+  getByType(type: string): Promise<IBlockDto[]>;
 
   /**
    * Получить дочерние блоки
    */
-  getChildren(parentId: string): Promise<BlockDto[]>;
+  getChildren(parentId: string): Promise<IBlockDto[]>;
 
   /**
    * Обновить блок
    */
-  update(id: string, updates: UpdateBlockDto): Promise<BlockDto>;
+  update(id: string, updates: IUpdateBlockDto): Promise<IBlockDto>;
 
   /**
    * Удалить блок

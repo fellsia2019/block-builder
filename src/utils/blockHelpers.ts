@@ -1,10 +1,10 @@
-import { BlockDto } from '../core/dto/BlockDto';
+import { IBlockDto } from '../core/dto/BlockDto';
 
 // Типы для утилит
-export type Block = BlockDto;
+export type TBlock = IBlockDto;
 // Дерево блоков для иерархического представления (дети как узлы)
-export type BlockWithChildren = Omit<BlockDto, 'children'> & { children: BlockWithChildren[] };
-export type BlockId = string;
+export type TBlockWithChildren = Omit<IBlockDto, 'children'> & { children: TBlockWithChildren[] };
+export type TBlockId = string;
 
 /**
  * Утилиты для работы с блоками
@@ -17,7 +17,7 @@ export type BlockId = string;
 /**
  * Создает копию блока с новым ID
  */
-export function cloneBlock(block: Block, newId: BlockId): Block {
+export function cloneBlock(block: TBlock, newId: TBlockId): TBlock {
   return {
     ...block,
     id: newId,
@@ -35,11 +35,11 @@ export function cloneBlock(block: Block, newId: BlockId): Block {
 /**
  * Создает иерархию блоков из плоского списка
  */
-export function buildBlockHierarchy(blocks: Block[]): BlockWithChildren[] {
-  const blockMap = new Map<string, BlockWithChildren>(
-    blocks.map(block => [block.id, { ...(block as Omit<BlockDto, 'children'>), children: [] }])
+export function buildBlockHierarchy(blocks: TBlock[]): TBlockWithChildren[] {
+  const blockMap = new Map<string, TBlockWithChildren>(
+    blocks.map(block => [block.id, { ...(block as Omit<IBlockDto, 'children'>), children: [] }])
   );
-  const rootBlocks: BlockWithChildren[] = [];
+  const rootBlocks: TBlockWithChildren[] = [];
   
   blocks.forEach(block => {
     const blockWithChildren = blockMap.get(block.id)!;
@@ -61,7 +61,7 @@ export function buildBlockHierarchy(blocks: Block[]): BlockWithChildren[] {
 /**
  * Получает все дочерние блоки рекурсивно
  */
-export function getAllChildren(block: Block, allBlocks: Block[]): Block[] {
+export function getAllChildren(block: TBlock, allBlocks: TBlock[]): TBlock[] {
   const children = allBlocks.filter(b => b.parent === block.id);
   let allChildren = [...children];
   
@@ -75,7 +75,7 @@ export function getAllChildren(block: Block, allBlocks: Block[]): Block[] {
 /**
  * Проверяет, является ли блок дочерним для другого блока
  */
-export function isChildOf(childBlock: Block, parentBlock: Block, allBlocks: Block[]): boolean {
+export function isChildOf(childBlock: TBlock, parentBlock: TBlock, allBlocks: TBlock[]): boolean {
   if (childBlock.parent === parentBlock.id) return true;
   
   const parent = allBlocks.find(b => b.id === childBlock.parent);
