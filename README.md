@@ -38,8 +38,8 @@ npm install naberika
 ```javascript
 // 1. Создайте конфигурацию блоков
 // block-config.js
-import TextBlock from './components/TextBlock.vue'
-import ButtonBlock from './components/ButtonBlock.vue'
+import TextBlock from './components/TextBlock.js'
+import ButtonBlock from './components/ButtonBlock.js'
 
 export const blockConfigs = {
   text: {

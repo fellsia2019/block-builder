@@ -39,11 +39,11 @@ component: TextBlock
 В `block-config.js` добавлены импорты реальных компонентов:
 
 ```javascript
-import TextBlock from './components/TextBlock.vue'
-import ImageBlock from './components/ImageBlock.vue'
-import ButtonBlock from './components/ButtonBlock.vue'
-import CardListBlock from './components/CardListBlock.vue'
-import HeroBlock from './components/HeroBlock.vue'
+import TextBlock from './components/TextBlock.js'
+import ImageBlock from './components/ImageBlock.js'
+import ButtonBlock from './components/ButtonBlock.js'
+import CardListBlock from './components/CardListBlock.js'
+import HeroBlock from './components/HeroBlock.js'
 ```
 
 ### 3. Чистая архитектура
@@ -55,27 +55,27 @@ import HeroBlock from './components/HeroBlock.vue'
 
 ## Компоненты
 
-### TextBlock.vue
+### TextBlock.js
 - Отображает текстовый контент
 - Поддерживает настройки: размер шрифта, цвет, выравнивание
 - Включает hover эффекты
 
-### ImageBlock.vue
+### ImageBlock.js
 - Отображает изображения
 - Поддерживает настройки: скругление углов, альтернативный текст
 - Обработка ошибок загрузки
 
-### ButtonBlock.vue
+### ButtonBlock.js
 - Интерактивная кнопка
 - Поддерживает настройки: цвет, размер, отступы
 - Состояние загрузки и hover эффекты
 
-### CardListBlock.vue
+### CardListBlock.js
 - Список карточек с информацией
 - Адаптивная сетка
 - Настраиваемые цвета и отступы
 
-### HeroBlock.vue
+### HeroBlock.js
 - Hero секция с градиентом
 - Анимированные декоративные элементы
 - Composition API
