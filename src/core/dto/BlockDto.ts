@@ -5,6 +5,25 @@
 
 import { IFormGenerationConfig } from '../entities/ValidationRule';
 
+// Рендер-описание (универсальное, независимое от фреймворка)
+export type TRenderRef =
+  | {
+      kind: 'html';
+      template: string;
+    }
+  | {
+      kind: 'component';
+      framework: 'vue' | 'react' | string; // Позволяет добавлять новые движки без изменения DTO
+      name?: string; // Имя компонента в реестре/адаптере
+      component?: any; // Прямая ссылка на компонент
+      props?: Record<string, any>;
+    }
+  | {
+      kind: 'external';
+      adapter: string; // Имя адаптера/рендерера, реализуемого в UI слое
+      payload: Record<string, any>; // Произвольные данные для адаптера
+    };
+
 export interface IBlockDto {
   id: string;
   type: string;
@@ -12,9 +31,7 @@ export interface IBlockDto {
   props: Record<string, any>;
   style?: Record<string, string | number>;
   order?: number; // Порядок блока в списке
-  template?: string; // Строковый шаблон (для HTML)
-  component?: string; // Имя Vue3 компонента
-  componentProps?: Record<string, any>; // Пропсы для Vue3 компонента
+  render?: TRenderRef; // Универсальная ссылка на способ рендера
   children?: string[]; // IDs дочерних блоков
   parent?: string;
   visible?: boolean;
@@ -34,9 +51,7 @@ export interface ICreateBlockDto {
   props: Record<string, any>;
   style?: Record<string, string | number>;
   order?: number; // Порядок блока в списке
-  template?: string; // Строковый шаблон (для HTML)
-  component?: string; // Имя Vue3 компонента
-  componentProps?: Record<string, any>; // Пропсы для Vue3 компонента
+  render?: TRenderRef; // Универсальная ссылка на способ рендера
   parent?: string;
   visible?: boolean;
   locked?: boolean;
@@ -54,9 +69,7 @@ export interface IUpdateBlockDto {
   props?: Partial<Record<string, any>>;
   style?: Partial<Record<string, string | number>>;
   order?: number; // Порядок блока в списке
-  template?: string; // Строковый шаблон (для HTML)
-  component?: string; // Имя Vue3 компонента
-  componentProps?: Record<string, any>; // Пропсы для Vue3 компонента
+  render?: TRenderRef; // Универсальная ссылка на способ рендера
   visible?: boolean;
   locked?: boolean;
   formConfig?: IFormGenerationConfig; // Конфигурация для автогенерации форм

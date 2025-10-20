@@ -1,4 +1,4 @@
-import { IBlockDto } from '../dto/BlockDto';
+import { IBlockDto, TRenderRef } from '../dto/BlockDto';
 import { IFormGenerationConfig } from './ValidationRule';
 
 // Типы для сущности
@@ -18,7 +18,7 @@ export interface IBlock {
   settings: IBlockSettings;
   props: IBlockProps;
   style?: IBlockStyle;
-  template: string;
+  render?: TRenderRef; // Универсальная ссылка на способ рендера
   children?: IBlock[];
   parent?: TBlockId;
   visible?: boolean;
@@ -64,8 +64,8 @@ export class BlockEntity {
   }
 
 
-  get template(): string | HTMLElement {
-    return this._block.template;
+  get render(): TRenderRef | undefined {
+    return this._block.render;
   }
 
   get children(): IBlock[] {

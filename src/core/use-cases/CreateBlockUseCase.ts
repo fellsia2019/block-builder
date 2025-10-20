@@ -36,10 +36,11 @@ export class CreateBlockUseCase {
       throw new Error('Block type is required and must be a string');
     }
 
-    // Допускаем два сценария отображения:
-    // 1) HTML template, предоставляемый конфигурацией UI, может не храниться в блоке
-    // 2) Vue компонент (имя компонента) — достаточно поля component/componentProps
-    // Поэтому не требуем наличия template в DTO
+    // Допускаем различные сценарии отображения через render:
+    // 1) HTML template (kind: 'html')
+    // 2) Vue/React компонент (kind: 'component')
+    // 3) Внешний адаптер (kind: 'external')
+    // Поэтому не требуем наличия render в DTO
 
   }
 

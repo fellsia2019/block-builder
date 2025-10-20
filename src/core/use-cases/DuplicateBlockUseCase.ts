@@ -33,7 +33,7 @@ export class DuplicateBlockUseCase {
       settings: { ...originalBlock.settings },
       props: { ...originalBlock.props },
       style: originalBlock.style ? { ...originalBlock.style } : undefined,
-      template: originalBlock.template,
+      render: originalBlock.render,
       parent: originalBlock.parent,
       visible: originalBlock.visible,
       locked: false, // Дубликат не заблокирован

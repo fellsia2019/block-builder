@@ -44,6 +44,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { IBlock, TBlockId, IBlockSettings, IBlockProps, IBlockStyle } from '../../core/entities/Block';
+import { TRenderRef } from '../../core/dto/BlockDto';
 import { BlockManagementUseCase } from '../../core/use-cases/BlockManagementUseCase';
 import { MemoryBlockRepositoryImpl } from '../../infrastructure/repositories/MemoryBlockRepositoryImpl';
 import BlockComponent from './BlockComponent.vue';
@@ -53,7 +54,8 @@ import CardDetailModal from './CardDetailModal.vue';
 interface BlockType {
   type: string;
   label: string;
-  template: string;
+  template?: string; // Deprecated
+  render?: TRenderRef; // Новый формат
   defaultSettings: IBlockSettings;
   defaultProps: IBlockProps;
 }
@@ -96,21 +98,30 @@ const availableBlockTypes = ref<BlockType[]>([
   {
     type: 'text',
     label: 'Text',
-    template: '<div class="text-block">{{ props.content }}</div>',
+    render: {
+      kind: 'html',
+      template: '<div class="text-block">{{ props.content }}</div>'
+    },
     defaultSettings: { fontSize: 16, color: '#000000' },
     defaultProps: { content: 'New text block' }
   },
   {
     type: 'image',
     label: 'Image',
-    template: '<img :src="props.src" :alt="props.alt" class="image-block" />',
+    render: {
+      kind: 'html',
+      template: '<img :src="props.src" :alt="props.alt" class="image-block" />'
+    },
     defaultSettings: { width: 300, height: 200 },
     defaultProps: { src: '', alt: 'Image' }
   },
   {
     type: 'button',
     label: 'Button',
-    template: '<button class="button-block">{{ props.text }}</button>',
+    render: {
+      kind: 'html',
+      template: '<button class="button-block">{{ props.text }}</button>'
+    },
     defaultSettings: { backgroundColor: '#007bff', color: '#ffffff' },
     defaultProps: { text: 'Click me' }
   }
@@ -125,15 +136,27 @@ const loadBlocks = async () => {
 };
 
 const addBlock = async (type: string) => {
-  const blockType = availableBlockTypes.value.find(bt => bt.type === type);
+  const blockType = availableBlockTypes.value.find((bt: BlockType) => bt.type === type);
   if (!blockType) return;
 
-  const block = await blockService.createBlock({
+  const createData: any = {
     type: blockType.type,
     settings: { ...blockType.defaultSettings },
-    props: { ...blockType.defaultProps },
-    template: blockType.template
-  });
+    props: { ...blockType.defaultProps }
+  };
+
+  // Используем новый формат render если доступен, иначе fallback на template
+  if (blockType.render) {
+    createData.render = blockType.render;
+  } else if (blockType.template) {
+    // Fallback на старый формат
+    createData.render = {
+      kind: 'html',
+      template: blockType.template
+    };
+  }
+
+  const block = await blockService.createBlock(createData);
 
   blocks.value.push(block as any);
   emit('block-added', block as any);
@@ -147,7 +170,7 @@ const updateBlock = async (blockId: TBlockId, updates: Partial<IBlock>) => {
   if (!updated) return;
 
   // Обновляем локальное состояние
-  const index = blocks.value.findIndex(block => block.id === blockId);
+  const index = blocks.value.findIndex((block: any) => block.id === blockId);
   if (index !== -1) {
     blocks.value[index] = updated as any;
     emit('block-updated', blocks.value[index]);
@@ -157,7 +180,7 @@ const updateBlock = async (blockId: TBlockId, updates: Partial<IBlock>) => {
 const deleteBlock = async (blockId: TBlockId) => {
   const success = await blockService.deleteBlock(blockId);
   if (success) {
-    blocks.value = blocks.value.filter(block => block.id !== blockId);
+    blocks.value = blocks.value.filter((block: any) => block.id !== blockId);
     emit('block-deleted', blockId);
   }
 };

@@ -9,7 +9,23 @@
     @click.stop="handleClick"
   >
     <div class="block-component__content" @click="handleCardClick">
-      <div v-html="renderedTemplate"></div>
+      <!-- Debug info -->
+      <div style="font-size: 12px; color: #666; margin-bottom: 10px;">
+        Debug: render={{ JSON.stringify(block.render) }}, 
+        isVue={{ isVueComponent(block.render) }}, 
+        hasHtml={{ !!getHtmlTemplate(block.render) }}
+      </div>
+      
+      <!-- Vue компонент -->
+      <component 
+        v-if="isVueComponent(block.render)" 
+        :is="getVueComponent(block.render)"
+        v-bind="block.props"
+      />
+      <!-- HTML template -->
+      <div v-else-if="getHtmlTemplate(block.render)" v-html="renderedTemplate"></div>
+      <!-- Fallback -->
+      <div v-else>Блок {{ block.type }}</div>
     </div>
     
     <div class="block-component__controls">
@@ -30,6 +46,15 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { IBlock, TBlockId } from '../../core/entities/Block';
+import { getHtmlTemplate, getComponentInfo, isVueComponent } from '../../utils/renderHelpers';
+
+// Функция для получения Vue компонента
+const getVueComponent = (render?: any) => {
+  console.log('getVueComponent called with:', render);
+  if (!render || render.kind !== 'component') return null;
+  console.log('Returning component:', render.component);
+  return render.component;
+};
 
 interface Props {
   block: IBlock;
@@ -61,17 +86,21 @@ const blockStyle = computed(() => {
 });
 
 const renderedTemplate = computed(() => {
-  let template = props.block.template;
+  // Получаем HTML template из render-описания
+  const template = getHtmlTemplate(props.block.render);
   
-  // Заменяем плейсхолдеры на значения из props
-  if (typeof template === 'string') {
-    Object.entries(props.block.props).forEach(([key, value]) => {
-      const placeholder = `{{ props.${key} }}`;
-      template = template.replace(new RegExp(placeholder, 'g'), String(value));
-    });
+  if (!template) {
+    return `<div>Блок ${props.block.type}</div>`;
   }
   
-  return template;
+  // Заменяем плейсхолдеры на значения из props
+  let processedTemplate = template;
+  Object.entries(props.block.props).forEach(([key, value]) => {
+    const placeholder = `{{ props.${key} }}`;
+    processedTemplate = processedTemplate.replace(new RegExp(placeholder, 'g'), String(value));
+  });
+  
+  return processedTemplate;
 });
 
 // Методы

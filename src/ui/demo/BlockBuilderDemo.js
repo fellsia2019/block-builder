@@ -198,7 +198,7 @@ export class BlockBuilder {
         }
         if (hasErrors) return;
         // Создание через Use Case
-        this.useCase.createBlock({
+        const createData = {
             type,
             props: blockData,
             settings: {
@@ -210,7 +210,20 @@ export class BlockBuilder {
             order: this.blocks.length, // Новый блок добавляется в конец
             visible: true,
             locked: false
-        }).then(() => this.fetchBlocks().then(() => this.renderBlocks()));
+        };
+
+        // Добавляем render из конфигурации блока
+        if (blockConfig.render) {
+            createData.render = blockConfig.render;
+        } else if (blockConfig.template) {
+            // Fallback на старый формат
+            createData.render = {
+                kind: 'html',
+                template: blockConfig.template
+            };
+        }
+
+        this.useCase.createBlock(createData).then(() => this.fetchBlocks().then(() => this.renderBlocks()));
         this.hideModal();
     }
 
@@ -319,6 +332,16 @@ export class BlockBuilder {
     }
 
     getRenderedContent(block) {
+        // Проверяем новое поле render
+        if (block.render) {
+            if (block.render.kind === 'html') {
+                return this.renderHtmlTemplate(block, block.render.template);
+            } else if (block.render.kind === 'component') {
+                return this.renderVueComponent(block);
+            }
+        }
+        
+        // Fallback на старые поля для совместимости
         const cfg = this.blockConfigs[block.type];
         if (!cfg) return `<div>Блок ${block.type}</div>`;
         if (cfg.component) return this.renderVueComponent(block);
@@ -327,13 +350,27 @@ export class BlockBuilder {
     }
 
     renderVueComponent(block) {
+        // Проверяем новый формат render
+        if (block.render && block.render.kind === 'component' && block.render.component) {
+            const id = `vue-component-${block.id}`;
+            return `<div id="${id}" data-block-id="${block.id}" data-block-type="${block.type}" data-component="${block.render.component.name || 'VueComponent'}"></div>`;
+        }
+        
+        // Fallback на старый формат
         const cfg = this.blockConfigs[block.type];
         if (!cfg || !cfg.component) return `<div>Vue компонент: ${block.type}</div>`;
         const id = `vue-component-${block.id}`;
         return `<div id="${id}" data-block-id="${block.id}" data-block-type="${block.type}"></div>`;
     }
 
-    renderHtmlTemplate(block) {
+    renderHtmlTemplate(block, template = null) {
+        // Если template передан напрямую (из render), используем его
+        if (template) {
+            if (typeof template === 'function') return template(block.props);
+            return template;
+        }
+        
+        // Fallback на старую логику
         const cfg = this.blockConfigs[block.type];
         if (!cfg || !cfg.template) return `<div>HTML template: ${block.type}</div>`;
         if (typeof cfg.template === 'function') return cfg.template(block.props);
@@ -345,12 +382,23 @@ export class BlockBuilder {
 
     initializeVueComponents() {
         this.blocks.forEach(block => {
-            const cfg = this.blockConfigs[block.type];
-            if (cfg && cfg.component) {
+            // Проверяем новый формат render
+            if (block.render && block.render.kind === 'component' && block.render.component) {
                 const id = `vue-component-${block.id}`;
                 const container = document.getElementById(id);
                 if (container && !container.hasAttribute('data-vue-mounted')) {
-                    this.mountVueComponent(block, cfg.component, container);
+                    this.mountVueComponent(block, block.render.component, container);
+                }
+            }
+            // Fallback на старый формат
+            else {
+                const cfg = this.blockConfigs[block.type];
+                if (cfg && cfg.component) {
+                    const id = `vue-component-${block.id}`;
+                    const container = document.getElementById(id);
+                    if (container && !container.hasAttribute('data-vue-mounted')) {
+                        this.mountVueComponent(block, cfg.component, container);
+                    }
                 }
             }
         });

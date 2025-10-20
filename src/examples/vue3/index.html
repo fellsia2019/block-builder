@@ -98,7 +98,7 @@
         
         console.log('✅ BlockBuilder инициализирован с конфигурацией пользователя');
         console.log('📦 Доступные блоки:', Object.keys(blockConfigs));
-        console.log('🎨 Компоненты блоков:', Object.values(blockConfigs).map(config => config.component?.name || 'Неизвестно'));
+        console.log('🎨 Компоненты блоков:', Object.values(blockConfigs).map(config => config.render?.component?.name || 'Неизвестно'));
     </script>
 </body>
 </html>

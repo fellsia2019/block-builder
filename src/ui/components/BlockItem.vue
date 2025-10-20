@@ -68,14 +68,15 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { Block } from '../../core/entities/Block';
+import { IBlock } from '../../core/entities/Block';
+import { getHtmlTemplate } from '../../utils/renderHelpers';
 
 interface Props {
-  block: Block;
+  block: IBlock;
 }
 
 interface Emits {
-  (e: 'edit', block: Block): void;
+  (e: 'edit', block: IBlock): void;
   (e: 'delete', blockId: string): void;
   (e: 'move-up', blockId: string): void;
   (e: 'move-down', blockId: string): void;
@@ -88,9 +89,14 @@ const emit = defineEmits<Emits>();
 
 // Рендерим контент блока
 const renderedContent = computed(() => {
-  if (!props.block.template) return props.block.type;
+  // Получаем HTML template из render-описания
+  const template = getHtmlTemplate(props.block.render);
   
-  let content = props.block.template;
+  if (!template) {
+    return props.block.type;
+  }
+  
+  let content = template;
   
   // Заменяем плейсхолдеры в шаблоне
   Object.entries(props.block.props || {}).forEach(([key, value]) => {

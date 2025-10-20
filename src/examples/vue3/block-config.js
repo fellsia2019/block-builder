@@ -15,8 +15,12 @@ export const blockConfigs = {
   text: {
     title: 'Текстовый блок',
     description: 'Добавьте текстовый контент на страницу',
-    // Реальный Vue компонент
-    component: TextBlock,
+    // Новый формат render
+    render: {
+      kind: 'component',
+      framework: 'vue',
+      component: TextBlock
+    },
     fields: [
       {
         field: 'content',
@@ -70,8 +74,12 @@ export const blockConfigs = {
   image: {
     title: 'Блок изображения',
     description: 'Добавьте изображение на страницу',
-    // Реальный Vue компонент
-    component: ImageBlock,
+    // Новый формат render
+    render: {
+      kind: 'component',
+      framework: 'vue',
+      component: ImageBlock
+    },
     fields: [
       {
         field: 'src',
@@ -110,8 +118,12 @@ export const blockConfigs = {
   button: {
     title: 'Кнопка',
     description: 'Добавьте интерактивную кнопку',
-    // Реальный Vue компонент
-    component: ButtonBlock,
+    // Новый формат render
+    render: {
+      kind: 'component',
+      framework: 'vue',
+      component: ButtonBlock
+    },
     fields: [
       {
         field: 'text',
@@ -168,8 +180,12 @@ export const blockConfigs = {
   cardlist: {
     title: 'Список карточек',
     description: 'Создайте список карточек с информацией',
-    // Реальный Vue компонент
-    component: CardListBlock,
+    // Новый формат render
+    render: {
+      kind: 'component',
+      framework: 'vue',
+      component: CardListBlock
+    },
     fields: [
       {
         field: 'title',
@@ -391,8 +407,12 @@ export const blockConfigs = {
   hero: {
     title: 'Hero секция',
     description: 'Создайте привлекательную hero секцию',
-    // Реальный Vue компонент
-    component: HeroBlock,
+    // Новый формат render
+    render: {
+      kind: 'component',
+      framework: 'vue',
+      component: HeroBlock
+    },
     fields: [
       {
         field: 'title',

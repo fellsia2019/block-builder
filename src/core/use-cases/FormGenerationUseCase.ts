@@ -1,7 +1,6 @@
 import { BlockEntity } from '../entities/Block';
 import { IFormGenerationConfig, IValidationResult, IFormData } from '../entities/ValidationRule';
 import { JavaScriptFormGenerator } from '../../utils/validation';
-// import { VueFormGenerator } from '../../utils/vueValidation';
 
 /**
  * Use Case для генерации форм создания и редактирования блоков

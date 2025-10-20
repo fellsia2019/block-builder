@@ -180,8 +180,12 @@ export class BlockManagementUseCase {
       type,
       settings,
       props: componentProps,
-      component: componentName,
-      componentProps,
+      render: {
+        kind: 'component',
+        framework: 'vue',
+        name: componentName,
+        props: componentProps
+      },
       visible: true,
       locked: false
     };
@@ -199,8 +203,12 @@ export class BlockManagementUseCase {
     }
 
     return this.updateBlock(blockId, {
-      component: componentName,
-      componentProps
+      render: {
+        kind: 'component',
+        framework: 'vue',
+        name: componentName,
+        props: componentProps
+      }
     });
   }
 }

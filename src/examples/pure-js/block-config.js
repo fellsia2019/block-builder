@@ -23,6 +23,23 @@ export const blockConfigs = {
         ${props.content}
       </div>
     `,
+    // Новый формат render (опционально, для демонстрации)
+    render: {
+      kind: 'html',
+      template: (props) => `
+        <div style="
+          text-align: ${props.textAlign}; 
+          font-size: ${props.fontSize}px; 
+          color: ${props.color};
+          padding: 10px;
+          border: 1px solid #e9ecef;
+          border-radius: 4px;
+          background: #f8f9fa;
+        ">
+          ${props.content}
+        </div>
+      `
+    },
     fields: [
       {
         field: 'content',
