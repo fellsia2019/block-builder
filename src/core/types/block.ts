@@ -5,92 +5,72 @@
 import { TBlockId, TRenderRef } from './common';
 import { IFormGenerationConfig } from './form';
 
-// Интерфейсы для настроек и свойств блоков
-export interface IBlockSettings {
-  [key: string]: any;
+// Базовые типы для свойств блоков
+export type TBlockSettings = Record<string, any>;
+export type TBlockProps = Record<string, any>;
+export type TBlockStyle = Record<string, string | number>;
+
+// Метаданные блока
+export interface IBlockMetadata {
+  createdAt: Date;
+  updatedAt: Date;
+  version: number;
+  author?: string;
 }
 
-export interface IBlockProps {
-  [key: string]: any;
-}
-
-export interface IBlockStyle {
-  [key: string]: string | number;
-}
-
-// Основной интерфейс блока (доменная модель)
-export interface IBlock {
-  id: TBlockId;
+// Базовый интерфейс с общими свойствами блока
+interface IBaseBlock {
   type: string;
-  settings: IBlockSettings;
-  props: IBlockProps;
-  style?: IBlockStyle;
-  render?: TRenderRef; // Универсальная ссылка на способ рендера
-  children?: IBlock[];
-  parent?: TBlockId;
+  settings: TBlockSettings;
+  props: TBlockProps;
+  style?: TBlockStyle;
+  render?: TRenderRef;
   visible?: boolean;
   locked?: boolean;
-  formConfig?: IFormGenerationConfig; // Конфигурация для автогенерации форм
-  metadata?: {
-    createdAt: Date;
-    updatedAt: Date;
-    version: number;
-    author?: string;
-  };
+  formConfig?: IFormGenerationConfig;
+}
+
+// Базовый интерфейс для блоков с ID и метаданными (все блоки в системе имеют это)
+interface IBaseBlockWithIdAndMetadata extends IBaseBlock {
+  id: TBlockId;
+  metadata?: IBlockMetadata;
+}
+
+// Интерфейсы для настроек и свойств блоков (обратная совместимость)
+export interface IBlockSettings extends TBlockSettings {}
+export interface IBlockProps extends TBlockProps {}
+export interface IBlockStyle extends TBlockStyle {}
+
+// Основной интерфейс блока (доменная модель)
+export interface IBlock extends IBaseBlockWithIdAndMetadata {
+  children?: IBlock[];
+  parent?: TBlockId;
 }
 
 // DTO для передачи данных блока (без бизнес-логики)
-export interface IBlockDto {
-  id: string;
-  type: string;
-  settings: Record<string, any>;
-  props: Record<string, any>;
-  style?: Record<string, string | number>;
-  order?: number; // Порядок блока в списке
-  render?: TRenderRef; // Универсальная ссылка на способ рендера
+export interface IBlockDto extends IBaseBlockWithIdAndMetadata {
   children?: string[]; // IDs дочерних блоков
   parent?: string;
-  visible?: boolean;
-  locked?: boolean;
-  formConfig?: IFormGenerationConfig; // Конфигурация для автогенерации форм
-  metadata?: {
-    createdAt: Date;
-    updatedAt: Date;
-    version: number;
-    author?: string;
-  };
+  order?: number; // Порядок блока в списке
 }
 
-// DTO для создания блока
-export interface ICreateBlockDto {
-  type: string;
-  settings: Record<string, any>;
-  props: Record<string, any>;
-  style?: Record<string, string | number>;
-  order?: number; // Порядок блока в списке
-  render?: TRenderRef; // Универсальная ссылка на способ рендера
+// DTO для создания блока (единственный случай без ID и метаданных)
+export interface ICreateBlockDto extends IBaseBlock {
   parent?: string;
-  visible?: boolean;
-  locked?: boolean;
-  formConfig?: IFormGenerationConfig; // Конфигурация для автогенерации форм
-  metadata?: {
-    createdAt: Date;
-    updatedAt: Date;
-    version: number;
-    author?: string;
-  };
+  order?: number; // Порядок блока в списке
+  metadata?: IBlockMetadata;
 }
 
 // DTO для обновления блока
 export interface IUpdateBlockDto {
-  settings?: Partial<Record<string, any>>;
-  props?: Partial<Record<string, any>>;
-  style?: Partial<Record<string, string | number>>;
-  order?: number; // Порядок блока в списке
-  render?: TRenderRef; // Универсальная ссылка на способ рендера
+  settings?: Partial<TBlockSettings>;
+  props?: Partial<TBlockProps>;
+  style?: Partial<TBlockStyle>;
+  order?: number;
+  render?: TRenderRef;
   visible?: boolean;
   locked?: boolean;
-  formConfig?: IFormGenerationConfig; // Конфигурация для автогенерации форм
+  formConfig?: IFormGenerationConfig;
 }
 
 // DTO для списка блоков

@@ -3,6 +3,7 @@ import {
   IBlockSettings,
   IBlockProps,
   IBlockStyle,
+  IBlockMetadata,
   TBlockId,
   TRenderRef,
   IFormGenerationConfig
