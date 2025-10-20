@@ -1,6 +1,6 @@
 /**
  * Naberika - Блочный конструктор для no-code разработки
- * 
+ *
  * Правильная чистая архитектура:
  * - Core: сущности, use cases, порты, DTO
  * - Infrastructure: реализации портов
@@ -12,7 +12,6 @@ export * from './core/dto/BlockDto';
 
 // Core - Entities
 export * from './core/entities/Block';
-export * from './core/entities/ValidationRule';
 
 // Core - Ports (интерфейсы)
 export * from './core/ports/BlockRepository';
