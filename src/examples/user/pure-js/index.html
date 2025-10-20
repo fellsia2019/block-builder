@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Мое приложение с Naberika (Pure JS)</title>
+    <title>Мое приложение с BlockBuilder (Pure JS)</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -37,7 +37,7 @@
 <body>
     <div class="app">
         <div class="app-header">
-            <h1>Мое приложение с Naberika (Pure JS)</h1>
+            <h1>Мое приложение с BlockBuilder (Pure JS)</h1>
             <div class="app-description">
                 Это пример пользовательского приложения на чистом JavaScript. 
                 Пользователь только инициализирует пакет с конфигурацией блоков.
@@ -46,8 +46,8 @@
         </div>
         
         <div class="app-content">
-            <!-- Naberika автоматически рендерит все контролы и UI -->
-            <div class="naberika-container" id="naberika-container">
+            <!-- BlockBuilder автоматически рендерит все контролы и UI -->
+            <div class="naberika-container" id="block-builder-container">
                 <!-- Здесь будет рендериться весь UI от пакета -->
             </div>
         </div>
@@ -57,23 +57,23 @@
         // Импортируем конфигурацию блоков
         import { blockConfigs } from './block-config.js';
         
-        // Импортируем настоящий пакет Naberika
-        import { Naberika } from '/package/index.js';
+        // Импортируем пакет BlockBuilder
+        import { BlockBuilder } from '/package/index.js';
         
-        // ПРАВИЛЬНОЕ использование пакета Naberika
+        // ПРАВИЛЬНОЕ использование пакета BlockBuilder
         // Пользователь только инициализирует пакет с конфигурацией
         // Все UI (формы, контролы, модальные окна) рендерится пакетом
         
         // Инициализация пакета
-        const naberika = new Naberika({
-            containerId: 'naberika-container',
+        const blockBuilder = new BlockBuilder({
+            containerId: 'block-builder-container',
             blockConfigs: blockConfigs,
             // Дополнительные настройки
             theme: 'light',
             locale: 'ru'
         });
         
-        console.log('✅ Naberika инициализирован с конфигурацией пользователя (Pure JS)');
+        console.log('✅ BlockBuilder инициализирован с конфигурацией пользователя (Pure JS)');
     </script>
 </body>
 </html>

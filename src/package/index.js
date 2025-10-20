@@ -1,7 +1,7 @@
 /**
- * Naberika - Блочный конструктор с чистой архитектурой
+ * BlockBuilder - Блочный конструктор с чистой архитектурой
  * Основной экспорт пакета
  */
 
-export { Naberika } from './Naberika.js';
+export { BlockBuilder } from './BlockBuilder.js';
 

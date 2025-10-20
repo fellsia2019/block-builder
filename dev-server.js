@@ -22,7 +22,7 @@ app.get('/', (req, res) => {
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Naberika - Примеры</title>
+        <title>BlockBuilder - Примеры</title>
         <style>
             body {
                 font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -90,7 +90,7 @@ app.get('/', (req, res) => {
     </head>
     <body>
         <div class="container">
-            <h1>🏗️ Naberika</h1>
+            <h1>🏗️ BlockBuilder</h1>
             <p>Блочный конструктор с чистой архитектурой</p>
             <p style="color: #888; font-size: 1rem; margin-top: 10px;">
                 Примеры пользовательских приложений
@@ -117,7 +117,7 @@ app.get('/', (req, res) => {
 app.get('/api/blocks', (req, res) => {
   res.json({
     blocks: [],
-    message: 'API для разработки Naberika'
+    message: 'API для разработки BlockBuilder'
   });
 });
 

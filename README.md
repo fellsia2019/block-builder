@@ -1,4 +1,4 @@
-# 🏗️ Naberika - Блочный конструктор с чистой архитектурой
+# 🏗️ BlockBuilder - Блочный конструктор с чистой архитектурой
 
 Библиотека для создания блочных конструкторов с правильной чистой архитектурой.
 
@@ -29,7 +29,7 @@ src/
 
 ### Установка
 ```bash
-npm install naberika
+npm install block-builder
 ```
 
 ### Использование
@@ -72,12 +72,12 @@ export const blockConfigs = {
 ```html
 <!-- 2. Используйте в HTML -->
 <script type="module">
-import { Naberika } from 'naberika'
+import { BlockBuilder } from 'block-builder'
 import { blockConfigs } from './block-config.js'
 
 // Пакет автоматически рендерит все UI компоненты
-const naberika = new Naberika({
-  containerId: 'naberika-container',
+const blockBuilder = new BlockBuilder({
+  containerId: 'block-builder-container',
   blockConfigs: blockConfigs
 })
 </script>
@@ -123,11 +123,11 @@ export const blockConfigs = {
 
 ## 📋 API
 
-### Naberika (Основной класс)
+### BlockBuilder (Основной класс)
 ```javascript
 // Инициализация пакета
-const naberika = new Naberika({
-  containerId: 'naberika-container',  // ID контейнера для рендеринга
+const blockBuilder = new BlockBuilder({
+  containerId: 'block-builder-container',  // ID контейнера для рендеринга
   blockConfigs: blockConfigs,        // Конфигурация блоков
   theme: 'light',                    // Тема (light/dark)
   locale: 'ru'                      // Локализация
