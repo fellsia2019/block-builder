@@ -33,12 +33,6 @@ export class DuplicateBlockUseCase {
       settings: { ...originalBlock.settings },
       props: { ...originalBlock.props },
       style: originalBlock.style ? { ...originalBlock.style } : undefined,
-      position: originalBlock.position ? {
-        ...originalBlock.position,
-        x: originalBlock.position.x + 20, // Смещение для визуального разделения
-        y: originalBlock.position.y + 20
-      } : undefined,
-      size: originalBlock.size ? { ...originalBlock.size } : undefined,
       template: originalBlock.template,
       parent: originalBlock.parent,
       visible: originalBlock.visible,

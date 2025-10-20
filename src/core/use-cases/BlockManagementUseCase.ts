@@ -4,7 +4,6 @@ import { ComponentRegistry } from '../ports/ComponentRegistry';
 import { CreateBlockUseCase } from './CreateBlockUseCase';
 import { UpdateBlockUseCase } from './UpdateBlockUseCase';
 import { DeleteBlockUseCase } from './DeleteBlockUseCase';
-import { MoveBlockUseCase } from './MoveBlockUseCase';
 import { DuplicateBlockUseCase } from './DuplicateBlockUseCase';
 import { ComponentManagementUseCase } from './ComponentManagementUseCase';
 
@@ -16,7 +15,6 @@ export class BlockManagementUseCase {
   private createBlockUseCase: CreateBlockUseCase;
   private updateBlockUseCase: UpdateBlockUseCase;
   private deleteBlockUseCase: DeleteBlockUseCase;
-  private moveBlockUseCase: MoveBlockUseCase;
   private duplicateBlockUseCase: DuplicateBlockUseCase;
   private componentManagementUseCase: ComponentManagementUseCase;
 
@@ -27,7 +25,6 @@ export class BlockManagementUseCase {
     this.createBlockUseCase = new CreateBlockUseCase(blockRepository);
     this.updateBlockUseCase = new UpdateBlockUseCase(blockRepository);
     this.deleteBlockUseCase = new DeleteBlockUseCase(blockRepository);
-    this.moveBlockUseCase = new MoveBlockUseCase(blockRepository);
     this.duplicateBlockUseCase = new DuplicateBlockUseCase(blockRepository);
     this.componentManagementUseCase = new ComponentManagementUseCase(componentRegistry);
   }
@@ -60,21 +57,6 @@ export class BlockManagementUseCase {
     return this.updateBlockUseCase.execute(blockId, updates);
   }
 
-  /**
-   * Перемещение блока
-   */
-  async moveBlock(blockId: string, position: { x: number; y: number; z?: number }): Promise<BlockDto | null> {
-    return this.moveBlockUseCase.execute(blockId, position);
-  }
-
-  /**
-   * Изменение размера блока
-   */
-  async resizeBlock(blockId: string, size: { width: number; height: number }): Promise<BlockDto | null> {
-    return this.updateBlockUseCase.execute(blockId, { 
-      size: { width: size.width, height: size.height }
-    });
-  }
 
   /**
    * Удаление блока
@@ -123,15 +105,10 @@ export class BlockManagementUseCase {
    */
   async reorderBlocks(blockIds: string[]): Promise<boolean> {
     try {
-      const blocks = await this.getAllBlocks();
-      const blockMap = new Map(blocks.map(block => [block.id, block]));
-      
-      // Обновляем порядок блоков
+      // Обновляем поле order для каждого блока согласно его позиции в массиве
       for (let i = 0; i < blockIds.length; i++) {
-        const block = blockMap.get(blockIds[i]);
-        if (block) {
-          await this.blockRepository.update(block.id, {});
-        }
+        const blockId = blockIds[i];
+        await this.blockRepository.update(blockId, { order: i });
       }
       
       return true;
@@ -193,8 +170,6 @@ export class BlockManagementUseCase {
     componentName: string,
     componentProps: Record<string, any> = {},
     settings: Record<string, any> = {},
-    position?: { x: number; y: number; z?: number },
-    size?: { width: number; height: number }
   ): Promise<BlockDto> {
     // Проверяем существование компонента
     if (!this.hasComponent(componentName)) {
@@ -207,8 +182,6 @@ export class BlockManagementUseCase {
       props: componentProps,
       component: componentName,
       componentProps,
-      position,
-      size,
       visible: true,
       locked: false
     };

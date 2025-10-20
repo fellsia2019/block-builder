@@ -48,50 +48,6 @@
         </div>
       </div>
       
-      <div class="property-section">
-        <h4>Position & Size</h4>
-        <div class="property-row">
-          <div class="property-group">
-            <label>X</label>
-            <input 
-              type="number" 
-              :value="block.position?.x || 0" 
-              @input="updatePosition('x', +$event.target.value)"
-              class="property-input"
-            />
-          </div>
-          <div class="property-group">
-            <label>Y</label>
-            <input 
-              type="number" 
-              :value="block.position?.y || 0" 
-              @input="updatePosition('y', +$event.target.value)"
-              class="property-input"
-            />
-          </div>
-        </div>
-        
-        <div class="property-row">
-          <div class="property-group">
-            <label>Width</label>
-            <input 
-              type="number" 
-              :value="block.size?.width || 0" 
-              @input="updateSize('width', +$event.target.value)"
-              class="property-input"
-            />
-          </div>
-          <div class="property-group">
-            <label>Height</label>
-            <input 
-              type="number" 
-              :value="block.size?.height || 0" 
-              @input="updateSize('height', +$event.target.value)"
-              class="property-input"
-            />
-          </div>
-        </div>
-      </div>
       
       <div class="property-section">
         <h4>Props</h4>
@@ -145,7 +101,7 @@
 </template>
 
 <script setup lang="ts">
-import { Block, BlockId, BlockPosition, BlockSize } from '../../domain/types';
+import { Block, BlockId } from '../../core/entities/Block';
 
 interface Props {
   block: Block | null;
@@ -162,17 +118,6 @@ const updateProperty = (key: string, value: any) => {
   emit('update', props.block.id, { [key]: value });
 };
 
-const updatePosition = (key: keyof BlockPosition, value: number) => {
-  if (!props.block) return;
-  const newPosition = { ...props.block.position, [key]: value };
-  emit('update', props.block.id, { position: newPosition });
-};
-
-const updateSize = (key: keyof BlockSize, value: number) => {
-  if (!props.block) return;
-  const newSize = { ...props.block.size, [key]: value };
-  emit('update', props.block.id, { size: newSize });
-};
 
 const updateProp = (key: string, value: string) => {
   if (!props.block) return;

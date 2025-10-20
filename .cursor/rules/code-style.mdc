@@ -1,0 +1,8 @@
+---
+alwaysApply: true
+---
+1. бери настройки из .editorconfig
+2. верстка по БЭМ
+3. название ts inerface должны начинаться с I, например interface IBlock {...}
+4. название ts type должны начинаться с T, например type TBlock = {...}
+

@@ -132,9 +132,7 @@ const addBlock = async (type: string) => {
     type: blockType.type,
     settings: { ...blockType.defaultSettings },
     props: { ...blockType.defaultProps },
-    template: blockType.template,
-    position: { x: 100, y: 100 },
-    size: { width: 200, height: 100 }
+    template: blockType.template
   });
 
   blocks.value.push(blockEntity.toJSON());
@@ -156,12 +154,6 @@ const updateBlock = async (blockId: BlockId, updates: Partial<Block>) => {
   }
   if (updates.style) {
     await blockService.updateBlockStyle(blockId, updates.style);
-  }
-  if (updates.position) {
-    await blockService.moveBlock(blockId, updates.position);
-  }
-  if (updates.size) {
-    await blockService.resizeBlock(blockId, updates.size);
   }
 
   // Обновляем локальное состояние

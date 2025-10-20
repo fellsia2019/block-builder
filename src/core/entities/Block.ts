@@ -12,23 +12,12 @@ export interface BlockProps {
 export interface BlockStyle {
   [key: string]: string | number;
 }
-export interface BlockPosition {
-  x: number;
-  y: number;
-  z?: number;
-}
-export interface BlockSize {
-  width: number;
-  height: number;
-}
 export interface Block {
   id: BlockId;
   type: string;
   settings: BlockSettings;
   props: BlockProps;
   style?: BlockStyle;
-  position?: BlockPosition;
-  size?: BlockSize;
   template: string;
   children?: Block[];
   parent?: BlockId;
@@ -74,13 +63,6 @@ export class BlockEntity {
     return this._block.style ? { ...this._block.style } : undefined;
   }
 
-  get position(): BlockPosition | undefined {
-    return this._block.position ? { ...this._block.position } : undefined;
-  }
-
-  get size(): BlockSize | undefined {
-    return this._block.size ? { ...this._block.size } : undefined;
-  }
 
   get template(): string | HTMLElement {
     return this._block.template;
@@ -142,21 +124,6 @@ export class BlockEntity {
     this._updateMetadata();
   }
 
-  /**
-   * Перемещает блок
-   */
-  moveTo(position: BlockPosition): void {
-    this._block.position = { ...position };
-    this._updateMetadata();
-  }
-
-  /**
-   * Изменяет размер блока
-   */
-  resize(size: BlockSize): void {
-    this._block.size = { ...size };
-    this._updateMetadata();
-  }
 
   /**
    * Блокирует/разблокирует блок

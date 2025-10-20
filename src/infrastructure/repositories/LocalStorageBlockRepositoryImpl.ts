@@ -58,7 +58,17 @@ export class LocalStorageBlockRepositoryImpl implements BlockRepository {
 
   async getAll(): Promise<BlockDto[]> {
     const blocks = this.getBlocksFromStorage();
-    return Array.from(blocks.values()).map(block => ({ ...block }));
+    return Array.from(blocks.values())
+      .sort((a, b) => {
+        // Сортируем по полю order, если оно есть, иначе по дате создания
+        if (a.order !== undefined && b.order !== undefined) {
+          return a.order - b.order;
+        }
+        const dateA = a.metadata?.createdAt || new Date(0);
+        const dateB = b.metadata?.createdAt || new Date(0);
+        return dateA.getTime() - dateB.getTime();
+      })
+      .map(block => ({ ...block }));
   }
 
   async getByType(type: string): Promise<BlockDto[]> {

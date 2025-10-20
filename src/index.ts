@@ -22,7 +22,6 @@ export * from './core/ports/ComponentRegistry';
 export * from './core/use-cases/CreateBlockUseCase';
 export * from './core/use-cases/UpdateBlockUseCase';
 export * from './core/use-cases/DeleteBlockUseCase';
-export * from './core/use-cases/MoveBlockUseCase';
 export * from './core/use-cases/DuplicateBlockUseCase';
 export * from './core/use-cases/BlockManagementUseCase';
 export * from './core/use-cases/ComponentManagementUseCase';
@@ -43,8 +42,8 @@ export type { ValidationRuleType as UV_ValidationRuleType, ValidationRule as UV_
 export { UniversalValidator as UV_UniversalValidator, FormUtils as UV_FormUtils, BlockFormConfigs as UV_BlockFormConfigs } from './utils/universalValidation';
 
 // Утилиты (избегаем конфликтов имен с Block entity)
-export type { Block as UtilsBlock, BlockId as UtilsBlockId, BlockPosition as UtilsBlockPosition, BlockSize as UtilsBlockSize } from './utils/blockHelpers';
-export { buildBlockHierarchy, cloneBlock, constrainBlockToBounds, doBlocksIntersect, findIntersectingBlocks, findNearestBlock, getAllChildren, getDistanceBetweenBlocks, isBlockInBounds, isChildOf, isPointInBlock, snapToGrid } from './utils/blockHelpers';
+export type { Block as UtilsBlock, BlockId as UtilsBlockId } from './utils/blockHelpers';
+export { buildBlockHierarchy, cloneBlock, getAllChildren, isChildOf } from './utils/blockHelpers';
 
 // Экспорт генератора/валидатора форм под уникальными именами
 export { JavaScriptValidator as UtilsJavaScriptValidator, JavaScriptFormGenerator as UtilsJavaScriptFormGenerator } from './utils/validation';

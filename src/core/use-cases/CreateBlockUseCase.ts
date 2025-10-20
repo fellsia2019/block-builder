@@ -41,13 +41,6 @@ export class CreateBlockUseCase {
     // 2) Vue компонент (имя компонента) — достаточно поля component/componentProps
     // Поэтому не требуем наличия template в DTO
 
-    if (blockData.position && (blockData.position.x < 0 || blockData.position.y < 0)) {
-      throw new Error('Block position must be non-negative');
-    }
-
-    if (blockData.size && (blockData.size.width <= 0 || blockData.size.height <= 0)) {
-      throw new Error('Block size must be positive');
-    }
   }
 
   private generateBlockId(): string {

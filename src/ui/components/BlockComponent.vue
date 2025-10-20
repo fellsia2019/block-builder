@@ -2,16 +2,11 @@
   <div
     class="block-component"
     :class="{
-      'is-dragging': isDragging,
       'is-locked': block.locked,
       'is-hidden': !block.visible
     }"
     :style="blockStyle"
     @click.stop="handleClick"
-    @mousedown="handleMouseDown"
-    @dragstart="handleDragStart"
-    @dragend="handleDragEnd"
-    draggable="true"
   >
     <div class="block-component__content" @click="handleCardClick">
       <div v-html="renderedTemplate"></div>
@@ -29,18 +24,12 @@
       </button>
     </div>
     
-    <div v-if="isResizing" class="block-component__resize-handles">
-      <div class="resize-handle nw" @mousedown="startResize('nw')"></div>
-      <div class="resize-handle ne" @mousedown="startResize('ne')"></div>
-      <div class="resize-handle sw" @mousedown="startResize('sw')"></div>
-      <div class="resize-handle se" @mousedown="startResize('se')"></div>
-    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue';
-import { Block, BlockId, BlockPosition, BlockSize } from '../../domain/types';
+import { computed } from 'vue';
+import { Block, BlockId } from '../../core/entities/Block';
 
 interface Props {
   block: Block;
@@ -51,26 +40,14 @@ const props = defineProps<Props>();
 const emit = defineEmits<{
   update: [blockId: BlockId, updates: Partial<Block>];
   delete: [blockId: BlockId];
-  'drag-start': [blockId: BlockId, event: DragEvent];
-  'drag-end': [blockId: BlockId];
   'card-click': [card: any];
 }>();
 
 // Состояние
-const isDragging = ref(false);
-const isResizing = ref(false);
-const dragStartPosition = ref<{ x: number; y: number } | null>(null);
-const resizeStartData = ref<{ size: BlockSize; position: BlockPosition } | null>(null);
 
 // Вычисляемые свойства
 const blockStyle = computed(() => {
   const style: Record<string, string> = {
-    position: 'absolute',
-    left: `${props.block.position?.x || 0}px`,
-    top: `${props.block.position?.y || 0}px`,
-    width: `${props.block.size?.width || 200}px`,
-    height: `${props.block.size?.height || 100}px`,
-    zIndex: String(props.block.position?.z || 1),
     opacity: props.block.visible ? '1' : '0.5',
     pointerEvents: props.block.locked ? 'none' : 'auto'
   };
@@ -129,50 +106,6 @@ const handleCardClick = (event: MouseEvent) => {
   }
 };
 
-const handleMouseDown = (event: MouseEvent) => {
-  if (props.block.locked) return;
-  
-  dragStartPosition.value = {
-    x: event.clientX - (props.block.position?.x || 0),
-    y: event.clientY - (props.block.position?.y || 0)
-  };
-  
-  document.addEventListener('mousemove', handleMouseMove);
-  document.addEventListener('mouseup', handleMouseUp);
-};
-
-const handleMouseMove = (event: MouseEvent) => {
-  if (!dragStartPosition.value) return;
-  
-  const newPosition: BlockPosition = {
-    x: event.clientX - dragStartPosition.value.x,
-    y: event.clientY - dragStartPosition.value.y,
-    z: props.block.position?.z || 1
-  };
-  
-  emit('update', props.block.id, { position: newPosition });
-};
-
-const handleMouseUp = () => {
-  dragStartPosition.value = null;
-  document.removeEventListener('mousemove', handleMouseMove);
-  document.removeEventListener('mouseup', handleMouseUp);
-};
-
-const handleDragStart = (event: DragEvent) => {
-  if (props.block.locked) {
-    event.preventDefault();
-    return;
-  }
-  
-  isDragging.value = true;
-  emit('drag-start', props.block.id, event);
-};
-
-const handleDragEnd = () => {
-  isDragging.value = false;
-  emit('drag-end', props.block.id);
-};
 
 const handleDelete = () => {
   emit('delete', props.block.id);
@@ -186,71 +119,6 @@ const handleVisibility = () => {
   emit('update', props.block.id, { visible: !props.block.visible });
 };
 
-const startResize = (direction: 'nw' | 'ne' | 'sw' | 'se') => {
-  if (props.block.locked) return;
-  
-  isResizing.value = true;
-  resizeStartData.value = {
-    size: { ...props.block.size! },
-    position: { ...props.block.position! }
-  };
-  
-  // Запоминаем handler, чтобы корректно отписаться
-  const resizeHandler = (event: MouseEvent) => handleResize(event, direction);
-  document.addEventListener('mousemove', resizeHandler);
-  const cleanup = () => {
-    document.removeEventListener('mousemove', resizeHandler);
-    document.removeEventListener('mouseup', cleanup);
-    stopResize();
-  };
-  document.addEventListener('mouseup', cleanup);
-};
-
-const handleResize = (event: MouseEvent, direction: string) => {
-  if (!resizeStartData.value) return;
-  
-  const deltaX = event.clientX - (resizeStartData.value.position.x + resizeStartData.value.size.width);
-  const deltaY = event.clientY - (resizeStartData.value.position.y + resizeStartData.value.size.height);
-  
-  let newSize: BlockSize = { ...resizeStartData.value.size };
-  let newPosition: BlockPosition = { ...resizeStartData.value.position };
-  
-  switch (direction) {
-    case 'se':
-      newSize.width = Math.max(50, resizeStartData.value.size.width + deltaX);
-      newSize.height = Math.max(50, resizeStartData.value.size.height + deltaY);
-      break;
-    case 'sw':
-      newSize.width = Math.max(50, resizeStartData.value.size.width - deltaX);
-      newSize.height = Math.max(50, resizeStartData.value.size.height + deltaY);
-      newPosition.x = resizeStartData.value.position.x + deltaX;
-      break;
-    case 'ne':
-      newSize.width = Math.max(50, resizeStartData.value.size.width + deltaX);
-      newSize.height = Math.max(50, resizeStartData.value.size.height - deltaY);
-      newPosition.y = resizeStartData.value.position.y + deltaY;
-      break;
-    case 'nw':
-      newSize.width = Math.max(50, resizeStartData.value.size.width - deltaX);
-      newSize.height = Math.max(50, resizeStartData.value.size.height - deltaY);
-      newPosition.x = resizeStartData.value.position.x + deltaX;
-      newPosition.y = resizeStartData.value.position.y + deltaY;
-      break;
-  }
-  
-  emit('update', props.block.id, { size: newSize, position: newPosition });
-};
-
-const stopResize = () => {
-  isResizing.value = false;
-  resizeStartData.value = null;
-};
-
-// Очистка при размонтировании
-onUnmounted(() => {
-  document.removeEventListener('mousemove', handleMouseMove);
-  document.removeEventListener('mouseup', handleMouseUp);
-});
 </script>
 
 <style scoped>
@@ -329,47 +197,4 @@ onUnmounted(() => {
   color: white;
 }
 
-.block-component__resize-handles {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  pointer-events: none;
-}
-
-.resize-handle {
-  position: absolute;
-  width: 8px;
-  height: 8px;
-  background: #007bff;
-  border: 1px solid white;
-  border-radius: 50%;
-  pointer-events: all;
-  cursor: nw-resize;
-}
-
-.resize-handle.nw {
-  top: -4px;
-  left: -4px;
-  cursor: nw-resize;
-}
-
-.resize-handle.ne {
-  top: -4px;
-  right: -4px;
-  cursor: ne-resize;
-}
-
-.resize-handle.sw {
-  bottom: -4px;
-  left: -4px;
-  cursor: sw-resize;
-}
-
-.resize-handle.se {
-  bottom: -4px;
-  right: -4px;
-  cursor: se-resize;
-}
 </style>

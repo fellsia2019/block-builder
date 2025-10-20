@@ -62,8 +62,9 @@ export class BlockBuilder {
     // Загружает блоки из репозитория в память
     fetchBlocks() {
         return this.useCase.getAllBlocks().then(blocks => {
+            // Репозиторий уже возвращает блоки в правильном порядке
             this.blocks = blocks;
-            return blocks;
+            return this.blocks;
         });
     }
 
@@ -206,6 +207,7 @@ export class BlockBuilder {
                 backgroundColor: blockData.backgroundColor || '#ffffff',
                 borderRadius: blockData.borderRadius || 0
             },
+            order: this.blocks.length, // Новый блок добавляется в конец
             visible: true,
             locked: false
         }).then(() => this.fetchBlocks().then(() => this.renderBlocks()));
@@ -414,8 +416,57 @@ export class BlockBuilder {
         this.showModal(content);
     }
 
-    moveBlockUp(blockId) { const i = this.blocks.findIndex(b => b.id === blockId); if (i > 0) { const t = this.blocks[i - 1]; this.blocks[i - 1] = this.blocks[i]; this.blocks[i] = t; this.renderBlocks(); } }
-    moveBlockDown(blockId) { const i = this.blocks.findIndex(b => b.id === blockId); if (i !== -1 && i < this.blocks.length - 1) { const t = this.blocks[i + 1]; this.blocks[i + 1] = this.blocks[i]; this.blocks[i] = t; this.renderBlocks(); } }
+    /**
+     * Перемещает блок вверх в списке
+     */
+    async moveBlockUp(blockId) {
+        const currentIndex = this.blocks.findIndex(b => b.id === blockId);
+        if (currentIndex > 0) {
+            // Меняем местами с предыдущим блоком
+            const temp = this.blocks[currentIndex - 1];
+            this.blocks[currentIndex - 1] = this.blocks[currentIndex];
+            this.blocks[currentIndex] = temp;
+            
+            // Сохраняем новый порядок в репозитории
+            await this.saveBlockOrder();
+            
+            // Перерисовываем блоки
+            this.renderBlocks();
+        }
+    }
+
+    /**
+     * Перемещает блок вниз в списке
+     */
+    async moveBlockDown(blockId) {
+        const currentIndex = this.blocks.findIndex(b => b.id === blockId);
+        if (currentIndex !== -1 && currentIndex < this.blocks.length - 1) {
+            // Меняем местами со следующим блоком
+            const temp = this.blocks[currentIndex + 1];
+            this.blocks[currentIndex + 1] = this.blocks[currentIndex];
+            this.blocks[currentIndex] = temp;
+            
+            // Сохраняем новый порядок в репозитории
+            await this.saveBlockOrder();
+            
+            // Перерисовываем блоки
+            this.renderBlocks();
+        }
+    }
+
+    /**
+     * Сохраняет порядок блоков в репозитории
+     */
+    async saveBlockOrder() {
+        // Обновляем поле order для каждого блока согласно его позиции в массиве
+        for (let i = 0; i < this.blocks.length; i++) {
+            const block = this.blocks[i];
+            if (block.order !== i) {
+                await this.useCase.updateBlock(block.id, { order: i });
+            }
+        }
+    }
+
 }
 
 

@@ -11,15 +11,7 @@ export interface BlockDto {
   settings: Record<string, any>;
   props: Record<string, any>;
   style?: Record<string, string | number>;
-  position?: {
-    x: number;
-    y: number;
-    z?: number;
-  };
-  size?: {
-    width: number;
-    height: number;
-  };
+  order?: number; // Порядок блока в списке
   template?: string; // Строковый шаблон (для HTML)
   component?: string; // Имя Vue3 компонента
   componentProps?: Record<string, any>; // Пропсы для Vue3 компонента
@@ -41,15 +33,7 @@ export interface CreateBlockDto {
   settings: Record<string, any>;
   props: Record<string, any>;
   style?: Record<string, string | number>;
-  position?: {
-    x: number;
-    y: number;
-    z?: number;
-  };
-  size?: {
-    width: number;
-    height: number;
-  };
+  order?: number; // Порядок блока в списке
   template?: string; // Строковый шаблон (для HTML)
   component?: string; // Имя Vue3 компонента
   componentProps?: Record<string, any>; // Пропсы для Vue3 компонента
@@ -69,15 +53,7 @@ export interface UpdateBlockDto {
   settings?: Partial<Record<string, any>>;
   props?: Partial<Record<string, any>>;
   style?: Partial<Record<string, string | number>>;
-  position?: {
-    x: number;
-    y: number;
-    z?: number;
-  };
-  size?: {
-    width: number;
-    height: number;
-  };
+  order?: number; // Порядок блока в списке
   template?: string; // Строковый шаблон (для HTML)
   component?: string; // Имя Vue3 компонента
   componentProps?: Record<string, any>; // Пропсы для Vue3 компонента
