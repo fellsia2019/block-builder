@@ -1,11 +1,12 @@
 /**
- * BlockBuilder (Demo UI) — демонстрационная оболочка UI для примеров
+ * DemoBlockBuilder — демонстрационная оболочка UI для примеров
  * Не является частью ядра/пакета. Хранится в src/ui/demo согласно чистой архитектуре.
+ * Основной BlockBuilder находится в core/BlockBuilder.ts
  */
 
 import { MemoryBlockRepositoryImpl, MemoryComponentRegistry, BlockManagementUseCase } from '/dist/index.esm.js';
 
-export class BlockBuilder {
+export class DemoBlockBuilder {
     constructor(options) {
         this.containerId = options.containerId;
         this.blockConfigs = options.blockConfigs;
@@ -23,7 +24,7 @@ export class BlockBuilder {
         this.renderUI();
         // Первичная загрузка данных из репозитория и рендер
         this.fetchBlocks().then(() => this.renderBlocks());
-        window.blockBuilder = this; // доступ из примеров
+        window.demoBlockBuilder = this; // доступ из примеров
     }
 
     renderUI() {
@@ -35,12 +36,12 @@ export class BlockBuilder {
                     ${Object.keys(this.blockConfigs).map(type => {
                         const config = this.blockConfigs[type];
                         return `
-                            <button onclick="blockBuilder.showAddBlockForm('${type}')" class="block-builder-btn block-builder-btn-primary">
+                            <button onclick="demoBlockBuilder.showAddBlockForm('${type}')" class="block-builder-btn block-builder-btn-primary">
                                 📝 Добавить ${config.title}
                             </button>
                         `;
                     }).join('')}
-                    <button onclick="blockBuilder.clearAllBlocks()" class="block-builder-btn block-builder-btn-danger">🗑️ Очистить все</button>
+                    <button onclick="demoBlockBuilder.clearAllBlocks()" class="block-builder-btn block-builder-btn-danger">🗑️ Очистить все</button>
                 </div>
                 <div class="block-builder-stats"><p>Всего блоков: <span id="blocks-count">0</span></p></div>
                 <div class="block-builder-blocks" id="block-builder-blocks"></div>
@@ -340,7 +341,7 @@ export class BlockBuilder {
                 return this.renderVueComponent(block);
             }
         }
-        
+
         // Fallback на старые поля для совместимости
         const cfg = this.blockConfigs[block.type];
         if (!cfg) return `<div>Блок ${block.type}</div>`;
@@ -355,7 +356,7 @@ export class BlockBuilder {
             const id = `vue-component-${block.id}`;
             return `<div id="${id}" data-block-id="${block.id}" data-block-type="${block.type}" data-component="${block.render.component.name || 'VueComponent'}"></div>`;
         }
-        
+
         // Fallback на старый формат
         const cfg = this.blockConfigs[block.type];
         if (!cfg || !cfg.component) return `<div>Vue компонент: ${block.type}</div>`;
@@ -369,7 +370,7 @@ export class BlockBuilder {
             if (typeof template === 'function') return template(block.props);
             return template;
         }
-        
+
         // Fallback на старую логику
         const cfg = this.blockConfigs[block.type];
         if (!cfg || !cfg.template) return `<div>HTML template: ${block.type}</div>`;
@@ -474,10 +475,10 @@ export class BlockBuilder {
             const temp = this.blocks[currentIndex - 1];
             this.blocks[currentIndex - 1] = this.blocks[currentIndex];
             this.blocks[currentIndex] = temp;
-            
+
             // Сохраняем новый порядок в репозитории
             await this.saveBlockOrder();
-            
+
             // Перерисовываем блоки
             this.renderBlocks();
         }
@@ -493,10 +494,10 @@ export class BlockBuilder {
             const temp = this.blocks[currentIndex + 1];
             this.blocks[currentIndex + 1] = this.blocks[currentIndex];
             this.blocks[currentIndex] = temp;
-            
+
             // Сохраняем новый порядок в репозитории
             await this.saveBlockOrder();
-            
+
             // Перерисовываем блоки
             this.renderBlocks();
         }

@@ -11,6 +11,7 @@ function startServer(port) {
     console.log(`📋 Доступные примеры:`);
     console.log(`   - http://localhost:${port}/examples/pure-js/index.html`);
     console.log(`   - http://localhost:${port}/examples/vue3/index.html`);
+    console.log(`   - http://localhost:${port}/examples/api-usage/index.html`);
   });
 
   server.on('error', (err) => {
@@ -109,6 +110,9 @@ app.get('/', (req, res) => {
             .vue-card {
                 border-left: 4px solid #42b883;
             }
+            .api-card {
+                border-left: 4px solid #ff6b35;
+            }
         </style>
     </head>
     <body>
@@ -118,16 +122,21 @@ app.get('/', (req, res) => {
             <p style="color: #888; font-size: 1rem; margin-top: 10px;">
                 Примеры пользовательских приложений
             </p>
-            
+
             <div class="examples">
                 <a href="/examples/pure-js/index.html" class="example-card js-card">
-                    <h3>📄 Pure JavaScript</h3>
-                    <p>Пользовательское приложение с HTML шаблонами. Показывает, как пользователь настраивает только конфигурацию блоков.</p>
+                    <h3>📄 Pure JavaScript Demo</h3>
+                    <p>Демонстрация с готовым UI. Показывает возможности пакета с HTML шаблонами.</p>
                 </a>
-                
+
                 <a href="/examples/vue3/index.html" class="example-card vue-card">
-                    <h3>🎨 Vue3 с реальными компонентами</h3>
-                    <p>Пользовательское приложение с реальными Vue3 компонентами. Демонстрирует правильное использование пакета.</p>
+                    <h3>🎨 Vue3 Demo</h3>
+                    <p>Демонстрация с готовым UI. Показывает возможности пакета с Vue3 компонентами.</p>
+                </a>
+
+                <a href="/examples/api-usage/index.html" class="example-card api-card">
+                    <h3>🔧 API Usage</h3>
+                    <p>Правильное использование основного BlockBuilder API без UI. Показывает, как пользователь должен использовать пакет.</p>
                 </a>
             </div>
         </div>

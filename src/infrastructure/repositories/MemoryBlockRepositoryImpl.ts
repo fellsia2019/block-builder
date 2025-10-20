@@ -13,6 +13,8 @@ export class MemoryBlockRepositoryImpl implements IBlockRepository {
     const block: IBlockDto = {
       id,
       ...blockData,
+      visible: blockData.visible ?? true, // По умолчанию видимые
+      locked: blockData.locked ?? false, // По умолчанию не заблокированные
       metadata: {
         createdAt: new Date(),
         updatedAt: new Date(),

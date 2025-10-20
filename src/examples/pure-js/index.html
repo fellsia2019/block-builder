@@ -39,12 +39,12 @@
         <div class="app-header">
             <h1>Мое приложение с BlockBuilder (Pure JS)</h1>
             <div class="app-description">
-                Это пример пользовательского приложения на чистом JavaScript. 
-                Пользователь только инициализирует пакет с конфигурацией блоков.
+                Это ПРАВИЛЬНОЕ использование пакета BlockBuilder на чистом JavaScript.
+                Пользователь получает готовый UI автоматически.
                 Все формы, валидация, модальные окна и UI контролы рендерятся автоматически пакетом.
             </div>
         </div>
-        
+
         <div class="app-content">
             <!-- BlockBuilder автоматически рендерит все контролы и UI -->
             <div class="block-builder-container" id="block-builder-container">
@@ -56,14 +56,14 @@
     <script type="module">
         // Импортируем конфигурацию блоков
         import { blockConfigs } from './block-config.js';
-        
-        // Импортируем демо-оболочку UI (не часть ядра)
-        import { BlockBuilder } from '/ui/demo/BlockBuilderDemo.js';
-        
+
+        // Импортируем основной BlockBuilder из пакета
+        import { BlockBuilder } from '/dist/index.esm.js';
+
         // ПРАВИЛЬНОЕ использование пакета BlockBuilder
-        // Пользователь только инициализирует пакет с конфигурацией
-        // Все UI (формы, контролы, модальные окна) рендерится пакетом
-        
+        // Пользователь получает готовый UI автоматически
+        // Все формы, валидация, модальные окна и UI контролы рендерятся автоматически
+
         // Инициализация пакета
         const blockBuilder = new BlockBuilder({
             containerId: 'block-builder-container',
@@ -72,7 +72,7 @@
             theme: 'light',
             locale: 'ru'
         });
-        
+
         console.log('✅ BlockBuilder инициализирован с конфигурацией пользователя (Pure JS)');
     </script>
 </body>

@@ -34,6 +34,46 @@ npm install block-builder
 
 ### Использование
 
+#### Основной API (Рекомендуемый способ)
+```javascript
+import { BlockBuilder } from 'block-builder'
+import { blockConfigs } from './block-config.js'
+
+// Создание экземпляра с автоматическим UI
+const blockBuilder = new BlockBuilder({
+  containerId: 'my-app', // ID контейнера для рендеринга UI
+  blockConfigs: blockConfigs,
+  storage: 'localStorage', // или 'memory'
+  autoRender: true // По умолчанию true - автоматически рендерит UI
+})
+
+// UI рендерится автоматически!
+// Пользователь получает готовые кнопки, формы, валидацию
+```
+
+#### Только API (без UI)
+```javascript
+import { BlockBuilder } from 'block-builder'
+import { blockConfigs } from './block-config.js'
+
+// Создание экземпляра только с API
+const blockBuilder = new BlockBuilder({
+  containerId: 'my-app',
+  blockConfigs: blockConfigs,
+  autoRender: false // Отключаем автоматический UI
+})
+
+// Использование только API
+await blockBuilder.createBlock({
+  type: 'text',
+  settings: { fontSize: 16 },
+  props: { content: 'Hello World', color: '#333' }
+})
+
+const blocks = await blockBuilder.getAllBlocks()
+console.log('Все блоки:', blocks)
+```
+
 #### Vue3 приложение
 ```javascript
 // 1. Создайте конфигурацию блоков
@@ -53,33 +93,23 @@ export const blockConfigs = {
         rules: [{ type: 'required', message: 'Текст обязателен' }]
       }
     ]
-  },
-  button: {
-    title: 'Кнопка',
-    component: ButtonBlock,
-    fields: [
-      {
-        field: 'text',
-        label: 'Текст кнопки',
-        type: 'text',
-        rules: [{ type: 'required', message: 'Текст обязателен' }]
-      }
-    ]
   }
 }
 ```
 
 ```html
-<!-- 2. Используйте в HTML -->
+<!-- 2. Используйте API в своем приложении -->
 <script type="module">
 import { BlockBuilder } from 'block-builder'
 import { blockConfigs } from './block-config.js'
 
-// Пакет автоматически рендерит все UI компоненты
+// Создайте свой собственный UI, используя API
 const blockBuilder = new BlockBuilder({
-  containerId: 'block-builder-container',
+  containerId: 'my-app',
   blockConfigs: blockConfigs
 })
+
+// Ваш собственный UI код здесь
 </script>
 ```
 
@@ -89,7 +119,6 @@ const blockBuilder = new BlockBuilder({
 export const blockConfigs = {
   text: {
     title: 'Текстовый блок',
-    template: '<div style="font-size: {{ fontSize }}px; color: {{ color }};">{{ content }}</div>',
     fields: [
       {
         field: 'content',
@@ -203,14 +232,45 @@ npm run start
 
 Смотрите папку `src/examples/` для примеров использования:
 
-### Пользовательские приложения (`src/examples/`)
-- **Vue3 пример** (`vue3/`):
-  - `index.html` - основное приложение с Vue3 компонентами
+### 🎯 Примеры использования
+- **Vue3 Example** (`vue3/`):
+  - `index.html` - правильное использование с Vue3 компонентами
   - `block-config.js` - конфигурация блоков с реальными Vue компонентами
   - `components/` - папка с Vue компонентами (TextBlock, ImageBlock, ButtonBlock, CardListBlock, HeroBlock)
-- **Pure JS пример** (`pure-js/`):
-  - `index.html` - приложение на чистом JavaScript
+- **Pure JS Example** (`pure-js/`):
+  - `index.html` - правильное использование на чистом JavaScript
   - `block-config.js` - конфигурация с HTML шаблонами
+- **API Only Example** (`api-usage/`):
+  - `index.html` - использование только API без UI
+  - `block-config.js` - минимальная конфигурация для API
+
+## 🎯 Режимы работы BlockBuilder
+
+### 🎨 С автоматическим UI (по умолчанию)
+```javascript
+// ✅ ПРАВИЛЬНО - для большинства случаев
+import { BlockBuilder } from 'block-builder'
+
+const blockBuilder = new BlockBuilder({
+  containerId: 'my-app',
+  blockConfigs: blockConfigs
+  // autoRender: true по умолчанию
+})
+// Автоматически рендерит готовый UI с кнопками, формами, валидацией
+```
+
+### 🔧 Только API (без UI)
+```javascript
+// ✅ Для продвинутых пользователей
+import { BlockBuilder } from 'block-builder'
+
+const blockBuilder = new BlockBuilder({
+  containerId: 'my-app',
+  blockConfigs: blockConfigs,
+  autoRender: false // Отключаем UI
+})
+// Только API - создавайте свой UI
+```
 
 ## 🎯 Преимущества чистой архитектуры
 

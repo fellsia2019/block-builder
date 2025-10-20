@@ -26,6 +26,10 @@ export * from './core/use-cases/BlockManagementUseCase';
 export * from './core/use-cases/ComponentManagementUseCase';
 export * from './core/use-cases/FormGenerationUseCase';
 
+// Core - Main API (главный класс пакета)
+export { BlockBuilder } from './core/BlockBuilder';
+export type { IBlockBuilderOptions } from './core/BlockBuilder';
+
 // Infrastructure - Реализации портов
 export * from './infrastructure/repositories/MemoryBlockRepositoryImpl';
 export * from './infrastructure/repositories/LocalStorageBlockRepositoryImpl';
