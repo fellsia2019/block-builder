@@ -200,7 +200,8 @@ const handleDrop = (event: DragEvent) => {
   const blockId = event.dataTransfer?.getData('text/plain');
   if (!blockId) return;
 
-  const rect = (event.target as HTMLElement).getBoundingClientRect();
+  // Используем currentTarget (холст), а не target внутреннего элемента
+  const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
   const x = event.clientX - rect.left;
   const y = event.clientY - rect.top;
 

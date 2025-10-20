@@ -5,8 +5,9 @@ const PORT = 3000;
 
 // Статические файлы
 app.use(express.static('dist'));
+app.use('/dist', express.static(path.join(__dirname, 'dist')));
 app.use('/examples', express.static('src/examples/user'));
-app.use('/package', express.static('src/package'));
+app.use('/ui', express.static('src/ui'));
 
 // Middleware для отладки запросов
 app.use((req, res, next) => {
@@ -126,6 +127,6 @@ app.listen(PORT, () => {
   console.log(`📁 Примеры доступны в папке src/examples/`);
   console.log(`🔧 Для сборки используйте: npm run build`);
   console.log(`📋 Доступные примеры:`);
-  console.log(`   - http://localhost:${PORT}/src/examples/user/pure-js/index.html`);
-  console.log(`   - http://localhost:${PORT}/src/examples/user/vue3/index.html`);
+  console.log(`   - http://localhost:${PORT}/examples/pure-js/index.html`);
+  console.log(`   - http://localhost:${PORT}/examples/vue3/index.html`);
 });

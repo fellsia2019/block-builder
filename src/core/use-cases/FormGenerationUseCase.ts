@@ -1,7 +1,7 @@
 import { BlockEntity } from '../entities/Block';
 import { FormGenerationConfig, ValidationResult, FormData } from '../entities/ValidationRule';
 import { JavaScriptFormGenerator } from '../../utils/validation';
-import { VueFormGenerator } from '../../utils/vueValidation';
+// import { VueFormGenerator } from '../../utils/vueValidation';
 
 /**
  * Use Case для генерации форм создания и редактирования блоков
@@ -21,9 +21,9 @@ export class FormGenerationUseCase {
   /**
    * Генерирует Vue3 компонент формы
    */
-  generateVueForm(config: FormGenerationConfig): string {
-    return VueFormGenerator.generateFormComponent(config);
-  }
+  // generateVueForm(config: FormGenerationConfig): string {
+  //   return VueFormGenerator.generateFormComponent(config);
+  // }
 
   /**
    * Создает конфигурацию формы для блока на основе его типа

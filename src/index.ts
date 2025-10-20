@@ -38,9 +38,13 @@ export * from './infrastructure/registries/MemoryComponentRegistry';
 // export { default as BlockComponent } from './ui/components/BlockComponent.vue';
 // export { default as BlockProperties } from './ui/components/BlockProperties.vue';
 
-// Универсальная валидация
-export * from './utils/universalValidation';
+// Универсальная валидация (избегаем конфликтов имен)
+export type { ValidationRuleType as UV_ValidationRuleType, ValidationRule as UV_ValidationRule, FormGenerationConfig as UV_FormGenerationConfig, ValidationResult as UV_ValidationResult, FormData as UV_FormData } from './utils/universalValidation';
+export { UniversalValidator as UV_UniversalValidator, FormUtils as UV_FormUtils, BlockFormConfigs as UV_BlockFormConfigs } from './utils/universalValidation';
 
-// Утилиты
-export * from './utils/blockHelpers';
-export * from './utils/validation';
+// Утилиты (избегаем конфликтов имен с Block entity)
+export type { Block as UtilsBlock, BlockId as UtilsBlockId, BlockPosition as UtilsBlockPosition, BlockSize as UtilsBlockSize } from './utils/blockHelpers';
+export { buildBlockHierarchy, cloneBlock, constrainBlockToBounds, doBlocksIntersect, findIntersectingBlocks, findNearestBlock, getAllChildren, getDistanceBetweenBlocks, isBlockInBounds, isChildOf, isPointInBlock, snapToGrid } from './utils/blockHelpers';
+
+// Экспорт генератора/валидатора форм под уникальными именами
+export { JavaScriptValidator as UtilsJavaScriptValidator, JavaScriptFormGenerator as UtilsJavaScriptFormGenerator } from './utils/validation';

@@ -121,6 +121,7 @@ export class JavaScriptValidator {
       return true;
     } catch {
       return false;
+    }
   }
 }
 
@@ -191,7 +192,7 @@ export class JavaScriptFormGenerator {
         `;
 
       case 'select':
-        const options = field.options?.map(opt => 
+        const options = field.options?.map((opt: { value: string; label: string }) => 
           `<option value="${opt.value}">${opt.label}</option>`
         ).join('') || '';
         return `

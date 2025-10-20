@@ -47,7 +47,7 @@
         
         <div class="app-content">
             <!-- BlockBuilder автоматически рендерит все контролы и UI -->
-            <div class="naberika-container" id="block-builder-container">
+            <div class="block-builder-container" id="block-builder-container">
                 <!-- Здесь будет рендериться весь UI от пакета -->
             </div>
         </div>
@@ -57,8 +57,8 @@
         // Импортируем конфигурацию блоков
         import { blockConfigs } from './block-config.js';
         
-        // Импортируем пакет BlockBuilder
-        import { BlockBuilder } from '/package/index.js';
+        // Импортируем демо-оболочку UI (не часть ядра)
+        import { BlockBuilder } from '/ui/demo/BlockBuilderDemo.js';
         
         // ПРАВИЛЬНОЕ использование пакета BlockBuilder
         // Пользователь только инициализирует пакет с конфигурацией

@@ -36,9 +36,10 @@ export class CreateBlockUseCase {
       throw new Error('Block type is required and must be a string');
     }
 
-    if (!blockData.template) {
-      throw new Error('Block template is required');
-    }
+    // Допускаем два сценария отображения:
+    // 1) HTML template, предоставляемый конфигурацией UI, может не храниться в блоке
+    // 2) Vue компонент (имя компонента) — достаточно поля component/componentProps
+    // Поэтому не требуем наличия template в DTO
 
     if (blockData.position && (blockData.position.x < 0 || blockData.position.y < 0)) {
       throw new Error('Block position must be non-negative');

@@ -2,6 +2,8 @@ import { BlockDto } from '../core/dto/BlockDto';
 
 // Типы для утилит
 export type Block = BlockDto;
+// Дерево блоков для иерархического представления (дети как узлы)
+export type BlockWithChildren = Omit<BlockDto, 'children'> & { children: BlockWithChildren[] };
 export type BlockId = string;
 export interface BlockPosition {
   x: number;
@@ -160,7 +162,8 @@ export function cloneBlock(block: Block, newId: BlockId): Block {
   return {
     ...block,
     id: newId,
-    children: block.children?.map(child => ({ ...child })),
+    // В DTO дети представлены как массив id, поэтому копируем как есть
+    children: Array.isArray(block.children) ? [...(block.children as any[])] : block.children,
     metadata: {
       ...block.metadata,
       createdAt: new Date(),
@@ -173,9 +176,11 @@ export function cloneBlock(block: Block, newId: BlockId): Block {
 /**
  * Создает иерархию блоков из плоского списка
  */
-export function buildBlockHierarchy(blocks: Block[]): Block[] {
-  const blockMap = new Map(blocks.map(block => [block.id, { ...block, children: [] as Block[] }]));
-  const rootBlocks: Block[] = [];
+export function buildBlockHierarchy(blocks: Block[]): BlockWithChildren[] {
+  const blockMap = new Map<string, BlockWithChildren>(
+    blocks.map(block => [block.id, { ...(block as Omit<BlockDto, 'children'>), children: [] }])
+  );
+  const rootBlocks: BlockWithChildren[] = [];
   
   blocks.forEach(block => {
     const blockWithChildren = blockMap.get(block.id)!;

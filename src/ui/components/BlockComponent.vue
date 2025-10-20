@@ -195,9 +195,15 @@ const startResize = (direction: 'nw' | 'ne' | 'sw' | 'se') => {
     position: { ...props.block.position! }
   };
   
+  // Запоминаем handler, чтобы корректно отписаться
   const resizeHandler = (event: MouseEvent) => handleResize(event, direction);
   document.addEventListener('mousemove', resizeHandler);
-  document.addEventListener('mouseup', stopResize);
+  const cleanup = () => {
+    document.removeEventListener('mousemove', resizeHandler);
+    document.removeEventListener('mouseup', cleanup);
+    stopResize();
+  };
+  document.addEventListener('mouseup', cleanup);
 };
 
 const handleResize = (event: MouseEvent, direction: string) => {
@@ -238,18 +244,12 @@ const handleResize = (event: MouseEvent, direction: string) => {
 const stopResize = () => {
   isResizing.value = false;
   resizeStartData.value = null;
-  // Удаляем все обработчики mousemove
-  document.removeEventListener('mousemove', () => {});
-  document.removeEventListener('mouseup', stopResize);
 };
 
 // Очистка при размонтировании
 onUnmounted(() => {
   document.removeEventListener('mousemove', handleMouseMove);
   document.removeEventListener('mouseup', handleMouseUp);
-  // Очищаем все обработчики resize
-  document.removeEventListener('mousemove', () => {});
-  document.removeEventListener('mouseup', stopResize);
 });
 </script>
 
