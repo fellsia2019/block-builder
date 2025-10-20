@@ -1,4 +1,4 @@
-import { TRenderRef } from '../core/dto/BlockDto';
+import { TRenderRef } from '../core/types';
 
 /**
  * Утилиты для работы с render-описанием блоков
@@ -9,11 +9,11 @@ import { TRenderRef } from '../core/dto/BlockDto';
  */
 export function getHtmlTemplate(render?: TRenderRef): string | null {
   if (!render) return null;
-  
+
   if (render.kind === 'html') {
     return render.template;
   }
-  
+
   return null;
 }
 
@@ -22,7 +22,7 @@ export function getHtmlTemplate(render?: TRenderRef): string | null {
  */
 export function getComponentInfo(render?: TRenderRef): { name?: string; component?: any; props?: Record<string, any> } | null {
   if (!render) return null;
-  
+
   if (render.kind === 'component') {
     return {
       name: render.name,
@@ -30,7 +30,7 @@ export function getComponentInfo(render?: TRenderRef): { name?: string; componen
       props: render.props
     };
   }
-  
+
   return null;
 }
 

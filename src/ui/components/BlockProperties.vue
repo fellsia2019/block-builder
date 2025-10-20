@@ -3,94 +3,94 @@
     <div v-if="!block" class="no-selection">
       <p>Select a block to edit its properties</p>
     </div>
-    
+
     <div v-else class="properties-content">
       <div class="property-section">
         <h4>General</h4>
         <div class="property-group">
           <label>Type</label>
-          <input 
-            :value="block.type" 
-            disabled 
+          <input
+            :value="block.type"
+            disabled
             class="property-input"
           />
         </div>
-        
+
         <div class="property-group">
           <label>ID</label>
-          <input 
-            :value="block.id" 
-            disabled 
+          <input
+            :value="block.id"
+            disabled
             class="property-input"
           />
         </div>
-        
+
         <div class="property-group">
           <label>
-            <input 
-              type="checkbox" 
-              :checked="block.visible" 
+            <input
+              type="checkbox"
+              :checked="block.visible"
               @change="updateProperty('visible', $event.target.checked)"
             />
             Visible
           </label>
         </div>
-        
+
         <div class="property-group">
           <label>
-            <input 
-              type="checkbox" 
-              :checked="block.locked" 
+            <input
+              type="checkbox"
+              :checked="block.locked"
               @change="updateProperty('locked', $event.target.checked)"
             />
             Locked
           </label>
         </div>
       </div>
-      
-      
+
+
       <div class="property-section">
         <h4>Props</h4>
-        <div 
-          v-for="(value, key) in block.props" 
+        <div
+          v-for="(value, key) in block.props"
           :key="`prop-${key}`"
           class="property-group"
         >
           <label>{{ key }}</label>
-          <input 
-            :value="value" 
+          <input
+            :value="value"
             @input="updateProp(key, $event.target.value)"
             class="property-input"
           />
         </div>
       </div>
-      
+
       <div class="property-section">
         <h4>Settings</h4>
-        <div 
-          v-for="(value, key) in block.settings" 
+        <div
+          v-for="(value, key) in block.settings"
           :key="`setting-${key}`"
           class="property-group"
         >
           <label>{{ key }}</label>
-          <input 
-            :value="value" 
+          <input
+            :value="value"
             @input="updateSetting(key, $event.target.value)"
             class="property-input"
           />
         </div>
       </div>
-      
+
       <div class="property-section">
         <h4>Style</h4>
-        <div 
-          v-for="(value, key) in block.style" 
+        <div
+          v-for="(value, key) in block.style"
           :key="`style-${key}`"
           class="property-group"
         >
           <label>{{ key }}</label>
-          <input 
-            :value="value" 
+          <input
+            :value="value"
             @input="updateStyle(key, $event.target.value)"
             class="property-input"
           />
@@ -101,7 +101,7 @@
 </template>
 
 <script setup lang="ts">
-import { IBlock, TBlockId } from '../../core/entities/Block';
+import { IBlock, TBlockId } from '../../core/types';
 
 interface Props {
   block: IBlock | null;

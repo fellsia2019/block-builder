@@ -1,4 +1,4 @@
-import { IBlockDto, ICreateBlockDto } from '../dto/BlockDto';
+import { IBlockDto, ICreateBlockDto } from '../types';
 import { IBlockRepository } from '../ports/BlockRepository';
 
 /**
@@ -47,15 +47,15 @@ export class DuplicateBlockUseCase {
 
   private async duplicateChildren(originalParentId: string, newParentId: string): Promise<void> {
     const children = await this.blockRepository.getChildren(originalParentId);
-    
+
     for (const child of children) {
       // Создаем дубликат дочернего блока
       const duplicatedChild = this.createDuplicate(child);
       duplicatedChild.parent = newParentId;
-      
+
       // Сохраняем дубликат
       const createdChild = await this.blockRepository.create(duplicatedChild);
-      
+
       // Рекурсивно дублируем дочерние блоки
       await this.duplicateChildren(child.id, createdChild.id);
     }

@@ -1,4 +1,4 @@
-import { IBlockDto, ICreateBlockDto, IUpdateBlockDto } from '../dto/BlockDto';
+import { IBlockDto, ICreateBlockDto, IUpdateBlockDto } from '../types';
 import { IBlockRepository } from '../ports/BlockRepository';
 import { IComponentRegistry } from '../ports/ComponentRegistry';
 import { CreateBlockUseCase } from './CreateBlockUseCase';
@@ -110,7 +110,7 @@ export class BlockManagementUseCase {
         const blockId = blockIds[i];
         await this.blockRepository.update(blockId, { order: i });
       }
-      
+
       return true;
     } catch (error) {
       console.error('Error reordering blocks:', error);

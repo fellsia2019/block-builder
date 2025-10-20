@@ -1,5 +1,5 @@
 import { BlockEntity } from '../entities/Block';
-import { IFormGenerationConfig, IValidationResult, IFormData } from '../entities/ValidationRule';
+import { IFormGenerationConfig, IValidationResult, IFormData } from '../types';
 import { JavaScriptFormGenerator } from '../../utils/validation';
 
 /**
@@ -10,8 +10,8 @@ export class FormGenerationUseCase {
    * Генерирует HTML форму для создания/редактирования блока (для чистого JS)
    */
   generateJavaScriptForm(
-    blockType: string, 
-    config: IFormGenerationConfig, 
+    blockType: string,
+    config: IFormGenerationConfig,
     onSubmit: (data: IFormData) => void
   ): string {
     return JavaScriptFormGenerator.generateForm(config, onSubmit);
@@ -343,7 +343,7 @@ export class FormGenerationUseCase {
    */
   createEditFormConfig(block: BlockEntity): IFormGenerationConfig {
     const baseConfig = this.createFormConfigForBlockType(block.type);
-    
+
     // Заполняем значения по умолчанию из существующего блока
     const updatedFields = baseConfig.fields.map(field => ({
       ...field,
@@ -365,7 +365,7 @@ export class FormGenerationUseCase {
    */
   async validateFormData(data: IFormData, config: IFormGenerationConfig): Promise<IValidationResult> {
     const { JavaScriptValidator } = await import('../../utils/validation');
-    const allRules = config.fields.flatMap(field => field.rules);
+    const allRules = config.fields.flatMap(field => field.rules || []) as any[];
     return JavaScriptValidator.validate(data, allRules);
   }
 }

@@ -1,5 +1,7 @@
-// Vue3 Component type (без импорта Vue для совместимости)
-export type TComponent = any;
+import { TComponent } from '../types';
+
+// Реэкспорт типа для обратной совместимости
+export type { TComponent } from '../types';
 
 /**
  * Port для регистрации Vue3 компонентов

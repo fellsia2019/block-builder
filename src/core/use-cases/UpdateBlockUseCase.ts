@@ -1,4 +1,4 @@
-import { IBlockDto, IUpdateBlockDto } from '../dto/BlockDto';
+import { IBlockDto, IUpdateBlockDto } from '../types';
 import { IBlockRepository } from '../ports/BlockRepository';
 
 /**
@@ -9,7 +9,7 @@ export class UpdateBlockUseCase {
   constructor(private blockRepository: IBlockRepository) {}
 
   async execute(
-    blockId: string, 
+    blockId: string,
     updates: IUpdateBlockDto
   ): Promise<IBlockDto | null> {
     // Получение существующего блока

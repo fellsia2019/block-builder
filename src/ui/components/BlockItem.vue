@@ -1,9 +1,9 @@
 <template>
-  <div 
-    class="block-item" 
-    :class="{ 
+  <div
+    class="block-item"
+    :class="{
       'locked': block.locked,
-      'hidden': !block.visible 
+      'hidden': !block.visible
     }"
   >
     <!-- Заголовок блока с кнопками управления -->
@@ -14,45 +14,45 @@
         <span v-if="block.locked" class="lock-icon">🔒</span>
         <span v-if="!block.visible" class="hidden-icon">👁️‍🗨️</span>
       </div>
-      
+
       <div class="block-controls">
-        <button 
-          class="control-btn edit-btn" 
+        <button
+          class="control-btn edit-btn"
           @click.stop="editBlock"
           title="Редактировать"
         >
           ✏️
         </button>
-        <button 
-          class="control-btn move-up-btn" 
+        <button
+          class="control-btn move-up-btn"
           @click.stop="moveUp"
           title="Переместить вверх"
         >
           ⬆️
         </button>
-        <button 
-          class="control-btn move-down-btn" 
+        <button
+          class="control-btn move-down-btn"
           @click.stop="moveDown"
           title="Переместить вниз"
         >
           ⬇️
         </button>
-        <button 
-          class="control-btn toggle-visibility-btn" 
+        <button
+          class="control-btn toggle-visibility-btn"
           @click.stop="toggleVisibility"
           :title="block.visible ? 'Скрыть' : 'Показать'"
         >
           {{ block.visible ? '👁️' : '👁️‍🗨️' }}
         </button>
-        <button 
-          class="control-btn toggle-lock-btn" 
+        <button
+          class="control-btn toggle-lock-btn"
           @click.stop="toggleLock"
           :title="block.locked ? 'Разблокировать' : 'Заблокировать'"
         >
           {{ block.locked ? '🔓' : '🔒' }}
         </button>
-        <button 
-          class="control-btn delete-btn" 
+        <button
+          class="control-btn delete-btn"
           @click.stop="deleteBlock"
           title="Удалить"
         >
@@ -68,7 +68,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { IBlock } from '../../core/entities/Block';
+import { IBlock } from '../../core/types';
 import { getHtmlTemplate } from '../../utils/renderHelpers';
 
 interface Props {
@@ -91,22 +91,22 @@ const emit = defineEmits<Emits>();
 const renderedContent = computed(() => {
   // Получаем HTML template из render-описания
   const template = getHtmlTemplate(props.block.render);
-  
+
   if (!template) {
     return props.block.type;
   }
-  
+
   let content = template;
-  
+
   // Заменяем плейсхолдеры в шаблоне
   Object.entries(props.block.props || {}).forEach(([key, value]) => {
     content = content.replace(new RegExp(`{{ props.${key} }}`, 'g'), String(value));
   });
-  
+
   Object.entries(props.block.settings || {}).forEach(([key, value]) => {
     content = content.replace(new RegExp(`{{ settings.${key} }}`, 'g'), String(value));
   });
-  
+
   return content;
 });
 

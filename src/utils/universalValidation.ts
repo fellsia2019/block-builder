@@ -3,44 +3,26 @@
  * Поддерживает: Pure JS, Vue3, React, Angular и другие
  */
 
-export type TValidationRuleType = 'required' | 'email' | 'url' | 'min' | 'max' | 'minLength' | 'maxLength' | 'pattern' | 'custom';
+import {
+  TValidationRuleType,
+  IValidationRule,
+  TFieldType,
+  IFormFieldConfig,
+  IFormGenerationConfig,
+  IFormData,
+  IValidationResult
+} from '../core/types';
 
-export interface IValidationRule {
-  type: TValidationRuleType;
-  field: string;
-  value?: any;
-  message: string;
-  validator?: (value: any) => boolean; // Для кастомных правил
-}
-
-export type TFieldType = 'text' | 'number' | 'email' | 'url' | 'textarea' | 'select' | 'checkbox' | 'color' | 'file';
-
-export interface IFormFieldConfig {
-  field: string;
-  label: string;
-  type: TFieldType;
-  placeholder?: string;
-  defaultValue?: any;
-  options?: { value: string; label: string }[]; // Для типа 'select'
-  rules?: IValidationRule[];
-}
-
-export interface IFormGenerationConfig {
-  title: string;
-  description?: string;
-  fields: IFormFieldConfig[];
-  submitButtonText?: string;
-  cancelButtonText?: string;
-}
-
-export interface IFormData {
-  [key: string]: any;
-}
-
-export interface IValidationResult {
-  isValid: boolean;
-  errors: Record<string, string[]>;
-}
+// Реэкспорт типов для обратной совместимости
+export type {
+  TValidationRuleType,
+  IValidationRule,
+  TFieldType,
+  IFormFieldConfig,
+  IFormGenerationConfig,
+  IFormData,
+  IValidationResult
+} from '../core/types';
 
 /**
  * Универсальный валидатор
@@ -51,7 +33,7 @@ export class UniversalValidator {
    */
   static validateField(value: any, rules: IValidationRule[]): string[] {
     const errors: string[] = [];
-    
+
     for (const rule of rules) {
       switch (rule.type) {
         case 'required':
@@ -59,13 +41,13 @@ export class UniversalValidator {
             errors.push(rule.message);
           }
           break;
-          
+
         case 'email':
           if (value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
             errors.push(rule.message);
           }
           break;
-          
+
         case 'url':
           if (value) {
             try {
@@ -75,37 +57,37 @@ export class UniversalValidator {
             }
           }
           break;
-          
+
         case 'min':
           if (value !== null && value !== undefined && parseFloat(value) < rule.value) {
             errors.push(rule.message);
           }
           break;
-          
+
         case 'max':
           if (value !== null && value !== undefined && parseFloat(value) > rule.value) {
             errors.push(rule.message);
           }
           break;
-          
+
         case 'minLength':
           if (value && value.length < rule.value) {
             errors.push(rule.message);
           }
           break;
-          
+
         case 'maxLength':
           if (value && value.length > rule.value) {
             errors.push(rule.message);
           }
           break;
-          
+
         case 'pattern':
           if (value && !new RegExp(rule.value).test(value)) {
             errors.push(rule.message);
           }
           break;
-          
+
         case 'custom':
           if (rule.validator && !rule.validator(value)) {
             errors.push(rule.message);
@@ -113,7 +95,7 @@ export class UniversalValidator {
           break;
       }
     }
-    
+
     return errors;
   }
 
@@ -164,7 +146,7 @@ export class FormUtils {
    */
   static initializeFormData(fields: IFormFieldConfig[]): IFormData {
     const formData: IFormData = {};
-    
+
     fields.forEach(field => {
       if (field.defaultValue !== undefined) {
         formData[field.field] = field.defaultValue;
@@ -181,7 +163,7 @@ export class FormUtils {
         }
       }
     });
-    
+
     return formData;
   }
 
@@ -632,7 +614,7 @@ export class BlockFormConfigs {
    */
   static createEditConfig(blockType: string, blockData: IFormData): IFormGenerationConfig {
     const config = this.getConfigForBlockType(blockType);
-    
+
     // Обновляем заголовок и кнопку
     config.title = `Редактирование ${config.title.toLowerCase().replace('настройка ', '')}`;
     config.submitButtonText = 'Сохранить изменения';

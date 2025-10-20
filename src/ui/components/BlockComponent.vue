@@ -11,14 +11,14 @@
     <div class="block-component__content" @click="handleCardClick">
       <!-- Debug info -->
       <div style="font-size: 12px; color: #666; margin-bottom: 10px;">
-        Debug: render={{ JSON.stringify(block.render) }}, 
-        isVue={{ isVueComponent(block.render) }}, 
+        Debug: render={{ JSON.stringify(block.render) }},
+        isVue={{ isVueComponent(block.render) }},
         hasHtml={{ !!getHtmlTemplate(block.render) }}
       </div>
-      
+
       <!-- Vue компонент -->
-      <component 
-        v-if="isVueComponent(block.render)" 
+      <component
+        v-if="isVueComponent(block.render)"
         :is="getVueComponent(block.render)"
         v-bind="block.props"
       />
@@ -27,7 +27,7 @@
       <!-- Fallback -->
       <div v-else>Блок {{ block.type }}</div>
     </div>
-    
+
     <div class="block-component__controls">
       <button @click.stop="handleDelete" class="control-button delete-button" title="Delete">
         ×
@@ -39,13 +39,13 @@
         {{ block.visible ? '👁' : '👁‍🗨' }}
       </button>
     </div>
-    
+
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { IBlock, TBlockId } from '../../core/entities/Block';
+import { IBlock, TBlockId } from '../../core/types';
 import { getHtmlTemplate, getComponentInfo, isVueComponent } from '../../utils/renderHelpers';
 
 // Функция для получения Vue компонента
@@ -88,18 +88,18 @@ const blockStyle = computed(() => {
 const renderedTemplate = computed(() => {
   // Получаем HTML template из render-описания
   const template = getHtmlTemplate(props.block.render);
-  
+
   if (!template) {
     return `<div>Блок ${props.block.type}</div>`;
   }
-  
+
   // Заменяем плейсхолдеры на значения из props
   let processedTemplate = template;
   Object.entries(props.block.props).forEach(([key, value]) => {
     const placeholder = `{{ props.${key} }}`;
     processedTemplate = processedTemplate.replace(new RegExp(placeholder, 'g'), String(value));
   });
-  
+
   return processedTemplate;
 });
 

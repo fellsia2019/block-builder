@@ -1,36 +1,12 @@
-import { IBlockDto, TRenderRef } from '../dto/BlockDto';
-import { IFormGenerationConfig } from './ValidationRule';
-
-// Типы для сущности
-export type TBlockId = string;
-export interface IBlockSettings {
-  [key: string]: any;
-}
-export interface IBlockProps {
-  [key: string]: any;
-}
-export interface IBlockStyle {
-  [key: string]: string | number;
-}
-export interface IBlock {
-  id: TBlockId;
-  type: string;
-  settings: IBlockSettings;
-  props: IBlockProps;
-  style?: IBlockStyle;
-  render?: TRenderRef; // Универсальная ссылка на способ рендера
-  children?: IBlock[];
-  parent?: TBlockId;
-  visible?: boolean;
-  locked?: boolean;
-  formConfig?: IFormGenerationConfig; // Конфигурация для автогенерации форм
-  metadata?: {
-    createdAt: Date;
-    updatedAt: Date;
-    version: number;
-    author?: string;
-  };
-}
+import {
+  IBlock,
+  IBlockSettings,
+  IBlockProps,
+  IBlockStyle,
+  TBlockId,
+  TRenderRef,
+  IFormGenerationConfig
+} from '../types';
 
 /**
  * Доменная сущность блока
@@ -157,10 +133,10 @@ export class BlockEntity {
    */
   removeChild(childId: TBlockId): boolean {
     if (!this._block.children) return false;
-    
+
     const index = this._block.children.findIndex(child => child.id === childId);
     if (index === -1) return false;
-    
+
     this._block.children.splice(index, 1);
     this._updateMetadata();
     return true;
@@ -202,7 +178,7 @@ export class BlockEntity {
         version: 1
       }
     };
-    
+
     return new BlockEntity(clonedBlock);
   }
 

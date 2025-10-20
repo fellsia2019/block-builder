@@ -1,4 +1,4 @@
-import { IBlockDto, ICreateBlockDto, IUpdateBlockDto } from '../../core/dto/BlockDto';
+import { IBlockDto, ICreateBlockDto, IUpdateBlockDto } from '../../core/types';
 import { IBlockRepository } from '../../core/ports/BlockRepository';
 
 /**

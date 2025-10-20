@@ -1,10 +1,7 @@
-import { IBlockDto } from '../core/dto/BlockDto';
+import { TBlock, TBlockWithChildren, TBlockId, IBlockDto } from '../core/types';
 
-// Типы для утилит
-export type TBlock = IBlockDto;
-// Дерево блоков для иерархического представления (дети как узлы)
-export type TBlockWithChildren = Omit<IBlockDto, 'children'> & { children: TBlockWithChildren[] };
-export type TBlockId = string;
+// Реэкспорт типов для обратной совместимости
+export type { TBlock, TBlockWithChildren, TBlockId } from '../core/types';
 
 /**
  * Утилиты для работы с блоками
@@ -40,10 +37,10 @@ export function buildBlockHierarchy(blocks: TBlock[]): TBlockWithChildren[] {
     blocks.map(block => [block.id, { ...(block as Omit<IBlockDto, 'children'>), children: [] }])
   );
   const rootBlocks: TBlockWithChildren[] = [];
-  
+
   blocks.forEach(block => {
     const blockWithChildren = blockMap.get(block.id)!;
-    
+
     if (block.parent) {
       const parent = blockMap.get(block.parent);
       if (parent) {
@@ -54,7 +51,7 @@ export function buildBlockHierarchy(blocks: TBlock[]): TBlockWithChildren[] {
       rootBlocks.push(blockWithChildren);
     }
   });
-  
+
   return rootBlocks;
 }
 
@@ -64,11 +61,11 @@ export function buildBlockHierarchy(blocks: TBlock[]): TBlockWithChildren[] {
 export function getAllChildren(block: TBlock, allBlocks: TBlock[]): TBlock[] {
   const children = allBlocks.filter(b => b.parent === block.id);
   let allChildren = [...children];
-  
+
   children.forEach(child => {
     allChildren = [...allChildren, ...getAllChildren(child, allBlocks)];
   });
-  
+
   return allChildren;
 }
 
@@ -77,9 +74,9 @@ export function getAllChildren(block: TBlock, allBlocks: TBlock[]): TBlock[] {
  */
 export function isChildOf(childBlock: TBlock, parentBlock: TBlock, allBlocks: TBlock[]): boolean {
   if (childBlock.parent === parentBlock.id) return true;
-  
+
   const parent = allBlocks.find(b => b.id === childBlock.parent);
   if (!parent) return false;
-  
+
   return isChildOf(parent, parentBlock, allBlocks);
 }

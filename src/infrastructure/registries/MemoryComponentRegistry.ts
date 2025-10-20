@@ -1,4 +1,4 @@
-import { TComponent } from '../../core/ports/ComponentRegistry';
+import { TComponent } from '../../core/types';
 import { IComponentRegistry } from '../../core/ports/ComponentRegistry';
 
 /**
@@ -12,7 +12,7 @@ export class MemoryComponentRegistry implements IComponentRegistry {
     if (!name || typeof name !== 'string') {
       throw new Error('Component name must be a non-empty string');
     }
-    
+
     if (!component) {
       throw new Error('Component must be provided');
     }

@@ -1,8 +1,8 @@
 <template>
   <div class="block-builder" :class="{ 'is-dragging': isDragging }">
     <div class="block-builder__toolbar">
-      <button 
-        v-for="blockType in availableBlockTypes" 
+      <button
+        v-for="blockType in availableBlockTypes"
         :key="blockType.type"
         @click="addBlock(blockType.type)"
         class="toolbar-button"
@@ -10,8 +10,8 @@
         {{ blockType.label }}
       </button>
     </div>
-    
-    <div 
+
+    <div
       class="block-builder__canvas"
       @drop="handleDrop"
       @dragover="handleDragOver"
@@ -28,9 +28,9 @@
         @card-click="handleCardClick"
       />
     </div>
-    
-    
-    
+
+
+
     <!-- Модальное окно для детальной информации карточки -->
     <CardDetailModal
       :card="selectedCard"
@@ -43,8 +43,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue';
-import { IBlock, TBlockId, IBlockSettings, IBlockProps, IBlockStyle } from '../../core/entities/Block';
-import { TRenderRef } from '../../core/dto/BlockDto';
+import { IBlock, TBlockId, IBlockSettings, IBlockProps, IBlockStyle, TRenderRef } from '../../core/types';
 import { BlockManagementUseCase } from '../../core/use-cases/BlockManagementUseCase';
 import { MemoryBlockRepositoryImpl } from '../../infrastructure/repositories/MemoryBlockRepositoryImpl';
 import BlockComponent from './BlockComponent.vue';
@@ -286,7 +285,7 @@ onUnmounted(() => {
   position: relative;
   overflow: auto;
   background: #fafafa;
-  background-image: 
+  background-image:
     linear-gradient(rgba(0,0,0,.1) 1px, transparent 1px),
     linear-gradient(90deg, rgba(0,0,0,.1) 1px, transparent 1px);
   background-size: 20px 20px;

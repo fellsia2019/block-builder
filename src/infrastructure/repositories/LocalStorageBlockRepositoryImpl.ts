@@ -1,4 +1,4 @@
-import { IBlockDto, ICreateBlockDto, IUpdateBlockDto } from '../../core/dto/BlockDto';
+import { IBlockDto, ICreateBlockDto, IUpdateBlockDto } from '../../core/types';
 import { IBlockRepository } from '../../core/ports/BlockRepository';
 
 /**
@@ -12,7 +12,7 @@ export class LocalStorageBlockRepositoryImpl implements IBlockRepository {
     try {
       const stored = localStorage.getItem(this.storageKey);
       if (!stored) return new Map();
-      
+
       const blocksArray = JSON.parse(stored) as IBlockDto[];
       return new Map(blocksArray.map(block => [block.id, block]));
     } catch (error) {
@@ -46,7 +46,7 @@ export class LocalStorageBlockRepositoryImpl implements IBlockRepository {
     const blocks = this.getBlocksFromStorage();
     blocks.set(id, block);
     this.saveBlocksToStorage(blocks);
-    
+
     return { ...block };
   }
 
@@ -88,7 +88,7 @@ export class LocalStorageBlockRepositoryImpl implements IBlockRepository {
   async update(id: string, updates: IUpdateBlockDto): Promise<IBlockDto> {
     const blocks = this.getBlocksFromStorage();
     const existingBlock = blocks.get(id);
-    
+
     if (!existingBlock) {
       throw new Error(`Block with id ${id} not found`);
     }
@@ -106,7 +106,7 @@ export class LocalStorageBlockRepositoryImpl implements IBlockRepository {
 
     blocks.set(id, updatedBlock);
     this.saveBlocksToStorage(blocks);
-    
+
     return { ...updatedBlock };
   }
 

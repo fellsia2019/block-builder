@@ -1,4 +1,4 @@
-import { TValidationRule, IValidationResult, IFormData } from '../core/entities/ValidationRule';
+import { TValidationRule, IValidationResult, IFormData } from '../core/types';
 
 /**
  * Валидатор для чистого JavaScript
@@ -14,7 +14,7 @@ export class JavaScriptValidator {
 
     for (const rule of rules) {
       const fieldErrors = await this.validateField(data[rule.field], rule);
-      
+
       if (fieldErrors.length > 0) {
         if (!errors[rule.field]) {
           errors[rule.field] = [];
@@ -134,7 +134,7 @@ export class JavaScriptFormGenerator {
    */
   static generateForm(config: any, onSubmit: (data: FormData) => void): string {
     const formId = `form_${Date.now()}`;
-    
+
     let html = `
       <form id="${formId}" class="naberika-form">
         <div class="form-header">
@@ -163,7 +163,7 @@ export class JavaScriptFormGenerator {
 
     // Добавляем стили
     html += this.generateStyles();
-    
+
     // Добавляем JavaScript для валидации
     html += this.generateValidationScript(formId, config.fields, onSubmit);
 
@@ -175,15 +175,15 @@ export class JavaScriptFormGenerator {
    */
   private static generateField(field: any): string {
     const fieldId = `field_${field.field}`;
-    
+
     switch (field.type) {
       case 'textarea':
         return `
           <div class="form-group">
             <label for="${fieldId}">${field.label}</label>
-            <textarea 
-              id="${fieldId}" 
-              name="${field.field}" 
+            <textarea
+              id="${fieldId}"
+              name="${field.field}"
               placeholder="${field.placeholder || ''}"
               class="form-control"
             >${field.defaultValue || ''}</textarea>
@@ -192,7 +192,7 @@ export class JavaScriptFormGenerator {
         `;
 
       case 'select':
-        const options = field.options?.map((opt: { value: string; label: string }) => 
+        const options = field.options?.map((opt: { value: string; label: string }) =>
           `<option value="${opt.value}">${opt.label}</option>`
         ).join('') || '';
         return `
@@ -210,10 +210,10 @@ export class JavaScriptFormGenerator {
         return `
           <div class="form-group">
             <label class="checkbox-label">
-              <input 
-                type="checkbox" 
-                id="${fieldId}" 
-                name="${field.field}" 
+              <input
+                type="checkbox"
+                id="${fieldId}"
+                name="${field.field}"
                 ${field.defaultValue ? 'checked' : ''}
                 class="form-checkbox"
               />
@@ -227,10 +227,10 @@ export class JavaScriptFormGenerator {
         return `
           <div class="form-group">
             <label for="${fieldId}">${field.label}</label>
-            <input 
-              type="color" 
-              id="${fieldId}" 
-              name="${field.field}" 
+            <input
+              type="color"
+              id="${fieldId}"
+              name="${field.field}"
               value="${field.defaultValue || '#000000'}"
               class="form-control"
             />
@@ -242,10 +242,10 @@ export class JavaScriptFormGenerator {
         return `
           <div class="form-group">
             <label for="${fieldId}">${field.label}</label>
-            <input 
-              type="file" 
-              id="${fieldId}" 
-              name="${field.field}" 
+            <input
+              type="file"
+              id="${fieldId}"
+              name="${field.field}"
               class="form-control"
             />
             <div class="field-errors" id="errors_${field.field}"></div>
@@ -256,10 +256,10 @@ export class JavaScriptFormGenerator {
         return `
           <div class="form-group">
             <label for="${fieldId}">${field.label}</label>
-            <input 
-              type="${field.type}" 
-              id="${fieldId}" 
-              name="${field.field}" 
+            <input
+              type="${field.type}"
+              id="${fieldId}"
+              name="${field.field}"
               placeholder="${field.placeholder || ''}"
               value="${field.defaultValue || ''}"
               class="form-control"
@@ -284,39 +284,39 @@ export class JavaScriptFormGenerator {
           border-radius: 8px;
           box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
-        
+
         .form-header h3 {
           margin: 0 0 10px 0;
           color: #333;
         }
-        
+
         .form-header p {
           margin: 0 0 20px 0;
           color: #666;
           font-size: 14px;
         }
-        
+
         .form-group {
           margin-bottom: 20px;
         }
-        
+
         .form-group label {
           display: block;
           margin-bottom: 5px;
           font-weight: 600;
           color: #333;
         }
-        
+
         .checkbox-label {
           display: flex;
           align-items: center;
           cursor: pointer;
         }
-        
+
         .checkbox-label input {
           margin-right: 8px;
         }
-        
+
         .form-control {
           width: 100%;
           padding: 10px;
@@ -325,35 +325,35 @@ export class JavaScriptFormGenerator {
           font-size: 14px;
           transition: border-color 0.2s;
         }
-        
+
         .form-control:focus {
           outline: none;
           border-color: #007bff;
           box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
         }
-        
+
         .form-control.error {
           border-color: #dc3545;
         }
-        
+
         .field-errors {
           margin-top: 5px;
           font-size: 12px;
           color: #dc3545;
         }
-        
+
         .field-errors .error {
           display: block;
           margin-bottom: 2px;
         }
-        
+
         .form-actions {
           display: flex;
           gap: 10px;
           justify-content: flex-end;
           margin-top: 20px;
         }
-        
+
         .btn {
           padding: 10px 20px;
           border: none;
@@ -363,21 +363,21 @@ export class JavaScriptFormGenerator {
           font-weight: 600;
           transition: all 0.2s;
         }
-        
+
         .btn-primary {
           background: #007bff;
           color: white;
         }
-        
+
         .btn-primary:hover {
           background: #0056b3;
         }
-        
+
         .btn-secondary {
           background: #6c757d;
           color: white;
         }
-        
+
         .btn-secondary:hover {
           background: #545b62;
         }
@@ -459,11 +459,11 @@ export class JavaScriptFormGenerator {
           function showErrors(fieldName, errors) {
             const errorContainer = document.getElementById('errors_' + fieldName);
             if (errorContainer) {
-              errorContainer.innerHTML = errors.map(error => 
+              errorContainer.innerHTML = errors.map(error =>
                 '<div class="error">' + error + '</div>'
               ).join('');
             }
-            
+
             const field = form.querySelector('[name="' + fieldName + '"]');
             if (field) {
               field.classList.toggle('error', errors.length > 0);
@@ -476,7 +476,7 @@ export class JavaScriptFormGenerator {
             if (errorContainer) {
               errorContainer.innerHTML = '';
             }
-            
+
             const field = form.querySelector('[name="' + fieldName + '"]');
             if (field) {
               field.classList.remove('error');
@@ -492,7 +492,7 @@ export class JavaScriptFormGenerator {
             for (const field of ${JSON.stringify(fields)}) {
               const value = data[field.field];
               const errors = validateField(field.field, value);
-              
+
               if (errors.length > 0) {
                 showErrors(field.field, errors);
                 isValid = false;
@@ -507,9 +507,9 @@ export class JavaScriptFormGenerator {
           // Обработчик отправки формы
           form.addEventListener('submit', function(e) {
             e.preventDefault();
-            
+
             const { isValid, data } = validateForm();
-            
+
             if (isValid) {
               // Преобразуем данные
               const processedData = {};
@@ -525,7 +525,7 @@ export class JavaScriptFormGenerator {
                   }
                 }
               }
-              
+
               ${onSubmit.toString()}(processedData);
             }
           });
