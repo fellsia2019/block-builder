@@ -6,7 +6,7 @@ const PORT = 3000;
 // Статические файлы
 app.use(express.static('dist'));
 app.use('/dist', express.static(path.join(__dirname, 'dist')));
-app.use('/examples', express.static('src/examples/user'));
+app.use('/examples', express.static('src/examples'));
 app.use('/ui', express.static('src/ui'));
 
 // Middleware для отладки запросов
