@@ -4,8 +4,15 @@ const app = express();
 const PORT = 3000;
 
 // Статические файлы
-app.use(express.static('src/examples'));
 app.use(express.static('dist'));
+app.use('/examples', express.static('src/examples/user'));
+app.use('/package', express.static('src/package'));
+
+// Middleware для отладки запросов
+app.use((req, res, next) => {
+  console.log(`📥 Запрос: ${req.method} ${req.url}`);
+  next();
+});
 
 // Главная страница - выбор примера
 app.get('/', (req, res) => {
@@ -85,16 +92,19 @@ app.get('/', (req, res) => {
         <div class="container">
             <h1>🏗️ Naberika</h1>
             <p>Блочный конструктор с чистой архитектурой</p>
+            <p style="color: #888; font-size: 1rem; margin-top: 10px;">
+                Примеры пользовательских приложений
+            </p>
             
             <div class="examples">
-                <a href="/pure-js-example.html" class="example-card js-card">
-                    <h3>📄 Чистый JavaScript</h3>
-                    <p>Демонстрация работы с HTML шаблонами и чистой архитектурой</p>
+                <a href="/examples/pure-js/index.html" class="example-card js-card">
+                    <h3>📄 Pure JavaScript</h3>
+                    <p>Пользовательское приложение с HTML шаблонами. Показывает, как пользователь настраивает только конфигурацию блоков.</p>
                 </a>
                 
-                <a href="/vue3-example.html" class="example-card vue-card">
-                    <h3>🎨 Vue3 Компоненты</h3>
-                    <p>Демонстрация работы с Vue3 компонентами и реактивностью</p>
+                <a href="/examples/vue3/index.html" class="example-card vue-card">
+                    <h3>🎨 Vue3 с реальными компонентами</h3>
+                    <p>Пользовательское приложение с реальными Vue3 компонентами. Демонстрирует правильное использование пакета.</p>
                 </a>
             </div>
         </div>
@@ -115,4 +125,7 @@ app.listen(PORT, () => {
   console.log(`🚀 Сервер разработки запущен на http://localhost:${PORT}`);
   console.log(`📁 Примеры доступны в папке src/examples/`);
   console.log(`🔧 Для сборки используйте: npm run build`);
+  console.log(`📋 Доступные примеры:`);
+  console.log(`   - http://localhost:${PORT}/src/examples/user/pure-js/index.html`);
+  console.log(`   - http://localhost:${PORT}/src/examples/user/vue3/index.html`);
 });

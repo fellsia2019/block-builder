@@ -34,53 +34,72 @@ npm install naberika
 
 ### Использование
 
-#### HTML шаблоны
-```typescript
-import { 
-  BlockManagementUseCase,
-  MemoryBlockRepositoryImpl,
-  MemoryComponentRegistry,
-  CreateBlockDto
-} from 'naberika';
+#### Vue3 приложение
+```javascript
+// 1. Создайте конфигурацию блоков
+// block-config.js
+import TextBlock from './components/TextBlock.vue'
+import ButtonBlock from './components/ButtonBlock.vue'
 
-// Создание use case с поддержкой Vue3 компонентов
-const blockRepository = new MemoryBlockRepositoryImpl();
-const componentRegistry = new MemoryComponentRegistry();
-const blockManagement = new BlockManagementUseCase(blockRepository, componentRegistry);
-
-// Создание блока с HTML шаблоном
-const createDto: CreateBlockDto = {
-  type: 'text',
-  settings: { fontSize: 16, color: '#333' },
-  props: { content: 'Hello World!' },
-  template: '<div style="font-size: {{ settings.fontSize }}px; color: {{ settings.color }};">{{ props.content }}</div>',
-  position: { x: 100, y: 100 },
-  size: { width: 300, height: 50 }
-};
-
-const block = await blockManagement.createBlock(createDto);
+export const blockConfigs = {
+  text: {
+    title: 'Текстовый блок',
+    component: TextBlock,
+    fields: [
+      {
+        field: 'content',
+        label: 'Текст',
+        type: 'textarea',
+        rules: [{ type: 'required', message: 'Текст обязателен' }]
+      }
+    ]
+  },
+  button: {
+    title: 'Кнопка',
+    component: ButtonBlock,
+    fields: [
+      {
+        field: 'text',
+        label: 'Текст кнопки',
+        type: 'text',
+        rules: [{ type: 'required', message: 'Текст обязателен' }]
+      }
+    ]
+  }
+}
 ```
 
-#### Vue3 компоненты
-```typescript
-// Регистрация Vue3 компонента
-const CustomButton = {
-  name: 'CustomButton',
-  props: ['text', 'variant'],
-  template: '<button :class="`btn btn-${variant}`">{{ text }}</button>'
-};
+```html
+<!-- 2. Используйте в HTML -->
+<script type="module">
+import { Naberika } from 'naberika'
+import { blockConfigs } from './block-config.js'
 
-blockManagement.registerComponent('CustomButton', CustomButton);
+// Пакет автоматически рендерит все UI компоненты
+const naberika = new Naberika({
+  containerId: 'naberika-container',
+  blockConfigs: blockConfigs
+})
+</script>
+```
 
-// Создание блока с Vue3 компонентом
-const vueBlock = await blockManagement.createVueBlock(
-  'button',
-  'CustomButton',
-  { text: 'Click me!', variant: 'primary' },
-  { backgroundColor: '#007bff' },
-  { x: 100, y: 100 },
-  { width: 150, height: 40 }
-);
+#### Pure JavaScript
+```javascript
+// block-config.js
+export const blockConfigs = {
+  text: {
+    title: 'Текстовый блок',
+    template: '<div style="font-size: {{ fontSize }}px; color: {{ color }};">{{ content }}</div>',
+    fields: [
+      {
+        field: 'content',
+        label: 'Текст',
+        type: 'textarea',
+        rules: [{ type: 'required', message: 'Текст обязателен' }]
+      }
+    ]
+  }
+}
 ```
 
 ## 🏗️ Архитектура
@@ -104,45 +123,50 @@ const vueBlock = await blockManagement.createVueBlock(
 
 ## 📋 API
 
-### BlockManagementUseCase
-```typescript
-// Создание блока
-await blockManagement.createBlock(createDto);
+### Naberika (Основной класс)
+```javascript
+// Инициализация пакета
+const naberika = new Naberika({
+  containerId: 'naberika-container',  // ID контейнера для рендеринга
+  blockConfigs: blockConfigs,        // Конфигурация блоков
+  theme: 'light',                    // Тема (light/dark)
+  locale: 'ru'                      // Локализация
+})
 
-// Получение блока
-await blockManagement.getBlock(blockId);
-
-// Обновление блока
-await blockManagement.updateBlock(blockId, updates);
-
-// Перемещение блока
-await blockManagement.moveBlock(blockId, position);
-
-// Удаление блока
-await blockManagement.deleteBlock(blockId);
-
-// Дублирование блока
-await blockManagement.duplicateBlock(blockId);
-
-// Vue3 компоненты
-await blockManagement.registerComponent(name, component);
-await blockManagement.createVueBlock(type, componentName, props, settings, position, size);
-await blockManagement.updateVueComponent(blockId, componentName, componentProps);
+// Пакет автоматически рендерит:
+// - Контролы для добавления блоков
+// - Формы создания/редактирования блоков
+// - Валидацию полей
+// - Модальные окна
+// - UI компоненты
 ```
 
-### DTO
-```typescript
-interface CreateBlockDto {
-  type: string;
-  settings: Record<string, any>;
-  props: Record<string, any>;
-  template?: string; // HTML шаблон
-  component?: string; // Vue3 компонент
-  componentProps?: Record<string, any>; // Пропсы для Vue3
-  position?: { x: number; y: number; z?: number };
-  size?: { width: number; height: number };
-  visible?: boolean;
-  locked?: boolean;
+### Конфигурация блоков
+```javascript
+const blockConfig = {
+  title: 'Название блока',
+  description: 'Описание блока',
+  component: MyVueComponent,        // Vue компонент (для Vue3)
+  template: '<div>{{ content }}</div>', // HTML шаблон (для Pure JS)
+  fields: [
+    {
+      field: 'fieldName',
+      label: 'Название поля',
+      type: 'text' | 'textarea' | 'number' | 'color' | 'select' | 'checkbox' | 'url',
+      placeholder: 'Подсказка',
+      rules: [
+        {
+          type: 'required' | 'email' | 'url' | 'min' | 'max' | 'minLength' | 'maxLength',
+          value?: number,
+          message: 'Сообщение об ошибке'
+        }
+      ],
+      defaultValue: 'Значение по умолчанию',
+      options?: [
+        { value: 'value', label: 'Label' }
+      ]
+    }
+  ]
 }
 ```
 
@@ -178,10 +202,15 @@ npm run start
 ## 📚 Примеры
 
 Смотрите папку `src/examples/` для примеров использования:
-- `simple-example.ts` - базовый пример с Vue3 компонентами
-- `vue3-components-example.ts` - расширенный пример Vue3 компонентов
-- `index.html` - интерактивная демонстрация
-- `vue3-example.vue` - Vue3 компонент
+
+### Пользовательские приложения (`src/examples/user/`)
+- **Vue3 пример** (`vue3/`):
+  - `index.html` - основное приложение с Vue3 компонентами
+  - `block-config.js` - конфигурация блоков с реальными Vue компонентами
+  - `components/` - папка с Vue компонентами (TextBlock, ImageBlock, ButtonBlock, CardListBlock, HeroBlock)
+- **Pure JS пример** (`pure-js/`):
+  - `index.html` - приложение на чистом JavaScript
+  - `block-config.js` - конфигурация с HTML шаблонами
 
 ## 🎯 Преимущества чистой архитектуры
 

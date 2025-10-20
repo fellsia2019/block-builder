@@ -74,7 +74,7 @@ const blockStyle = computed(() => {
     width: `${props.block.size?.width || 200}px`,
     height: `${props.block.size?.height || 100}px`,
     zIndex: String(props.block.position?.z || 1),
-    opacity: props.block.visible ? 1 : 0.5,
+    opacity: props.block.visible ? '1' : '0.5',
     pointerEvents: props.block.locked ? 'none' : 'auto'
   };
 
@@ -106,10 +106,20 @@ const handleClick = () => {
 };
 
 const handleCardClick = (event: MouseEvent) => {
-  // Проверяем, кликнули ли по карточке внутри блока
+  // Останавливаем всплытие, чтобы не переключать выделение блока
+  event.stopPropagation();
+
   const target = event.target as HTMLElement;
-  const cardItem = target.closest('.card-item');
-  
+
+  // Предотвращаем переход по ссылке внутри карточки, откроем её из модалки
+  const clickedAnchor = target.closest('a');
+  if (clickedAnchor && clickedAnchor.classList.contains('card-button')) {
+    event.preventDefault();
+  }
+
+  // Поддерживаем оба варианта класса карточки: .card-item и .card
+  const cardItem = (target.closest('.card-item') || target.closest('.card')) as HTMLElement | null;
+
   if (cardItem && props.block.type === 'cardlist') {
     // Извлекаем данные карточки из DOM
     const title = cardItem.querySelector('h3')?.textContent || '';
@@ -117,15 +127,9 @@ const handleCardClick = (event: MouseEvent) => {
     const button = cardItem.querySelector('a')?.textContent || '';
     const link = cardItem.querySelector('a')?.getAttribute('href') || '';
     const image = cardItem.querySelector('img')?.getAttribute('src') || '';
-    
-    const card = {
-      title,
-      text,
-      button,
-      link,
-      image
-    };
-    
+
+    const card = { title, text, button, link, image };
+
     emit('card-click', card);
   }
 };

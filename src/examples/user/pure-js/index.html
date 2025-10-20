@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мое приложение с Naberika (Pure JS)</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background: #f5f5f5;
+        }
+        .app {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: #f8f9fa;
+        }
+        .app-header {
+            background: white;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .app-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        .app-description {
+            color: #666;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <div class="app-header">
+            <h1>Мое приложение с Naberika (Pure JS)</h1>
+            <div class="app-description">
+                Это пример пользовательского приложения на чистом JavaScript. 
+                Пользователь только инициализирует пакет с конфигурацией блоков.
+                Все формы, валидация, модальные окна и UI контролы рендерятся автоматически пакетом.
+            </div>
+        </div>
+        
+        <div class="app-content">
+            <!-- Naberika автоматически рендерит все контролы и UI -->
+            <div class="naberika-container" id="naberika-container">
+                <!-- Здесь будет рендериться весь UI от пакета -->
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Импортируем конфигурацию блоков
+        import { blockConfigs } from './block-config.js';
+        
+        // Импортируем настоящий пакет Naberika
+        import { Naberika } from '/package/index.js';
+        
+        // ПРАВИЛЬНОЕ использование пакета Naberika
+        // Пользователь только инициализирует пакет с конфигурацией
+        // Все UI (формы, контролы, модальные окна) рендерится пакетом
+        
+        // Инициализация пакета
+        const naberika = new Naberika({
+            containerId: 'naberika-container',
+            blockConfigs: blockConfigs,
+            // Дополнительные настройки
+            theme: 'light',
+            locale: 'ru'
+        });
+        
+        console.log('✅ Naberika инициализирован с конфигурацией пользователя (Pure JS)');
+    </script>
+</body>
+</html>
