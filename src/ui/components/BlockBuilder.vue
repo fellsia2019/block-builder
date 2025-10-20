@@ -21,8 +21,6 @@
         v-for="block in blocks"
         :key="block.id"
         :block="block"
-        :selected="selectedBlocks.includes(block.id)"
-        @select="selectBlock"
         @update="updateBlock"
         @delete="deleteBlock"
         @drag-start="handleDragStart"
@@ -31,13 +29,7 @@
       />
     </div>
     
-    <div v-if="selectedBlocks.length > 0" class="block-builder__properties">
-      <h3>Properties</h3>
-      <BlockProperties
-        :block="selectedBlock"
-        @update="updateBlockProperties"
-      />
-    </div>
+    
     
     <!-- Модальное окно для детальной информации карточки -->
     <CardDetailModal
@@ -94,7 +86,6 @@ const blockService = new BlockService(blockRepository);
 
 // Состояние
 const blocks = ref<Block[]>([]);
-const selectedBlocks = ref<BlockId[]>([]);
 const isDragging = ref(false);
 const dragStartPosition = ref<{ x: number; y: number } | null>(null);
 const showCardModal = ref(false);
@@ -126,12 +117,6 @@ const availableBlockTypes = ref<BlockType[]>([
 ]);
 
 // Вычисляемые свойства
-const selectedBlock = computed(() => {
-  if (selectedBlocks.value.length === 1) {
-    return blocks.value.find(block => block.id === selectedBlocks.value[0]);
-  }
-  return null;
-});
 
 // Методы
 const loadBlocks = async () => {
@@ -153,17 +138,10 @@ const addBlock = async (type: string) => {
   });
 
   blocks.value.push(blockEntity.toJSON());
-  selectBlock(blockEntity.id);
   emit('block-added', blockEntity.toJSON());
 };
 
-const selectBlock = (blockId: BlockId) => {
-  if (selectedBlocks.value.includes(blockId)) {
-    selectedBlocks.value = selectedBlocks.value.filter(id => id !== blockId);
-  } else {
-    selectedBlocks.value.push(blockId);
-  }
-};
+// Удалено: логика выбора блоков
 
 const updateBlock = async (blockId: BlockId, updates: Partial<Block>) => {
   const blockEntity = await blockService.getBlock(blockId);
@@ -198,7 +176,6 @@ const deleteBlock = async (blockId: BlockId) => {
   const success = await blockService.deleteBlock(blockId);
   if (success) {
     blocks.value = blocks.value.filter(block => block.id !== blockId);
-    selectedBlocks.value = selectedBlocks.value.filter(id => id !== blockId);
     emit('block-deleted', blockId);
   }
 };
@@ -234,11 +211,8 @@ const handleDragOver = (event: DragEvent) => {
   event.preventDefault();
 };
 
-const handleCanvasClick = (event: MouseEvent) => {
-  // Снимаем выделение при клике на пустое место
-  if (event.target === event.currentTarget) {
-    selectedBlocks.value = [];
-  }
+const handleCanvasClick = (_event: MouseEvent) => {
+  // Выбор блоков не используется
 };
 
 // Обработчики для модального окна карточки
@@ -257,12 +231,8 @@ const handleLinkClick = (link: string) => {
   window.open(link, '_blank');
 };
 
-// Обработка клавиатуры
-const handleKeyDown = (event: KeyboardEvent) => {
-  if (event.key === 'Delete' && selectedBlocks.value.length > 0) {
-    selectedBlocks.value.forEach(blockId => deleteBlock(blockId));
-  }
-};
+// Обработка клавиатуры: удаление выделенных блоков удалено
+const handleKeyDown = (_event: KeyboardEvent) => {};
 
 // Жизненный цикл
 onMounted(() => {

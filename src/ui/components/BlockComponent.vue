@@ -2,7 +2,6 @@
   <div
     class="block-component"
     :class="{
-      'is-selected': selected,
       'is-dragging': isDragging,
       'is-locked': block.locked,
       'is-hidden': !block.visible
@@ -18,7 +17,7 @@
       <div v-html="renderedTemplate"></div>
     </div>
     
-    <div v-if="selected" class="block-component__controls">
+    <div class="block-component__controls">
       <button @click.stop="handleDelete" class="control-button delete-button" title="Delete">
         ×
       </button>
@@ -45,13 +44,11 @@ import { Block, BlockId, BlockPosition, BlockSize } from '../../domain/types';
 
 interface Props {
   block: Block;
-  selected: boolean;
 }
 
 const props = defineProps<Props>();
 
 const emit = defineEmits<{
-  select: [blockId: BlockId];
   update: [blockId: BlockId, updates: Partial<Block>];
   delete: [blockId: BlockId];
   'drag-start': [blockId: BlockId, event: DragEvent];
@@ -101,9 +98,7 @@ const renderedTemplate = computed(() => {
 });
 
 // Методы
-const handleClick = () => {
-  emit('select', props.block.id);
-};
+const handleClick = () => {};
 
 const handleCardClick = (event: MouseEvent) => {
   // Останавливаем всплытие, чтобы не переключать выделение блока

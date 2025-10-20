@@ -2,11 +2,9 @@
   <div 
     class="block-item" 
     :class="{ 
-      'selected': isSelected, 
       'locked': block.locked,
       'hidden': !block.visible 
     }"
-    @click="selectBlock"
   >
     <!-- Заголовок блока с кнопками управления -->
     <div class="block-header">
@@ -17,7 +15,7 @@
         <span v-if="!block.visible" class="hidden-icon">👁️‍🗨️</span>
       </div>
       
-      <div class="block-controls" v-if="isSelected">
+      <div class="block-controls">
         <button 
           class="control-btn edit-btn" 
           @click.stop="editBlock"
@@ -74,11 +72,9 @@ import { Block } from '../../core/entities/Block';
 
 interface Props {
   block: Block;
-  isSelected: boolean;
 }
 
 interface Emits {
-  (e: 'select', blockId: string): void;
   (e: 'edit', block: Block): void;
   (e: 'delete', blockId: string): void;
   (e: 'move-up', blockId: string): void;
@@ -108,9 +104,7 @@ const renderedContent = computed(() => {
   return content;
 });
 
-const selectBlock = () => {
-  emit('select', props.block.id);
-};
+// Выбор блоков удален
 
 const editBlock = () => {
   emit('edit', props.block);

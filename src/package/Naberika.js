@@ -10,7 +10,6 @@ export class Naberika {
         this.theme = options.theme || 'light';
         this.locale = options.locale || 'ru';
         this.blocks = [];
-        this.selectedBlocks = [];
         this.init();
     }
 
@@ -42,7 +41,6 @@ export class Naberika {
                 
                 <div class="naberika-stats">
                     <p>Всего блоков: <span id="blocks-count">0</span></p>
-                    <p>Выбрано блоков: <span id="selected-count">0</span></p>
                 </div>
                 
                 <div class="naberika-blocks" id="naberika-blocks">
@@ -175,11 +173,7 @@ export class Naberika {
                 box-shadow: 0 4px 15px rgba(0, 123, 255, 0.2);
             }
             
-            .naberika-block.selected {
-                border-color: #28a745;
-                background: rgba(40, 167, 69, 0.1);
-                box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.2);
-            }
+            
             
             .naberika-block.locked {
                 border-color: #dc3545;
@@ -622,20 +616,12 @@ export class Naberika {
     deleteBlock(blockId) {
         if (confirm('Удалить этот блок?')) {
             this.blocks = this.blocks.filter(block => block.id !== blockId);
-            this.selectedBlocks = this.selectedBlocks.filter(id => id !== blockId);
             this.renderBlocks();
             console.log('🗑️ Блок удален:', blockId);
         }
     }
 
-    selectBlock(blockId) {
-                if (this.selectedBlocks.includes(blockId)) {
-                    this.selectedBlocks = this.selectedBlocks.filter(id => id !== blockId);
-                } else {
-                    this.selectedBlocks.push(blockId);
-                }
-                this.renderBlocks();
-            }
+    
 
     clearAllBlocks() {
         this.blocks = [];
@@ -648,7 +634,7 @@ export class Naberika {
         if (!blocksContainer) return;
         
         blocksContainer.innerHTML = this.blocks.map(block => `
-            <div class="naberika-block ${this.selectedBlocks.includes(block.id) ? 'selected' : ''} ${block.locked ? 'locked' : ''} ${!block.visible ? 'hidden' : ''}" onclick="naberika.selectBlock('${block.id}')">
+            <div class="naberika-block ${block.locked ? 'locked' : ''} ${!block.visible ? 'hidden' : ''}">
                 <div class="naberika-block-header">
                     <div class="naberika-block-info">
                         <span class="naberika-block-type">${block.type}</span>
@@ -671,7 +657,6 @@ export class Naberika {
         
         // Обновляем статистику
         document.getElementById('blocks-count').textContent = this.blocks.length;
-        document.getElementById('selected-count').textContent = this.selectedBlocks.length;
         
         // Инициализируем Vue компоненты
         this.initializeVueComponents();
