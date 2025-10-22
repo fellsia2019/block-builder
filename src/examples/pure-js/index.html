@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Мое приложение с BlockBuilder (Pure JS)</title>
+    
+    <!-- Swiper CSS для слайдера -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
+    
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -312,6 +316,90 @@
                 }
             }
         });
+    </script>
+    
+    <!-- Swiper JS для слайдера -->
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    
+    <script>
+        // ===== ПОЛЬЗОВАТЕЛЬСКАЯ ЛОГИКА ДЛЯ ИНИЦИАЛИЗАЦИИ SWIPER =====
+        // Это код пользователя, НЕ пакета!
+        
+        // MutationObserver для отслеживания добавления новых слайдеров
+        const initSwiper = function(swiperElement) {
+            if (swiperElement.swiper) {
+                // Swiper уже инициализирован
+                return;
+            }
+            
+            const configAttr = swiperElement.getAttribute('data-swiper-config');
+            let config = {};
+            
+            if (configAttr) {
+                try {
+                    config = JSON.parse(configAttr);
+                } catch (e) {
+                    console.error('Ошибка парсинга конфигурации Swiper:', e);
+                }
+            }
+            
+            // Инициализируем Swiper с настройками
+            new Swiper(swiperElement, {
+                slidesPerView: 1,
+                spaceBetween: config.spaceBetween || 30,
+                loop: config.loop !== undefined ? config.loop : true,
+                autoplay: config.autoplay ? {
+                    delay: config.autoplayDelay || 3000,
+                    disableOnInteraction: false,
+                } : false,
+                pagination: {
+                    el: swiperElement.querySelector('.swiper-pagination'),
+                    clickable: true,
+                    dynamicBullets: true,
+                },
+                navigation: {
+                    nextEl: swiperElement.querySelector('.swiper-button-next'),
+                    prevEl: swiperElement.querySelector('.swiper-button-prev'),
+                },
+                effect: 'slide',
+                grabCursor: true,
+            });
+        };
+        
+        // Инициализируем все существующие слайдеры
+        const initAllSwipers = function() {
+            document.querySelectorAll('.swiper').forEach(initSwiper);
+        };
+        
+        // Создаём наблюдатель за изменениями DOM
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                mutation.addedNodes.forEach(function(node) {
+                    if (node.nodeType === 1) { // Element node
+                        // Проверяем сам элемент
+                        if (node.classList && node.classList.contains('swiper')) {
+                            initSwiper(node);
+                        }
+                        // Проверяем дочерние элементы
+                        if (node.querySelectorAll) {
+                            node.querySelectorAll('.swiper').forEach(initSwiper);
+                        }
+                    }
+                });
+            });
+        });
+        
+        // Запускаем наблюдение за изменениями в DOM
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+        
+        // Инициализируем слайдеры при загрузке страницы
+        document.addEventListener('DOMContentLoaded', initAllSwipers);
+        
+        // Также вызываем инициализацию после небольшой задержки на случай динамической загрузки
+        setTimeout(initAllSwipers, 500);
     </script>
 </body>
 </html>

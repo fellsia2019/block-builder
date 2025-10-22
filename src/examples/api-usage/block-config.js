@@ -43,10 +43,9 @@ export const blockConfigs = {
       {
         field: 'src',
         label: 'URL изображения',
-        type: 'url',
+        type: 'text',
         rules: [
-          { type: 'required', message: 'URL изображения обязателен' },
-          { type: 'url', message: 'Введите корректный URL' }
+          { type: 'required', message: 'URL изображения обязателен' }
         ]
       },
       {

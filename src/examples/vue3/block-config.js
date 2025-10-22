@@ -10,6 +10,7 @@ import ImageBlock from './components/ImageBlock.js'
 import ButtonBlock from './components/ButtonBlock.js'
 import CardListBlock from './components/CardListBlock.js'
 import HeroBlock from './components/HeroBlock.js'
+import GallerySliderBlock from './components/GallerySliderBlock.js'
 
 export const blockConfigs = {
   text: {
@@ -84,13 +85,12 @@ export const blockConfigs = {
       {
         field: 'src',
         label: 'URL изображения',
-        type: 'url',
+        type: 'text',
         placeholder: 'https://example.com/image.jpg',
         rules: [
-          { type: 'required', message: 'URL изображения обязателен' },
-          { type: 'url', message: 'Введите корректный URL' }
+          { type: 'required', message: 'URL изображения обязателен' }
         ],
-        defaultValue: ''
+        defaultValue: '../static-files/img/1364537351_peyzazhi-na-rabochiy-stol-1.jpeg'
       },
       {
         field: 'alt',
@@ -241,12 +241,12 @@ export const blockConfigs = {
       {
         field: 'card1_image',
         label: 'Карточка 1 - Изображение',
-        type: 'url',
+        type: 'text',
         placeholder: 'https://example.com/image.jpg',
         rules: [
           { type: 'required', message: 'Изображение обязательно' }
         ],
-        defaultValue: 'https://i.pinimg.com/736x/ca/9a/12/ca9a123b7269fba0574726629bad42b9.jpg'
+        defaultValue: '../static-files/img/fwfw.jpg'
       },
       {
         field: 'card2_title',
@@ -291,12 +291,12 @@ export const blockConfigs = {
       {
         field: 'card2_image',
         label: 'Карточка 2 - Изображение',
-        type: 'url',
+        type: 'text',
         placeholder: 'https://example.com/image.jpg',
         rules: [
           { type: 'required', message: 'Изображение обязательно' }
         ],
-        defaultValue: 'https://i.pinimg.com/736x/ca/9a/12/ca9a123b7269fba0574726629bad42b9.jpg'
+        defaultValue: '../static-files/img/fwfw.jpg'
       },
       {
         field: 'card3_title',
@@ -341,12 +341,12 @@ export const blockConfigs = {
       {
         field: 'card3_image',
         label: 'Карточка 3 - Изображение',
-        type: 'url',
+        type: 'text',
         placeholder: 'https://example.com/image.jpg',
         rules: [
           { type: 'required', message: 'Изображение обязательно' }
         ],
-        defaultValue: 'https://i.pinimg.com/736x/ca/9a/12/ca9a123b7269fba0574726629bad42b9.jpg'
+        defaultValue: '../static-files/img/fwfw.jpg'
       },
       {
         field: 'cardBackground',
@@ -501,6 +501,180 @@ export const blockConfigs = {
         label: 'Показать декорации',
         type: 'checkbox',
         defaultValue: true
+      }
+    ]
+  },
+
+  gallerySlider: {
+    title: 'Галерея со слайдером',
+    description: 'Слайдер изображений с использованием Swiper.js',
+    render: {
+      kind: 'component',
+      framework: 'vue',
+      component: GallerySliderBlock
+    },
+    fields: [
+      {
+        field: 'title',
+        label: 'Заголовок галереи',
+        type: 'text',
+        placeholder: 'Галерея изображений',
+        rules: [
+          { type: 'required', message: 'Заголовок обязателен' }
+        ],
+        defaultValue: 'Галерея изображений'
+      },
+      {
+        field: 'image1_url',
+        label: 'Изображение 1 - URL',
+        type: 'text',
+        placeholder: 'https://example.com/image1.jpg',
+        rules: [
+          { type: 'required', message: 'URL изображения обязателен' }
+        ],
+        defaultValue: '../static-files/img/fwfw.jpg'
+      },
+      {
+        field: 'image1_title',
+        label: 'Изображение 1 - Заголовок',
+        type: 'text',
+        placeholder: 'Заголовок изображения',
+        rules: [
+          { type: 'required', message: 'Заголовок обязателен' }
+        ],
+        defaultValue: 'Изображение 1'
+      },
+      {
+        field: 'image1_description',
+        label: 'Изображение 1 - Описание',
+        type: 'textarea',
+        placeholder: 'Описание изображения',
+        rules: [
+          { type: 'required', message: 'Описание обязательно' }
+        ],
+        defaultValue: 'Описание первого изображения'
+      },
+      {
+        field: 'image2_url',
+        label: 'Изображение 2 - URL',
+        type: 'text',
+        placeholder: 'https://example.com/image2.jpg',
+        rules: [
+          { type: 'required', message: 'URL изображения обязателен' }
+        ],
+        defaultValue: '../static-files/img/spanch.jpg'
+      },
+      {
+        field: 'image2_title',
+        label: 'Изображение 2 - Заголовок',
+        type: 'text',
+        placeholder: 'Заголовок изображения',
+        rules: [
+          { type: 'required', message: 'Заголовок обязателен' }
+        ],
+        defaultValue: 'Изображение 2'
+      },
+      {
+        field: 'image2_description',
+        label: 'Изображение 2 - Описание',
+        type: 'textarea',
+        placeholder: 'Описание изображения',
+        rules: [
+          { type: 'required', message: 'Описание обязательно' }
+        ],
+        defaultValue: 'Описание второго изображения'
+      },
+      {
+        field: 'image3_url',
+        label: 'Изображение 3 - URL',
+        type: 'text',
+        placeholder: 'https://example.com/image3.jpg',
+        rules: [
+          { type: 'required', message: 'URL изображения обязателен' }
+        ],
+        defaultValue: '../static-files/img/мэдвэд.jpg'
+      },
+      {
+        field: 'image3_title',
+        label: 'Изображение 3 - Заголовок',
+        type: 'text',
+        placeholder: 'Заголовок изображения',
+        rules: [
+          { type: 'required', message: 'Заголовок обязателен' }
+        ],
+        defaultValue: 'Изображение 3'
+      },
+      {
+        field: 'image3_description',
+        label: 'Изображение 3 - Описание',
+        type: 'textarea',
+        placeholder: 'Описание изображения',
+        rules: [
+          { type: 'required', message: 'Описание обязательно' }
+        ],
+        defaultValue: 'Описание третьего изображения'
+      },
+      {
+        field: 'image4_url',
+        label: 'Изображение 4 - URL',
+        type: 'text',
+        placeholder: 'https://example.com/image4.jpg',
+        rules: [
+          { type: 'required', message: 'URL изображения обязателен' }
+        ],
+        defaultValue: '../static-files/img/Квантовое_4D-кодирование_картинка.jpg'
+      },
+      {
+        field: 'image4_title',
+        label: 'Изображение 4 - Заголовок',
+        type: 'text',
+        placeholder: 'Заголовок изображения',
+        rules: [
+          { type: 'required', message: 'Заголовок обязателен' }
+        ],
+        defaultValue: 'Изображение 4'
+      },
+      {
+        field: 'image4_description',
+        label: 'Изображение 4 - Описание',
+        type: 'textarea',
+        placeholder: 'Описание изображения',
+        rules: [
+          { type: 'required', message: 'Описание обязательно' }
+        ],
+        defaultValue: 'Описание четвёртого изображения'
+      },
+      {
+        field: 'autoplay',
+        label: 'Автоматическая прокрутка',
+        type: 'checkbox',
+        defaultValue: true
+      },
+      {
+        field: 'autoplayDelay',
+        label: 'Задержка автопрокрутки (мс)',
+        type: 'number',
+        rules: [
+          { type: 'min', value: 1000, message: 'Минимум 1000 мс' },
+          { type: 'max', value: 10000, message: 'Максимум 10000 мс' }
+        ],
+        defaultValue: 3000
+      },
+      {
+        field: 'loop',
+        label: 'Бесконечная прокрутка',
+        type: 'checkbox',
+        defaultValue: true
+      },
+      {
+        field: 'spaceBetween',
+        label: 'Отступ между слайдами (px)',
+        type: 'number',
+        rules: [
+          { type: 'min', value: 0, message: 'Минимум 0 px' },
+          { type: 'max', value: 100, message: 'Максимум 100 px' }
+        ],
+        defaultValue: 30
       }
     ]
   }

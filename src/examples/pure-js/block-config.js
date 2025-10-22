@@ -112,13 +112,12 @@ export const blockConfigs = {
       {
         field: 'src',
         label: 'URL изображения',
-        type: 'url',
+        type: 'text',
         placeholder: 'https://example.com/image.jpg',
         rules: [
-          { type: 'required', message: 'URL изображения обязателен' },
-          { type: 'url', message: 'Введите корректный URL' }
+          { type: 'required', message: 'URL изображения обязателен' }
         ],
-        defaultValue: ''
+        defaultValue: '../static-files/img/1364537351_peyzazhi-na-rabochiy-stol-1.jpeg'
       },
       {
         field: 'alt',
@@ -303,12 +302,12 @@ export const blockConfigs = {
       {
         field: 'card1_image',
         label: 'Карточка 1 - Изображение',
-        type: 'url',
+        type: 'text',
         placeholder: 'https://example.com/image.jpg',
         rules: [
           { type: 'required', message: 'Изображение обязательно' }
         ],
-        defaultValue: 'https://i.pinimg.com/736x/ca/9a/12/ca9a123b7269fba0574726629bad42b9.jpg'
+        defaultValue: '../static-files/img/fwfw.jpg'
       },
       {
         field: 'card2_title',
@@ -353,12 +352,12 @@ export const blockConfigs = {
       {
         field: 'card2_image',
         label: 'Карточка 2 - Изображение',
-        type: 'url',
+        type: 'text',
         placeholder: 'https://example.com/image.jpg',
         rules: [
           { type: 'required', message: 'Изображение обязательно' }
         ],
-        defaultValue: 'https://i.pinimg.com/736x/ca/9a/12/ca9a123b7269fba0574726629bad42b9.jpg'
+        defaultValue: '../static-files/img/fwfw.jpg'
       },
       {
         field: 'card3_title',
@@ -403,12 +402,12 @@ export const blockConfigs = {
       {
         field: 'card3_image',
         label: 'Карточка 3 - Изображение',
-        type: 'url',
+        type: 'text',
         placeholder: 'https://example.com/image.jpg',
         rules: [
           { type: 'required', message: 'Изображение обязательно' }
         ],
-        defaultValue: 'https://i.pinimg.com/736x/ca/9a/12/ca9a123b7269fba0574726629bad42b9.jpg'
+        defaultValue: '../static-files/img/fwfw.jpg'
       },
       {
         field: 'cardBackground',
@@ -462,6 +461,223 @@ export const blockConfigs = {
           { type: 'max', value: 50, message: 'Максимальный отступ: 50px' }
         ],
         defaultValue: 16
+      }
+    ]
+  },
+
+  gallerySlider: {
+    title: 'Галерея со слайдером',
+    description: 'Слайдер изображений с использованием Swiper.js',
+    template: (props) => {
+      const title = props.title || '';
+      const autoplay = props.autoplay !== 'false' && props.autoplay !== false;
+      const autoplayDelay = parseInt(props.autoplayDelay || '3000', 10);
+      const loop = props.loop !== 'false' && props.loop !== false;
+      const spaceBetween = parseInt(props.spaceBetween || '30', 10);
+
+      const slides = [
+        { url: props.image1_url, title: props.image1_title, description: props.image1_description },
+        { url: props.image2_url, title: props.image2_title, description: props.image2_description },
+        { url: props.image3_url, title: props.image3_title, description: props.image3_description },
+        { url: props.image4_url, title: props.image4_title, description: props.image4_description }
+      ].filter(s => s && s.url && s.title);
+
+      const swiperId = `swiper-${Math.random().toString(36).substr(2, 9)}`;
+      const swiperData = JSON.stringify({ autoplay, autoplayDelay, loop, spaceBetween }).replace(/"/g, '&quot;');
+
+      const slidesHtml = slides.map(slide => `
+        <div class="swiper-slide">
+          <div style="position: relative; background: white;">
+            <img src="${slide.url}" alt="${slide.title}" style="width: 100%; height: 400px; object-fit: cover; display: block;" />
+            <div style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); padding: 30px 20px 20px; color: white;">
+              <h3 style="margin: 0 0 8px 0; font-size: 20px; font-weight: 600;">${slide.title}</h3>
+              <p style="margin: 0; font-size: 14px; opacity: 0.9;">${slide.description}</p>
+            </div>
+          </div>
+        </div>
+      `).join('');
+
+      return `
+        <div class="gallery-slider-block" style="padding: 20px; background: #f8f9fa; border-radius: 8px;">
+          ${title ? `<h2 style="text-align: center; margin-bottom: 30px; font-size: 28px; font-weight: 700; color: #333;">${title}</h2>` : ''}
+          
+          <div id="${swiperId}" class="swiper" data-swiper-config='${swiperData}' style="width: 100%; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+            <div class="swiper-wrapper">
+              ${slidesHtml}
+            </div>
+            
+            <!-- Navigation -->
+            <div class="swiper-button-next" style="color: white;"></div>
+            <div class="swiper-button-prev" style="color: white;"></div>
+            
+            <!-- Pagination -->
+            <div class="swiper-pagination"></div>
+          </div>
+        </div>
+      `;
+    },
+    fields: [
+      {
+        field: 'title',
+        label: 'Заголовок галереи',
+        type: 'text',
+        placeholder: 'Галерея изображений',
+        rules: [
+          { type: 'required', message: 'Заголовок обязателен' }
+        ],
+        defaultValue: 'Галерея изображений'
+      },
+      {
+        field: 'image1_url',
+        label: 'Изображение 1 - URL',
+        type: 'text',
+        placeholder: 'https://example.com/image1.jpg',
+        rules: [
+          { type: 'required', message: 'URL изображения обязателен' }
+        ],
+        defaultValue: '../static-files/img/fwfw.jpg'
+      },
+      {
+        field: 'image1_title',
+        label: 'Изображение 1 - Заголовок',
+        type: 'text',
+        placeholder: 'Заголовок изображения',
+        rules: [
+          { type: 'required', message: 'Заголовок обязателен' }
+        ],
+        defaultValue: 'Изображение 1'
+      },
+      {
+        field: 'image1_description',
+        label: 'Изображение 1 - Описание',
+        type: 'textarea',
+        placeholder: 'Описание изображения',
+        rules: [
+          { type: 'required', message: 'Описание обязательно' }
+        ],
+        defaultValue: 'Описание первого изображения в галерее'
+      },
+      {
+        field: 'image2_url',
+        label: 'Изображение 2 - URL',
+        type: 'text',
+        placeholder: 'https://example.com/image2.jpg',
+        rules: [
+          { type: 'required', message: 'URL изображения обязателен' }
+        ],
+        defaultValue: '../static-files/img/spanch.jpg'
+      },
+      {
+        field: 'image2_title',
+        label: 'Изображение 2 - Заголовок',
+        type: 'text',
+        placeholder: 'Заголовок изображения',
+        rules: [
+          { type: 'required', message: 'Заголовок обязателен' }
+        ],
+        defaultValue: 'Изображение 2'
+      },
+      {
+        field: 'image2_description',
+        label: 'Изображение 2 - Описание',
+        type: 'textarea',
+        placeholder: 'Описание изображения',
+        rules: [
+          { type: 'required', message: 'Описание обязательно' }
+        ],
+        defaultValue: 'Описание второго изображения в галерее'
+      },
+      {
+        field: 'image3_url',
+        label: 'Изображение 3 - URL',
+        type: 'text',
+        placeholder: 'https://example.com/image3.jpg',
+        rules: [
+          { type: 'required', message: 'URL изображения обязателен' }
+        ],
+        defaultValue: '../static-files/img/мэдвэд.jpg'
+      },
+      {
+        field: 'image3_title',
+        label: 'Изображение 3 - Заголовок',
+        type: 'text',
+        placeholder: 'Заголовок изображения',
+        rules: [
+          { type: 'required', message: 'Заголовок обязателен' }
+        ],
+        defaultValue: 'Изображение 3'
+      },
+      {
+        field: 'image3_description',
+        label: 'Изображение 3 - Описание',
+        type: 'textarea',
+        placeholder: 'Описание изображения',
+        rules: [
+          { type: 'required', message: 'Описание обязательно' }
+        ],
+        defaultValue: 'Описание третьего изображения в галерее'
+      },
+      {
+        field: 'image4_url',
+        label: 'Изображение 4 - URL',
+        type: 'text',
+        placeholder: 'https://example.com/image4.jpg',
+        rules: [
+          { type: 'required', message: 'URL изображения обязателен' }
+        ],
+        defaultValue: '../static-files/img/Квантовое_4D-кодирование_картинка.jpg'
+      },
+      {
+        field: 'image4_title',
+        label: 'Изображение 4 - Заголовок',
+        type: 'text',
+        placeholder: 'Заголовок изображения',
+        rules: [
+          { type: 'required', message: 'Заголовок обязателен' }
+        ],
+        defaultValue: 'Изображение 4'
+      },
+      {
+        field: 'image4_description',
+        label: 'Изображение 4 - Описание',
+        type: 'textarea',
+        placeholder: 'Описание изображения',
+        rules: [
+          { type: 'required', message: 'Описание обязательно' }
+        ],
+        defaultValue: 'Описание четвёртого изображения в галерее'
+      },
+      {
+        field: 'autoplay',
+        label: 'Автоматическая прокрутка',
+        type: 'checkbox',
+        defaultValue: true
+      },
+      {
+        field: 'autoplayDelay',
+        label: 'Задержка автопрокрутки (мс)',
+        type: 'number',
+        rules: [
+          { type: 'min', value: 1000, message: 'Минимум 1000 мс' },
+          { type: 'max', value: 10000, message: 'Максимум 10000 мс' }
+        ],
+        defaultValue: 3000
+      },
+      {
+        field: 'loop',
+        label: 'Бесконечная прокрутка',
+        type: 'checkbox',
+        defaultValue: true
+      },
+      {
+        field: 'spaceBetween',
+        label: 'Отступ между слайдами (px)',
+        type: 'number',
+        rules: [
+          { type: 'min', value: 0, message: 'Минимум 0 px' },
+          { type: 'max', value: 100, message: 'Максимум 100 px' }
+        ],
+        defaultValue: 30
       }
     ]
   }

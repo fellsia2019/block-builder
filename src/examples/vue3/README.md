@@ -44,6 +44,7 @@ import ImageBlock from './components/ImageBlock.js'
 import ButtonBlock from './components/ButtonBlock.js'
 import CardListBlock from './components/CardListBlock.js'
 import HeroBlock from './components/HeroBlock.js'
+import GallerySliderBlock from './components/GallerySliderBlock.js'
 ```
 
 ### 3. Чистая архитектура
@@ -80,6 +81,14 @@ import HeroBlock from './components/HeroBlock.js'
 - Анимированные декоративные элементы
 - Composition API
 
+### GallerySliderBlock.js ⭐ СЛОЖНЫЙ КОМПОНЕНТ
+- Галерея изображений со Swiper слайдером
+- Динамическая загрузка внешней библиотеки (Swiper.js)
+- Навигация, пагинация, автопрокрутка
+- Инициализация в lifecycle хуках
+- Правильная очистка ресурсов при размонтировании
+- **Демонстрирует работу со сторонними библиотеками БЕЗ нарушения чистой архитектуры**
+
 ## Использование
 
 1. Откройте `index.html` в браузере
@@ -94,3 +103,30 @@ import HeroBlock from './components/HeroBlock.js'
 - ✅ Легкость тестирования и отладки
 - ✅ Возможность использования TypeScript
 - ✅ Поддержка всех Vue3 возможностей (Composition API, Teleport, Suspense и т.д.)
+- ✅ Интеграция сторонних библиотек (Swiper) без зависимостей в пакете
+- ✅ Пакет остаётся универсальным и не знает о пользовательских компонентах
+
+## Интеграция сторонних библиотек
+
+### GallerySliderBlock + Swiper.js
+
+Этот блок демонстрирует **правильный подход** к интеграции сложных библиотек:
+
+1. **Пакет НЕ зависит от Swiper** - библиотека загружается в пользовательском компоненте
+2. **Динамическая загрузка** - Swiper CSS и JS подгружаются только когда нужны
+3. **Lifecycle управление** - инициализация в `mounted()`, очистка в `beforeUnmount()`
+4. **Настройки через props** - autoplay, loop, spaceBetween передаются из формы
+
+```javascript
+// В компоненте GallerySliderBlock
+mounted() {
+  this.loadSwiper(); // Загружаем Swiper динамически
+},
+beforeUnmount() {
+  if (this.swiper) {
+    this.swiper.destroy(true, true); // Очищаем ресурсы
+  }
+}
+```
+
+Такой подход позволяет добавлять любые библиотеки (Chart.js, FullCalendar, AOS и т.д.) без изменения кода пакета!
