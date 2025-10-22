@@ -26,9 +26,22 @@ export * from './core/use-cases/BlockManagementUseCase';
 export * from './core/use-cases/ComponentManagementUseCase';
 export * from './core/use-cases/FormGenerationUseCase';
 
-// Core - Main API (главный класс пакета)
-export { BlockBuilder } from './core/BlockBuilder';
-export type { IBlockBuilderOptions } from './core/BlockBuilder';
+// Core - Main API (главный класс пакета) - применен паттерн Facade
+export { BlockBuilderFacade as BlockBuilder } from './core/BlockBuilderFacade';
+export type { IBlockBuilderOptions } from './core/BlockBuilderFacade';
+
+// UI Services (для расширенного использования)
+export { StyleManager } from './ui/services/StyleManager';
+export { FormBuilder } from './ui/services/FormBuilder';
+export { ModalManager } from './ui/services/ModalManager';
+export { UIRenderer } from './ui/services/UIRenderer';
+export { BlockUIController } from './ui/controllers/BlockUIController';
+
+// UI Types
+export type { IFieldConfig } from './ui/services/FormBuilder';
+export type { IModalOptions } from './ui/services/ModalManager';
+export type { IUIRendererConfig } from './ui/services/UIRenderer';
+export type { IBlockUIControllerConfig } from './ui/controllers/BlockUIController';
 
 // Infrastructure - Реализации портов
 export * from './infrastructure/repositories/MemoryBlockRepositoryImpl';

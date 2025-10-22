@@ -227,17 +227,20 @@ export const blockConfigs = {
         { title: props.card3_title, text: props.card3_text, button: props.card3_button, link: props.card3_link, image: props.card3_image }
       ].filter(c => c && c.title && c.text);
 
-      const cardsHtml = cards.map(card => `
-        <div class="card" style="background-color:${cardBackground};color:${cardTextColor};border-radius:${cardBorderRadius}px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,0.1);transition:all 0.2s ease;">
+      const cardsHtml = cards.map((card, index) => `
+        <div class="card" data-card-index="${index}" style="background-color:${cardBackground};color:${cardTextColor};border-radius:${cardBorderRadius}px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,0.1);transition:all 0.2s ease;cursor:pointer;">
           ${card.image ? `<div class="card-image"><img src="${card.image}" alt="${card.title}" style="width:100%;height:200px;object-fit:cover;border-radius:4px;margin-bottom:15px;"/></div>` : ''}
           <h3 class="card-title" style="margin-bottom:10px;font-size:18px;font-weight:600;">${card.title}</h3>
           <p class="card-text" style="margin-bottom:15px;line-height:1.5;opacity:0.8;">${card.text}</p>
-          ${card.button && card.link ? `<a href="${card.link}" class="card-button" style="display:inline-block;background-color:#007bff;color:#ffffff;padding:8px 16px;border-radius:4px;text-decoration:none;font-size:14px;font-weight:500;transition:all 0.2s ease;">${card.button}</a>` : ''}
+          ${card.button && card.link ? `<span class="card-button" style="display:inline-block;background-color:#007bff;color:#ffffff;padding:8px 16px;border-radius:4px;text-decoration:none;font-size:14px;font-weight:500;transition:all 0.2s ease;">${card.button}</span>` : ''}
         </div>
       `).join('');
 
+      // Сохраняем данные карточек в data-атрибуте для доступа из JS
+      const cardsData = JSON.stringify(cards).replace(/"/g, '&quot;');
+
       return `
-        <div class="card-list-block">
+        <div class="card-list-block" data-cards='${cardsData}'>
           ${title ? `<h2 class="list-title" style="text-align:center;margin-bottom:30px;font-size:28px;font-weight:700;color:#333;">${title}</h2>` : ''}
           <div class="cards-container" style="display:grid;grid-template-columns:repeat(${isNaN(columns) ? 3 : columns},1fr);gap:${isNaN(gap) ? 16 : gap}px;padding:20px 0;">
             ${cardsHtml}

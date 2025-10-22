@@ -32,6 +32,140 @@
             margin-top: 10px;
             font-size: 14px;
         }
+
+        /* Модалка для деталей карточки (код пользователя, НЕ пакета!) */
+        .card-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            backdrop-filter: blur(4px);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .card-modal-overlay.show {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .card-modal-content {
+            background: white;
+            border-radius: 12px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9) translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 24px;
+            border-radius: 12px 12px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        .modal-close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            transition: all 0.2s;
+        }
+
+        .modal-close-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        .modal-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-title {
+            margin: 0 0 12px 0;
+            font-size: 1.25rem;
+            color: #333;
+        }
+
+        .modal-description {
+            margin: 0 0 20px 0;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .modal-actions {
+            text-align: center;
+            margin-top: 24px;
+        }
+
+        .modal-link-btn {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(79, 172, 254, 0.3);
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .modal-link-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(79, 172, 254, 0.4);
+        }
+
+        /* Hover эффекты для карточек */
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important;
+        }
     </style>
 </head>
 <body>
@@ -49,6 +183,24 @@
             <!-- BlockBuilder автоматически рендерит все контролы и UI -->
             <div class="block-builder-container" id="block-builder-container">
                 <!-- Здесь будет рендериться весь UI от пакета -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Модалка для деталей карточки (код пользователя, НЕ пакета!) -->
+    <div class="card-modal-overlay" id="cardModal">
+        <div class="card-modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h3 id="modalTitle"></h3>
+                <button class="modal-close-btn" onclick="closeCardModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <img id="modalImage" class="modal-image" src="" alt="" style="display: none;">
+                <h4 id="modalSubtitle" class="modal-title"></h4>
+                <p id="modalDescription" class="modal-description"></p>
+                <div class="modal-actions">
+                    <a id="modalLink" class="modal-link-btn" href="#" target="_blank" style="display: none;"></a>
+                </div>
             </div>
         </div>
     </div>
@@ -74,6 +226,92 @@
         });
 
         console.log('✅ BlockBuilder инициализирован с конфигурацией пользователя (Pure JS)');
+
+        // ===== ПОЛЬЗОВАТЕЛЬСКАЯ ЛОГИКА ДЛЯ МОДАЛКИ КАРТОЧЕК =====
+        // Это код пользователя, НЕ пакета!
+
+        // Функция для показа модалки с деталями карточки
+        window.showCardModal = function(card) {
+            const modal = document.getElementById('cardModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalSubtitle = document.getElementById('modalSubtitle');
+            const modalDescription = document.getElementById('modalDescription');
+            const modalImage = document.getElementById('modalImage');
+            const modalLink = document.getElementById('modalLink');
+
+            // Заполняем данные
+            modalTitle.textContent = card.title;
+            modalSubtitle.textContent = card.title;
+            modalDescription.textContent = card.text;
+
+            // Показываем/скрываем изображение
+            if (card.image) {
+                modalImage.src = card.image;
+                modalImage.alt = card.title;
+                modalImage.style.display = 'block';
+            } else {
+                modalImage.style.display = 'none';
+            }
+
+            // Показываем/скрываем кнопку
+            if (card.link && card.button) {
+                modalLink.href = card.link;
+                modalLink.textContent = card.button;
+                modalLink.style.display = 'inline-block';
+            } else {
+                modalLink.style.display = 'none';
+            }
+
+            // Показываем модалку
+            modal.classList.add('show');
+        };
+
+        // Функция для закрытия модалки
+        window.closeCardModal = function() {
+            const modal = document.getElementById('cardModal');
+            modal.classList.remove('show');
+        };
+
+        // Закрытие по клику на overlay
+        document.getElementById('cardModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeCardModal();
+            }
+        });
+
+        // Закрытие по ESC
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeCardModal();
+            }
+        });
+
+        // Обработчик кликов по карточкам
+        document.addEventListener('click', function(e) {
+            const card = e.target.closest('.card[data-card-index]');
+            if (card) {
+                e.preventDefault();
+                
+                // Получаем данные карточек из родительского элемента
+                const cardListBlock = card.closest('.card-list-block');
+                if (cardListBlock) {
+                    const cardsData = cardListBlock.getAttribute('data-cards');
+                    if (cardsData) {
+                        try {
+                            const cards = JSON.parse(cardsData);
+                            const cardIndex = parseInt(card.getAttribute('data-card-index'), 10);
+                            const selectedCard = cards[cardIndex];
+                            
+                            if (selectedCard) {
+                                showCardModal(selectedCard);
+                            }
+                        } catch (error) {
+                            console.error('Ошибка при парсинге данных карточки:', error);
+                        }
+                    }
+                }
+            }
+        });
     </script>
 </body>
 </html>

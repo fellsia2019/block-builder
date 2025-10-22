@@ -163,6 +163,13 @@ export class BlockManagementUseCase {
   }
 
   /**
+   * Получение реестра компонентов
+   */
+  getComponentRegistry(): IComponentRegistry {
+    return this.componentRegistry;
+  }
+
+  /**
    * Создание блока с Vue3 компонентом
    */
   async createVueBlock(
