@@ -5,8 +5,31 @@
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.esm.js",
+      "require": "./dist/index.js"
+    },
+    "./vue": {
+      "types": "./src/vue.ts",
+      "import": "./src/vue.ts"
+    }
+  },
+  "workspaces": [
+    "examples/vue3",
+    "examples/pure-js-vite",
+    "examples/api-usage"
+  ],
   "files": [
-    "dist"
+    "dist",
+    "src/vue.ts",
+    "src/ui/components/**/*.vue",
+    "src/core/types/**/*",
+    "src/core/use-cases/**/*",
+    "src/core/ports/**/*",
+    "src/infrastructure/**/*",
+    "src/utils/**/*"
   ],
   "scripts": {
     "build": "rollup -c rollup.config.cjs",
@@ -19,7 +42,11 @@
     "type-check": "tsc --noEmit",
     "start": "node dev-server.js",
     "clean": "rimraf dist",
-    "prebuild": "npm run clean"
+    "prebuild": "npm run clean",
+    "example:vue3": "npm run dev --workspace=examples/vue3",
+    "example:pure-js": "npm run dev --workspace=examples/pure-js-vite",
+    "example:api-usage": "npm run dev --workspace=examples/api-usage",
+    "examples:install": "npm install"
   },
   "keywords": [
     "block-builder",

@@ -102,14 +102,25 @@ export class BlockUIController {
     }
 
     try {
-      // Создаем блок через use case
-      await this.config.useCase.createBlock({
+      // Получаем конфигурацию блока
+      const blockConfig = this.config.blockConfigs[type];
+      
+      // Создаем данные блока
+      const createData: ICreateBlockDto = {
         type,
         settings: {},
         props,
         visible: true,
         locked: false
-      });
+      };
+
+      // Добавляем render из конфигурации, если он есть
+      if (blockConfig?.render) {
+        createData.render = blockConfig.render;
+      }
+
+      // Создаем блок через use case
+      await this.config.useCase.createBlock(createData);
 
       this.modalManager.closeModal();
       await this.refreshBlocks();

@@ -9,13 +9,6 @@
     @click.stop="handleClick"
   >
     <div class="block-component__content" @click="handleCardClick">
-      <!-- Debug info -->
-      <div style="font-size: 12px; color: #666; margin-bottom: 10px;">
-        Debug: render={{ JSON.stringify(block.render) }},
-        isVue={{ isVueComponent(block.render) }},
-        hasHtml={{ !!getHtmlTemplate(block.render) }}
-      </div>
-
       <!-- Vue компонент -->
       <component
         v-if="isVueComponent(block.render)"
@@ -29,8 +22,30 @@
     </div>
 
     <div class="block-component__controls">
-      <button @click.stop="handleDelete" class="control-button delete-button" title="Delete">
-        ×
+      <button 
+        @click.stop="handleMoveUp" 
+        class="control-button move-button" 
+        title="Переместить вверх"
+        :disabled="isFirst"
+      >
+        ⬆️
+      </button>
+      <button 
+        @click.stop="handleMoveDown" 
+        class="control-button move-button" 
+        title="Переместить вниз"
+        :disabled="isLast"
+      >
+        ⬇️
+      </button>
+      <button @click.stop="handleEdit" class="control-button edit-button" title="Редактировать">
+        ✏️
+      </button>
+      <button @click.stop="handleDuplicate" class="control-button duplicate-button" title="Дублировать">
+        📋
+      </button>
+      <button @click.stop="handleDelete" class="control-button delete-button" title="Удалить">
+        🗑️
       </button>
       <button @click.stop="handleLock" class="control-button lock-button" :title="block.locked ? 'Unlock' : 'Lock'">
         {{ block.locked ? '🔒' : '🔓' }}
@@ -58,6 +73,8 @@ const getVueComponent = (render?: any) => {
 
 interface IProps {
   block: IBlock;
+  isFirst?: boolean;
+  isLast?: boolean;
 }
 
 const props = defineProps<IProps>();
@@ -65,6 +82,10 @@ const props = defineProps<IProps>();
 const emit = defineEmits<{
   update: [blockId: TBlockId, updates: Partial<IBlock>];
   delete: [blockId: TBlockId];
+  edit: [blockId: TBlockId];
+  duplicate: [blockId: TBlockId];
+  moveUp: [blockId: TBlockId];
+  moveDown: [blockId: TBlockId];
   'card-click': [card: any];
 }>();
 
@@ -93,7 +114,12 @@ const renderedTemplate = computed(() => {
     return `<div>Блок ${props.block.type}</div>`;
   }
 
-  // Заменяем плейсхолдеры на значения из props
+  // Если template - функция, вызываем её с пропсами
+  if (typeof template === 'function') {
+    return template(props.block.props);
+  }
+
+  // Если template - строка, заменяем плейсхолдеры на значения из props
   let processedTemplate = template;
   Object.entries(props.block.props).forEach(([key, value]) => {
     const placeholder = `{{ props.${key} }}`;
@@ -135,6 +161,22 @@ const handleCardClick = (event: MouseEvent) => {
   }
 };
 
+
+const handleMoveUp = () => {
+  emit('moveUp', props.block.id);
+};
+
+const handleMoveDown = () => {
+  emit('moveDown', props.block.id);
+};
+
+const handleEdit = () => {
+  emit('edit', props.block.id);
+};
+
+const handleDuplicate = () => {
+  emit('duplicate', props.block.id);
+};
 
 const handleDelete = () => {
   emit('delete', props.block.id);
@@ -219,6 +261,12 @@ const handleVisibility = () => {
 
 .control-button:hover {
   background: #f0f0f0;
+}
+
+.control-button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  pointer-events: none;
 }
 
 .delete-button:hover {

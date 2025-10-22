@@ -78,6 +78,11 @@ export class UIRenderer {
 
     // Рендерим блоки
     blocksContainer.innerHTML = blocks.map(block => this.renderBlock(block)).join('');
+
+    // Инициализируем custom блоки после рендеринга
+    setTimeout(() => {
+      this.initializeCustomBlocks(blocks);
+    }, 0);
   }
 
   /**
@@ -128,19 +133,25 @@ export class UIRenderer {
    * Рендеринг содержимого блока
    */
   private renderBlockContent(block: IBlockDto, config: any): string {
+    // Если есть custom render с функцией mount
+    if (config.render?.kind === 'custom' && config.render?.mount) {
+      return this.renderCustomBlock(block);
+    }
+
     // Если есть Vue компонент
     if (config.render?.kind === 'component' && config.render?.component) {
       return this.renderVueComponent(block, config);
     }
 
-    // Если есть HTML шаблон
-    if (config.template && typeof config.template === 'function') {
-      return config.template(block.props);
+    // Если есть HTML шаблон в render
+    if (config.render?.kind === 'html' && config.render?.template) {
+      const template = config.render.template;
+      return typeof template === 'function' ? template(block.props) : template;
     }
 
-    // Если есть render.template
-    if (config.render?.kind === 'html' && config.render?.template) {
-      return config.render.template(block.props);
+    // Fallback на старый формат template
+    if (config.template) {
+      return typeof config.template === 'function' ? config.template(block.props) : config.template;
     }
 
     // Fallback - простое отображение
@@ -215,6 +226,41 @@ export class UIRenderer {
       const errorMessage = error instanceof Error ? error.message : String(error);
       container.innerHTML = `<div class="vue-error">Ошибка рендеринга компонента: ${errorMessage}</div>`;
     }
+  }
+
+  /**
+   * Рендеринг custom блока (с императивной функцией mount)
+   */
+  private renderCustomBlock(block: IBlockDto): string {
+    const containerId = `custom-block-${block.id}`;
+    return `<div id="${containerId}" class="custom-block-container" data-block-id="${block.id}"></div>`;
+  }
+
+  /**
+   * Инициализация custom блоков после рендеринга
+   */
+  private initializeCustomBlocks(blocks: IBlockDto[]): void {
+    blocks.forEach(block => {
+      const config = this.config.blockConfigs[block.type];
+      if (config?.render?.kind === 'custom' && config.render.mount) {
+        const containerId = `custom-block-${block.id}`;
+        const container = document.getElementById(containerId);
+        
+        if (container && !container.hasAttribute('data-custom-mounted')) {
+          try {
+            // Вызываем функцию mount с контейнером и пропсами
+            config.render.mount(container, block.props);
+            container.setAttribute('data-custom-mounted', 'true');
+          } catch (error) {
+            console.error(`Ошибка монтирования custom блока ${block.id}:`, error);
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            container.innerHTML = `<div style="color: red; padding: 10px; border: 1px solid red; border-radius: 4px;">
+              <strong>⚠️ Ошибка рендеринга:</strong><br>${errorMessage}
+            </div>`;
+          }
+        }
+      }
+    });
   }
 }
 

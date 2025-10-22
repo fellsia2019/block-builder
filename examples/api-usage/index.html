@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlockBuilder API Usage Example</title>
+</head>
+<body>
+    <div id="app">
+        <div class="app">
+            <div class="app-header">
+                <h1>BlockBuilder API Usage Example</h1>
+                <div class="app-description">
+                    <p>✅ Использование программного API</p>
+                    <p>✅ Кастомный UI вместо готового</p>
+                    <p>✅ Полный контроль над рендерингом</p>
+                    <p>✅ Прямое управление блоками через API</p>
+                </div>
+            </div>
+
+            <div class="app-content">
+                <div class="controls">
+                    <h2>Управление блоками</h2>
+                    <div class="button-group">
+                        <button id="addTextBlock" class="btn btn-primary">+ Добавить текст</button>
+                        <button id="addImageBlock" class="btn btn-primary">+ Добавить изображение</button>
+                        <button id="getAllBlocks" class="btn btn-secondary">Получить все блоки</button>
+                        <button id="clearBlocks" class="btn btn-danger">Очистить все</button>
+                    </div>
+                </div>
+
+                <div class="content-area">
+                    <div class="blocks-json">
+                        <h3>Блоки (JSON)</h3>
+                        <pre id="blocksJson">[]</pre>
+                    </div>
+                    
+                    <div class="blocks-render">
+                        <h3>Рендер блоков</h3>
+                        <div id="blocksContainer"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+</body>
+</html>
+

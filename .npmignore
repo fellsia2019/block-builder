@@ -1,0 +1,54 @@
+# npm ignore file
+# Защита от случайной публикации примеров и разработческих файлов
+
+# Примеры (НЕ должны попадать пользователям)
+examples/
+src/examples/
+
+# Исходники (только dist попадает в публикацию)
+src/
+
+# Конфигурация разработки
+dev-server.js
+rollup.dev.cjs
+rollup.config.cjs
+tsconfig.json
+jest.config.js
+.editorconfig
+
+# Документация разработки
+*.md
+!README.md
+
+# Правила и конфигурация
+.cursor/
+.vscode/
+.idea/
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# CI/CD
+.github/
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Тесты
+__tests__/
+*.test.ts
+*.test.js
+*.spec.ts
+*.spec.js
+
+# Временные файлы
+*.tmp
+*.temp
+.DS_Store
+Thumbs.db
+

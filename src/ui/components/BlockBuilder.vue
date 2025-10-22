@@ -1,316 +1,742 @@
 <template>
-  <div class="block-builder" :class="{ 'is-dragging': isDragging }">
+  <div class="block-builder">
+    <!-- Панель добавления блоков -->
     <div class="block-builder__toolbar">
-      <button
-        v-for="blockType in availableBlockTypes"
-        :key="blockType.type"
-        @click="addBlock(blockType.type)"
-        class="toolbar-button"
-      >
-        {{ blockType.label }}
-      </button>
+      <h2>Добавить блок</h2>
+      <div class="toolbar-buttons">
+        <button
+          v-for="blockType in availableBlockTypes"
+          :key="blockType.type"
+          @click="openCreateModal(blockType.type)"
+          class="toolbar-button"
+        >
+          + {{ blockType.label }}
+        </button>
+      </div>
     </div>
 
-    <div
-      class="block-builder__canvas"
-      @drop="handleDrop"
-      @dragover="handleDragOver"
-      @click="handleCanvasClick"
-    >
-      <BlockComponent
-        v-for="block in blocks"
+    <!-- Список блоков -->
+    <div class="block-builder__list">
+      <div v-if="blocks.length === 0" class="empty-state">
+        <p>Добавьте первый блок используя кнопки выше</p>
+      </div>
+
+      <div
+        v-for="(block, index) in blocks"
         :key="block.id"
-        :block="block"
-        @update="updateBlock"
-        @delete="deleteBlock"
-        @drag-start="handleDragStart"
-        @drag-end="handleDragEnd"
-        @card-click="handleCardClick"
-      />
+        class="block-item"
+      >
+        <!-- Контролы блока -->
+        <div class="block-controls">
+          <button 
+            @click="handleMoveUp(block.id)" 
+            class="control-btn" 
+            title="Переместить вверх"
+            :disabled="index === 0"
+          >
+            ⬆️
+          </button>
+          <button 
+            @click="handleMoveDown(block.id)" 
+            class="control-btn" 
+            title="Переместить вниз"
+            :disabled="index === blocks.length - 1"
+          >
+            ⬇️
+          </button>
+          <button @click="openEditModal(block)" class="control-btn" title="Редактировать">
+            ✏️
+          </button>
+          <button @click="handleDuplicateBlock(block.id)" class="control-btn" title="Дублировать">
+            📋
+          </button>
+          <button @click="handleDeleteBlock(block.id)" class="control-btn delete" title="Удалить">
+            🗑️
+          </button>
+        </div>
+
+        <!-- Рендер блока -->
+        <div class="block-content">
+          <component
+            v-if="isVueComponent(block)"
+            :is="getVueComponent(block)"
+            v-bind="block.props"
+          />
+          <div v-else>Блок {{ block.type }}</div>
+        </div>
+      </div>
     </div>
 
+    <!-- Модальное окно создания/редактирования -->
+    <div v-if="showModal" class="modal-overlay" @click="closeModal">
+      <div class="modal" @click.stop>
+        <div class="modal-header">
+          <h3>{{ modalMode === 'create' ? 'Создать' : 'Редактировать' }} {{ currentBlockType?.label }}</h3>
+          <button @click="closeModal" class="close-btn">×</button>
+        </div>
+        
+        <div class="modal-body">
+          <form @submit.prevent="handleSubmit">
+            <div
+              v-for="field in currentBlockFields"
+              :key="field.field"
+              class="form-field"
+            >
+              <label>{{ field.label }}</label>
+              
+              <!-- Text input -->
+              <input
+                v-if="field.type === 'text'"
+                v-model="formData[field.field]"
+                type="text"
+                :placeholder="field.placeholder"
+              />
+              
+              <!-- Textarea -->
+              <textarea
+                v-else-if="field.type === 'textarea'"
+                v-model="formData[field.field]"
+                :placeholder="field.placeholder"
+                rows="4"
+              ></textarea>
+              
+              <!-- Number -->
+              <input
+                v-else-if="field.type === 'number'"
+                v-model.number="formData[field.field]"
+                type="number"
+              />
+              
+              <!-- Color -->
+              <input
+                v-else-if="field.type === 'color'"
+                v-model="formData[field.field]"
+                type="color"
+              />
+              
+              <!-- Select -->
+              <select
+                v-else-if="field.type === 'select'"
+                v-model="formData[field.field]"
+              >
+                <option
+                  v-for="option in field.options"
+                  :key="option.value"
+                  :value="option.value"
+                >
+                  {{ option.label }}
+                </option>
+              </select>
+              
+              <!-- Checkbox -->
+              <label v-else-if="field.type === 'checkbox'" class="checkbox-label">
+                <input
+                  v-model="formData[field.field]"
+                  type="checkbox"
+                />
+                <span>{{ field.label }}</span>
+              </label>
 
+              <!-- Array (для cards) -->
+              <div v-else-if="field.type === 'array' && field.itemFields">
+                <div
+                  v-for="(item, idx) in formData[field.field]"
+                  :key="idx"
+                  class="array-item"
+                >
+                  <h4>{{ field.itemLabel || 'Элемент' }} {{ idx + 1 }}</h4>
+                  <div
+                    v-for="itemField in field.itemFields"
+                    :key="itemField.field"
+                    class="form-field"
+                  >
+                    <label>{{ itemField.label }}</label>
+                    <input
+                      v-if="itemField.type === 'text'"
+                      v-model="item[itemField.field]"
+                      type="text"
+                      :placeholder="itemField.placeholder"
+                    />
+                    <textarea
+                      v-else-if="itemField.type === 'textarea'"
+                      v-model="item[itemField.field]"
+                      :placeholder="itemField.placeholder"
+                      rows="2"
+                    ></textarea>
+                  </div>
+                  <button type="button" @click="removeArrayItem(field.field, idx)" class="btn-remove">
+                    Удалить
+                  </button>
+                </div>
+                <button type="button" @click="addArrayItem(field)" class="btn-add">
+                  + Добавить {{ field.itemLabel || 'элемент' }}
+                </button>
+              </div>
+            </div>
 
-    <!-- Модальное окно для детальной информации карточки -->
-    <CardDetailModal
-      :card="selectedCard"
-      :is-visible="showCardModal"
-      @close="closeCardModal"
-      @link-click="handleLinkClick"
-    />
+            <div class="modal-actions">
+              <button type="button" @click="closeModal" class="btn-secondary">
+                Отмена
+              </button>
+              <button type="submit" class="btn-primary">
+                {{ modalMode === 'create' ? 'Создать' : 'Сохранить' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue';
-import { IBlock, TBlockId, IBlockSettings, IBlockProps, IBlockStyle, TRenderRef } from '../../core/types';
+import { ref, reactive, computed, onMounted } from 'vue';
+import { IBlock, TBlockId } from '../../core/types';
 import { BlockManagementUseCase } from '../../core/use-cases/BlockManagementUseCase';
 import { IBlockRepository } from '../../core/ports/BlockRepository';
 import { IComponentRegistry } from '../../core/ports/ComponentRegistry';
-import BlockComponent from './BlockComponent.vue';
-import BlockProperties from './BlockProperties.vue';
-import CardDetailModal from './CardDetailModal.vue';
+import { MemoryBlockRepositoryImpl } from '../../infrastructure/repositories/MemoryBlockRepositoryImpl';
 
 interface IBlockType {
   type: string;
   label: string;
-  template?: string; // Deprecated
-  render?: TRenderRef; // Новый формат
-  defaultSettings: IBlockSettings;
-  defaultProps: IBlockProps;
+  render?: any;
+  defaultSettings?: any;
+  defaultProps?: any;
+  fields?: any[];
 }
 
 interface IProps {
   config?: {
     availableBlockTypes?: IBlockType[];
-    allowNesting?: boolean;
-    maxDepth?: number;
   };
   blockRepository?: IBlockRepository;
   componentRegistry?: IComponentRegistry;
 }
 
 const props = withDefaults(defineProps<IProps>(), {
-  config: () => ({
-    allowNesting: true,
-    maxDepth: 5
-  })
+  config: () => ({ availableBlockTypes: [] })
 });
 
 const emit = defineEmits<{
   'block-added': [block: IBlock];
   'block-updated': [block: IBlock];
   'block-deleted': [blockId: TBlockId];
-  'blocks-reordered': [blocks: IBlock[]];
 }>();
 
-// Инициализация сервисов через dependency injection
-const blockRepository = props.blockRepository || (() => {
-  // Fallback для демо - в реальном приложении зависимости должны передаваться через props
-  console.warn('BlockBuilder: blockRepository not provided, using fallback');
-  return {} as IBlockRepository;
-})();
-const componentRegistry = props.componentRegistry || (() => {
-  console.warn('BlockBuilder: componentRegistry not provided, using fallback');
-  return {} as IComponentRegistry;
-})();
-const blockService = new BlockManagementUseCase(blockRepository, componentRegistry);
+// Инициализация
+const blockRepository = props.blockRepository || new MemoryBlockRepositoryImpl();
+const componentRegistry = props.componentRegistry;
+const blockService = new BlockManagementUseCase(blockRepository, componentRegistry as any);
 
 // Состояние
 const blocks = ref<IBlock[]>([]);
-const isDragging = ref(false);
-const dragStartPosition = ref<{ x: number; y: number } | null>(null);
-const showCardModal = ref(false);
-const selectedCard = ref<any>(null);
-
-// Доступные типы блоков
-const availableBlockTypes = ref<IBlockType[]>([
-  {
-    type: 'text',
-    label: 'Text',
-    render: {
-      kind: 'html',
-      template: '<div class="text-block">{{ props.content }}</div>'
-    },
-    defaultSettings: { fontSize: 16, color: '#000000' },
-    defaultProps: { content: 'New text block' }
-  },
-  {
-    type: 'image',
-    label: 'Image',
-    render: {
-      kind: 'html',
-      template: '<img :src="props.src" :alt="props.alt" class="image-block" />'
-    },
-    defaultSettings: { width: 300, height: 200 },
-    defaultProps: { src: '', alt: 'Image' }
-  },
-  {
-    type: 'button',
-    label: 'Button',
-    render: {
-      kind: 'html',
-      template: '<button class="button-block">{{ props.text }}</button>'
-    },
-    defaultSettings: { backgroundColor: '#007bff', color: '#ffffff' },
-    defaultProps: { text: 'Click me' }
-  }
-]);
+const showModal = ref(false);
+const modalMode = ref<'create' | 'edit'>('create');
+const currentType = ref<string | null>(null);
+const currentBlockId = ref<TBlockId | null>(null);
+const formData = reactive<Record<string, any>>({});
 
 // Вычисляемые свойства
+const availableBlockTypes = computed(() => props.config?.availableBlockTypes || []);
 
-// Методы
-const loadBlocks = async () => {
-  const list = await blockService.getAllBlocks();
-  blocks.value = list as any;
-};
-
-const addBlock = async (type: string) => {
-  const blockType = availableBlockTypes.value.find((bt: IBlockType) => bt.type === type);
-  if (!blockType) return;
-
-  const createData: any = {
-    type: blockType.type,
-    settings: { ...blockType.defaultSettings },
-    props: { ...blockType.defaultProps }
-  };
-
-  // Используем новый формат render если доступен, иначе fallback на template
-  if (blockType.render) {
-    createData.render = blockType.render;
-  } else if (blockType.template) {
-    // Fallback на старый формат
-    createData.render = {
-      kind: 'html',
-      template: blockType.template
-    };
-  }
-
-  const block = await blockService.createBlock(createData);
-
-  blocks.value.push(block as any);
-  emit('block-added', block as any);
-};
-
-// Удалено: логика выбора блоков
-
-const updateBlock = async (blockId: TBlockId, updates: Partial<IBlock>) => {
-  // Обновляем блок через юзкейс
-  const updated = await blockService.updateBlock(blockId, updates as any);
-  if (!updated) return;
-
-  // Обновляем локальное состояние
-  const index = blocks.value.findIndex((block: any) => block.id === blockId);
-  if (index !== -1) {
-    blocks.value[index] = updated as any;
-    emit('block-updated', blocks.value[index]);
-  }
-};
-
-const deleteBlock = async (blockId: TBlockId) => {
-  const success = await blockService.deleteBlock(blockId);
-  if (success) {
-    blocks.value = blocks.value.filter((block: any) => block.id !== blockId);
-    emit('block-deleted', blockId);
-  }
-};
-
-const updateBlockProperties = (blockId: TBlockId, properties: Partial<IBlockSettings & IBlockProps & IBlockStyle>) => {
-  updateBlock(blockId, properties as any);
-};
-
-const handleDragStart = (blockId: TBlockId, event: DragEvent) => {
-  isDragging.value = true;
-  dragStartPosition.value = { x: event.clientX, y: event.clientY };
-  event.dataTransfer?.setData('text/plain', blockId.toString());
-};
-
-const handleDragEnd = () => {
-  isDragging.value = false;
-  dragStartPosition.value = null;
-};
-
-const handleDrop = (event: DragEvent) => {
-  event.preventDefault();
-  const blockId = event.dataTransfer?.getData('text/plain');
-  if (!blockId) return;
-
-  // Используем currentTarget (холст), а не target внутреннего элемента
-  const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
-  const x = event.clientX - rect.left;
-  const y = event.clientY - rect.top;
-
-  updateBlock(blockId as any, { position: { x, y } } as any);
-};
-
-const handleDragOver = (event: DragEvent) => {
-  event.preventDefault();
-};
-
-const handleCanvasClick = (_event: MouseEvent) => {
-  // Выбор блоков не используется
-};
-
-// Обработчики для модального окна карточки
-const handleCardClick = (card: any) => {
-  selectedCard.value = card;
-  showCardModal.value = true;
-};
-
-const closeCardModal = () => {
-  showCardModal.value = false;
-  selectedCard.value = null;
-};
-
-const handleLinkClick = (link: string) => {
-  // Открываем ссылку в новой вкладке
-  window.open(link, '_blank');
-};
-
-// Обработка клавиатуры: удаление выделенных блоков удалено
-const handleKeyDown = (_event: KeyboardEvent) => {};
-
-// Жизненный цикл
-onMounted(() => {
-  loadBlocks();
-  document.addEventListener('keydown', handleKeyDown);
+const currentBlockType = computed(() => {
+  if (!currentType.value) return null;
+  return availableBlockTypes.value.find(bt => bt.type === currentType.value) || null;
 });
 
-onUnmounted(() => {
-  document.removeEventListener('keydown', handleKeyDown);
+const currentBlockFields = computed(() => {
+  return currentBlockType.value?.fields || [];
+});
+
+// Методы для работы с блоками
+const isVueComponent = (block: IBlock) => {
+  return block.render?.kind === 'component' && block.render?.framework === 'vue';
+};
+
+const getVueComponent = (block: IBlock) => {
+  if (!componentRegistry) return null;
+  return componentRegistry.get(block.type);
+};
+
+// Открыть модалку создания
+const openCreateModal = (type: string) => {
+  modalMode.value = 'create';
+  currentType.value = type;
+  currentBlockId.value = null;
+  
+  // Заполняем форму дефолтными значениями
+  Object.keys(formData).forEach(key => delete formData[key]);
+  const blockType = currentBlockType.value;
+  blockType?.fields?.forEach((field: any) => {
+    formData[field.field] = field.defaultValue;
+  });
+  
+  showModal.value = true;
+};
+
+// Открыть модалку редактирования
+const openEditModal = (block: IBlock) => {
+  modalMode.value = 'edit';
+  currentType.value = block.type;
+  currentBlockId.value = block.id;
+  
+  // Заполняем форму текущими значениями
+  Object.keys(formData).forEach(key => delete formData[key]);
+  Object.assign(formData, { ...block.props });
+  
+  showModal.value = true;
+};
+
+// Закрыть модалку
+const closeModal = () => {
+  showModal.value = false;
+  currentType.value = null;
+  currentBlockId.value = null;
+  Object.keys(formData).forEach(key => delete formData[key]);
+};
+
+// Отправка формы
+const handleSubmit = async () => {
+  if (modalMode.value === 'create') {
+    await createBlock();
+  } else {
+    await updateBlock();
+  }
+  closeModal();
+};
+
+// Создание блока
+const createBlock = async () => {
+  if (!currentType.value) return;
+  
+  const blockType = currentBlockType.value;
+  if (!blockType) return;
+  
+  try {
+    const newBlock = await blockService.createBlock({
+      type: currentType.value,
+      props: { ...formData },
+      settings: blockType.defaultSettings || {},
+      render: blockType.render
+    } as any);
+    
+    blocks.value.push(newBlock as any);
+    emit('block-added', newBlock as any);
+    console.log('✅ Блок создан:', newBlock);
+  } catch (error) {
+    console.error('Ошибка создания блока:', error);
+    alert('Ошибка создания блока: ' + (error as Error).message);
+  }
+};
+
+// Обновление блока
+const updateBlock = async () => {
+  if (!currentBlockId.value) return;
+  
+  try {
+    const updated = await blockService.updateBlock(currentBlockId.value, {
+      props: { ...formData }
+    } as any);
+    
+    const index = blocks.value.findIndex(b => b.id === currentBlockId.value);
+    if (index !== -1) {
+      blocks.value[index] = updated as any;
+    }
+    
+    emit('block-updated', updated as any);
+    console.log('✅ Блок обновлен:', updated);
+  } catch (error) {
+    console.error('Ошибка обновления блока:', error);
+    alert('Ошибка обновления блока: ' + (error as Error).message);
+  }
+};
+
+// Дублирование блока
+const handleDuplicateBlock = async (id: TBlockId) => {
+  try {
+    const duplicated = await blockService.duplicateBlock(id);
+    blocks.value.push(duplicated as any);
+    emit('block-added', duplicated as any);
+    console.log('✅ Блок продублирован:', duplicated);
+  } catch (error) {
+    console.error('Ошибка дублирования:', error);
+  }
+};
+
+// Удаление блока
+const handleDeleteBlock = async (id: TBlockId) => {
+  if (confirm('Удалить блок?')) {
+    try {
+      await blockService.deleteBlock(id);
+      blocks.value = blocks.value.filter(b => b.id !== id);
+      emit('block-deleted', id);
+      console.log('✅ Блок удален:', id);
+    } catch (error) {
+      console.error('Ошибка удаления:', error);
+    }
+  }
+};
+
+// Перемещение блоков
+const handleMoveUp = (id: TBlockId) => {
+  const index = blocks.value.findIndex(b => b.id === id);
+  if (index > 0) {
+    const temp = blocks.value[index];
+    blocks.value[index] = blocks.value[index - 1];
+    blocks.value[index - 1] = temp;
+  }
+};
+
+const handleMoveDown = (id: TBlockId) => {
+  const index = blocks.value.findIndex(b => b.id === id);
+  if (index < blocks.value.length - 1) {
+    const temp = blocks.value[index];
+    blocks.value[index] = blocks.value[index + 1];
+    blocks.value[index + 1] = temp;
+  }
+};
+
+// Работа с массивами в формах
+const addArrayItem = (field: any) => {
+  if (!formData[field.field]) {
+    formData[field.field] = [];
+  }
+  
+  const newItem: Record<string, any> = {};
+  field.itemFields?.forEach((itemField: any) => {
+    newItem[itemField.field] = itemField.defaultValue || '';
+  });
+  
+  formData[field.field].push(newItem);
+};
+
+const removeArrayItem = (fieldName: string, index: number) => {
+  formData[fieldName].splice(index, 1);
+};
+
+// Загрузка блоков
+onMounted(async () => {
+  try {
+    blocks.value = (await blockService.getAllBlocks()) as any;
+  } catch (error) {
+    console.error('Ошибка загрузки блоков:', error);
+  }
 });
 </script>
 
 <style scoped>
 .block-builder {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  background: #f5f5f5;
+  width: 100%;
+  background: #f8f9fa;
 }
 
+/* Toolbar */
 .block-builder__toolbar {
-  display: flex;
-  gap: 8px;
-  padding: 12px;
   background: white;
-  border-bottom: 1px solid #e0e0e0;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+}
+
+.block-builder__toolbar h2 {
+  margin: 0 0 1rem 0;
+  font-size: 1.25rem;
+  color: #2c3e50;
+}
+
+.toolbar-buttons {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
 }
 
 .toolbar-button {
-  padding: 8px 16px;
-  border: 1px solid #ddd;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.toolbar-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+/* Block list */
+.block-builder__list {
+  min-height: 400px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: #999;
+  font-size: 1.1rem;
   background: white;
+  border-radius: 8px;
+}
+
+.block-item {
+  position: relative;
+  margin-bottom: 2rem;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.block-item:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.block-item:hover .block-controls {
+  opacity: 1;
+}
+
+.block-controls {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  display: flex;
+  gap: 0.25rem;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  z-index: 10;
+}
+
+.control-btn {
+  padding: 0.5rem;
+  background: white;
+  border: 1px solid #ddd;
   border-radius: 4px;
+  cursor: pointer;
+  font-size: 1.2rem;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.control-btn:hover {
+  background: #f0f0f0;
+  transform: scale(1.1);
+}
+
+.control-btn.delete:hover {
+  background: #fee;
+  border-color: #fcc;
+}
+
+.control-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.modal {
+  background: white;
+  border-radius: 12px;
+  max-width: 600px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 2rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 2rem;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  transition: background 0.2s;
+}
+
+.close-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.modal-body {
+  padding: 2rem;
+}
+
+/* Form */
+.form-field {
+  margin-bottom: 1.5rem;
+}
+
+.form-field label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #2c3e50;
+}
+
+.form-field input[type="text"],
+.form-field input[type="number"],
+.form-field textarea,
+.form-field select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+}
+
+.form-field input[type="text"]:focus,
+.form-field input[type="number"]:focus,
+.form-field textarea:focus,
+.form-field select:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.form-field input[type="color"] {
+  width: 100px;
+  height: 40px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}
+
+.array-item {
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.array-item h4 {
+  margin: 0 0 1rem 0;
+  color: #667eea;
+}
+
+.btn-remove,
+.btn-add {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.9rem;
   cursor: pointer;
   transition: all 0.2s;
 }
 
-.toolbar-button:hover {
-  background: #f0f0f0;
-  border-color: #999;
+.btn-remove {
+  background: #fee;
+  color: #c00;
 }
 
-.block-builder__canvas {
-  flex: 1;
-  position: relative;
-  overflow: auto;
-  background: #fafafa;
-  background-image:
-    linear-gradient(rgba(0,0,0,.1) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0,0,0,.1) 1px, transparent 1px);
-  background-size: 20px 20px;
+.btn-remove:hover {
+  background: #fcc;
 }
 
-.block-builder__properties {
-  width: 300px;
-  background: white;
-  border-left: 1px solid #e0e0e0;
-  padding: 16px;
-  overflow-y: auto;
+.btn-add {
+  background: #e0f0ff;
+  color: #007bff;
 }
 
-.is-dragging .block-builder__canvas {
-  cursor: grabbing;
+.btn-add:hover {
+  background: #c0e0ff;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 2rem;
+}
+
+.btn-primary,
+.btn-secondary {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.btn-secondary {
+  background: #e0e0e0;
+  color: #333;
+}
+
+.btn-secondary:hover {
+  background: #d0d0d0;
 }
 </style>

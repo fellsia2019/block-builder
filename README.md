@@ -32,9 +32,41 @@ src/
 npm install block-builder
 ```
 
+### Для Vue3 проектов
+
+BlockBuilder предоставляет готовые Vue3 компоненты из коробки:
+
+```vue
+<template>
+  <BlockBuilderComponent :config="config" />
+</template>
+
+<script setup>
+import { BlockBuilderComponent } from 'block-builder/vue'
+import YourTextBlock from './components/YourTextBlock.vue'
+
+const config = {
+  availableBlockTypes: [
+    {
+      type: 'text',
+      label: 'Текст',
+      render: {
+        kind: 'component',
+        framework: 'vue',
+        component: YourTextBlock  // Ваш Vue SFC компонент!
+      },
+      defaultProps: { content: 'Hello' }
+    }
+  ]
+}
+</script>
+```
+
+📚 **[Полная документация Vue3 компонентов →](./VUE_COMPONENTS_USAGE.md)**
+
 ### Использование
 
-#### Основной API (Рекомендуемый способ)
+#### Основной API (Для Pure JS/Other frameworks)
 ```javascript
 import { BlockBuilder } from 'block-builder'
 import { blockConfigs } from './block-config.js'

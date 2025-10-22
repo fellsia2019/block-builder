@@ -329,6 +329,7 @@ export class DemoBlockBuilder {
         const countEl = document.getElementById('blocks-count');
         if (countEl) countEl.textContent = this.blocks.length;
         this.initializeVueComponents();
+        this.initializeCustomBlocks();
         this.bindBlockContentEvents();
     }
 
@@ -339,6 +340,8 @@ export class DemoBlockBuilder {
                 return this.renderHtmlTemplate(block, block.render.template);
             } else if (block.render.kind === 'component') {
                 return this.renderVueComponent(block);
+            } else if (block.render.kind === 'custom') {
+                return this.renderCustomBlock(block);
             }
         }
 
@@ -378,8 +381,33 @@ export class DemoBlockBuilder {
         return cfg.template;
     }
 
+    renderCustomBlock(block) {
+        // Для custom блоков создаем контейнер с уникальным ID
+        const containerId = `custom-block-${block.id}`;
+        return `<div id="${containerId}" data-block-id="${block.id}" data-custom-mount="true"></div>`;
+    }
+
     toggleVisibility(blockId) { const b = this.blocks.find(x => x.id === blockId); if (b) { b.visible = !b.visible; this.renderBlocks(); } }
     toggleLock(blockId) { const b = this.blocks.find(x => x.id === blockId); if (b) { b.locked = !b.locked; this.renderBlocks(); } }
+
+    initializeCustomBlocks() {
+        this.blocks.forEach(block => {
+            if (block.render && block.render.kind === 'custom' && block.render.mount) {
+                const containerId = `custom-block-${block.id}`;
+                const container = document.getElementById(containerId);
+                if (container && !container.hasAttribute('data-custom-mounted')) {
+                    try {
+                        // Вызываем функцию mount с контейнером и пропсами
+                        block.render.mount(container, block.props);
+                        container.setAttribute('data-custom-mounted', 'true');
+                    } catch (error) {
+                        console.error(`Ошибка монтирования custom блока ${block.id}:`, error);
+                        container.innerHTML = `<div style="color: red; padding: 10px;">Ошибка: ${error.message}</div>`;
+                    }
+                }
+            }
+        });
+    }
 
     initializeVueComponents() {
         this.blocks.forEach(block => {

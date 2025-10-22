@@ -7,7 +7,7 @@ import { TRenderRef } from '../core/types';
 /**
  * Извлекает HTML template из render-описания
  */
-export function getHtmlTemplate(render?: TRenderRef): string | null {
+export function getHtmlTemplate(render?: TRenderRef): string | ((props: Record<string, any>) => string) | null {
   if (!render) return null;
 
   if (render.kind === 'html') {
@@ -63,6 +63,13 @@ export function isExternalAdapter(render?: TRenderRef): boolean {
 }
 
 /**
+ * Проверяет, является ли render кастомным (с функцией mount)
+ */
+export function isCustomRender(render?: TRenderRef): boolean {
+  return render?.kind === 'custom';
+}
+
+/**
  * Получает framework из render-описания
  */
 export function getFramework(render?: TRenderRef): string | null {
@@ -78,6 +85,26 @@ export function getFramework(render?: TRenderRef): string | null {
 export function getAdapter(render?: TRenderRef): string | null {
   if (render?.kind === 'external') {
     return render.adapter;
+  }
+  return null;
+}
+
+/**
+ * Получает функцию mount из custom render-описания
+ */
+export function getCustomMount(render?: TRenderRef): ((container: HTMLElement, props: Record<string, any>) => void) | null {
+  if (render?.kind === 'custom') {
+    return render.mount;
+  }
+  return null;
+}
+
+/**
+ * Получает функцию unmount из custom render-описания
+ */
+export function getCustomUnmount(render?: TRenderRef): ((container: HTMLElement) => void) | null {
+  if (render?.kind === 'custom') {
+    return render.unmount || null;
   }
   return null;
 }
