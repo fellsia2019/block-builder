@@ -7,7 +7,6 @@
 export { default as BlockBuilderComponent } from './ui/components/BlockBuilder.vue'
 export { default as BlockComponent } from './ui/components/BlockComponent.vue'
 export { default as BlockProperties } from './ui/components/BlockProperties.vue'
-export { default as CardDetailModal } from './ui/components/CardDetailModal.vue'
 
 // Core для использования в Vue компонентах
 export * from './core/use-cases/BlockManagementUseCase'

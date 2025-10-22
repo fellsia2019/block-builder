@@ -36,7 +36,6 @@
     "dev:build": "rollup -c rollup.dev.cjs -w",
     "dev:server": "node dev-server.js",
     "dev": "concurrently -k -n BUILD,SERVER -c blue,green \"npm:dev:build\" \"npm:dev:server\"",
-    "devф": "npm run dev",
     "test": "jest",
     "lint": "eslint src/**/*.ts",
     "type-check": "tsc --noEmit",
