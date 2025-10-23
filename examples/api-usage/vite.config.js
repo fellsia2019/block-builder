@@ -9,7 +9,9 @@ export default defineConfig({
   },
   publicDir: path.resolve(__dirname, '../static'),
   server: {
-    port: 3002,
+    host: 'localhost',
+    port: 3003,
+    strictPort: true,
     open: true
   },
   optimizeDeps: {

@@ -19,7 +19,8 @@
   "workspaces": [
     "examples/vue3",
     "examples/pure-js-vite",
-    "examples/api-usage"
+    "examples/api-usage",
+    "examples/pure-js-cdn"
   ],
   "files": [
     "dist",
@@ -46,6 +47,7 @@
     "example:vue3": "npm run dev --workspace=examples/vue3",
     "example:pure-js": "npm run dev --workspace=examples/pure-js-vite",
     "example:api-usage": "npm run dev --workspace=examples/api-usage",
+    "example:cdn": "npm run dev --workspace=examples/pure-js-cdn",
     "examples:install": "npm install"
   },
   "keywords": [
