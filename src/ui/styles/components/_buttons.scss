@@ -66,6 +66,10 @@
     @include btn-variant(var(--bb-color-secondary), var(--bb-color-secondary-dark));
   }
 
+  &--success {
+    @include btn-variant(var(--bb-color-success), var(--bb-color-success-dark));
+  }
+
   &--danger {
     @include btn-variant(var(--bb-color-danger), var(--bb-color-danger-dark));
   }

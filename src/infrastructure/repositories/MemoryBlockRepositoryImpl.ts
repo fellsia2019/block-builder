@@ -8,8 +8,10 @@ import { IBlockRepository } from '../../core/ports/BlockRepository';
 export class MemoryBlockRepositoryImpl implements IBlockRepository {
   private blocks: Map<string, IBlockDto> = new Map();
 
-  async create(blockData: ICreateBlockDto): Promise<IBlockDto> {
-    const id = this.generateId();
+  async create(blockData: ICreateBlockDto & { id?: string }): Promise<IBlockDto> {
+    // Используем переданный ID, если он есть (для восстановления сохраненных блоков)
+    // Иначе генерируем новый ID
+    const id = blockData.id || this.generateId();
     const block: IBlockDto = {
       id,
       ...blockData,
@@ -39,8 +41,8 @@ export class MemoryBlockRepositoryImpl implements IBlockRepository {
         if (a.order !== undefined && b.order !== undefined) {
           return a.order - b.order;
         }
-        const dateA = a.metadata?.createdAt || new Date(0);
-        const dateB = b.metadata?.createdAt || new Date(0);
+        const dateA = a.metadata?.createdAt ? new Date(a.metadata.createdAt) : new Date(0);
+        const dateB = b.metadata?.createdAt ? new Date(b.metadata.createdAt) : new Date(0);
         return dateA.getTime() - dateB.getTime();
       })
       .map(block => ({ ...block }));

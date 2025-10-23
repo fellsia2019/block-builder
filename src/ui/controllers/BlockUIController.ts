@@ -17,6 +17,7 @@ export interface IBlockUIControllerConfig {
   containerId: string;
   blockConfigs: Record<string, any>;
   useCase: BlockManagementUseCase;
+  onSave?: (blocks: IBlockDto[]) => Promise<boolean> | boolean;
 }
 
 export class BlockUIController {
@@ -26,9 +27,11 @@ export class BlockUIController {
   private modalManager: ModalManager;
   private styleManager: StyleManager;
   private blocks: IBlockDto[] = [];
+  private onSave?: (blocks: IBlockDto[]) => Promise<boolean> | boolean;
 
   constructor(config: IBlockUIControllerConfig) {
     this.config = config;
+    this.onSave = config.onSave;
     
     // Инициализация сервисов (Dependency Injection)
     this.uiRenderer = new UIRenderer({
@@ -310,6 +313,31 @@ export class BlockUIController {
       await this.config.useCase.deleteBlock(block.id);
     }
     await this.refreshBlocks();
+  }
+
+  /**
+   * Сохранение всех блоков
+   */
+  async saveAllBlocksUI(): Promise<void> {
+    // Если колбэк сохранения не указан, показываем предупреждение
+    if (!this.onSave) {
+      this.showNotification('Функция сохранения не настроена. Передайте onSave в конфигурацию BlockBuilder.', 'error');
+      return;
+    }
+
+    try {
+      const blocks = await this.config.useCase.getAllBlocks();
+      const result = await Promise.resolve(this.onSave(blocks));
+
+      if (result === true) {
+        this.showNotification('Данные успешно сохранены', 'success');
+      } else {
+        this.showNotification('Произошла ошибка при сохранении', 'error');
+      }
+    } catch (error) {
+      console.error('Ошибка при сохранении блоков:', error);
+      this.showNotification('Произошла ошибка при сохранении', 'error');
+    }
   }
 
   /**

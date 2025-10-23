@@ -46,6 +46,9 @@ export class UIRenderer {
    */
   private renderControlButtons(): string {
     return `
+      <button onclick="blockBuilder.saveAllBlocksUI()" class="block-builder-btn block-builder-btn--success">
+        💾 Сохранить
+      </button>
       <button onclick="blockBuilder.clearAllBlocksUI()" class="block-builder-btn block-builder-btn--danger">
         🗑️ Очистить все
       </button>

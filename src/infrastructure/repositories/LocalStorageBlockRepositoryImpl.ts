@@ -14,7 +14,16 @@ export class LocalStorageBlockRepositoryImpl implements IBlockRepository {
       if (!stored) return new Map();
 
       const blocksArray = JSON.parse(stored) as IBlockDto[];
-      return new Map(blocksArray.map(block => [block.id, block]));
+      // Нормализуем даты (они приходят как строки из JSON)
+      const normalizedBlocks = blocksArray.map(block => ({
+        ...block,
+        metadata: block.metadata ? {
+          ...block.metadata,
+          createdAt: new Date(block.metadata.createdAt),
+          updatedAt: new Date(block.metadata.updatedAt)
+        } : undefined
+      }));
+      return new Map(normalizedBlocks.map(block => [block.id, block]));
     } catch (error) {
       console.error('Error loading blocks from localStorage:', error);
       return new Map();
@@ -30,11 +39,15 @@ export class LocalStorageBlockRepositoryImpl implements IBlockRepository {
     }
   }
 
-  async create(blockData: ICreateBlockDto): Promise<IBlockDto> {
-    const id = this.generateId();
+  async create(blockData: ICreateBlockDto & { id?: string }): Promise<IBlockDto> {
+    // Используем переданный ID, если он есть (для восстановления сохраненных блоков)
+    // Иначе генерируем новый ID
+    const id = blockData.id || this.generateId();
     const block: IBlockDto = {
       id,
       ...blockData,
+      visible: blockData.visible ?? true, // По умолчанию видимые
+      locked: blockData.locked ?? false, // По умолчанию не заблокированные
       metadata: {
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -64,8 +77,8 @@ export class LocalStorageBlockRepositoryImpl implements IBlockRepository {
         if (a.order !== undefined && b.order !== undefined) {
           return a.order - b.order;
         }
-        const dateA = a.metadata?.createdAt || new Date(0);
-        const dateB = b.metadata?.createdAt || new Date(0);
+        const dateA = a.metadata?.createdAt ? new Date(a.metadata.createdAt) : new Date(0);
+        const dateB = b.metadata?.createdAt ? new Date(b.metadata.createdAt) : new Date(0);
         return dateA.getTime() - dateB.getTime();
       })
       .map(block => ({ ...block }));

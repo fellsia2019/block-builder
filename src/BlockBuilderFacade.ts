@@ -25,6 +25,8 @@ export interface IBlockBuilderOptions {
     locale?: string;
     storage?: 'memory' | 'localStorage';
     autoRender?: boolean;
+    onSave?: (blocks: IBlockDto[]) => Promise<boolean> | boolean;
+    initialBlocks?: IBlockDto[];
 }
 
 /**
@@ -37,6 +39,7 @@ export class BlockBuilderFacade {
     private componentRegistry: IComponentRegistry;
     private blockConfigs: Record<string, any>;
     private uiController?: BlockUIController;
+    private onSave?: (blocks: IBlockDto[]) => Promise<boolean> | boolean;
 
     // Публичные настройки
     public readonly theme: string;
@@ -46,6 +49,7 @@ export class BlockBuilderFacade {
         this.blockConfigs = options.blockConfigs;
         this.theme = options.theme || 'light';
         this.locale = options.locale || 'ru';
+        this.onSave = options.onSave;
 
         // Инициализация репозитория (применяем Strategy pattern через опции)
         this.repository = options.repository || this.createDefaultRepository(options.storage);
@@ -59,9 +63,22 @@ export class BlockBuilderFacade {
         // Регистрация компонентов из конфигурации
         this.registerComponentsFromConfig();
 
+        // Асинхронная инициализация (загрузка блоков + UI)
+        this.initialize(options.containerId, options.initialBlocks, options.autoRender);
+    }
+
+    /**
+     * Асинхронная инициализация: загрузка начальных блоков и рендеринг UI
+     */
+    private async initialize(containerId: string, initialBlocks?: IBlockDto[], autoRender?: boolean): Promise<void> {
+        // Загрузка начальных блоков (если переданы)
+        if (initialBlocks && initialBlocks.length > 0) {
+            await this.loadInitialBlocks(initialBlocks);
+        }
+
         // Автоматический рендеринг UI (если требуется)
-        if (options.autoRender !== false && options.containerId) {
-            this.initUI(options.containerId);
+        if (autoRender !== false && containerId) {
+            await this.initUI(containerId);
         }
     }
 
@@ -72,7 +89,8 @@ export class BlockBuilderFacade {
         this.uiController = new BlockUIController({
             containerId,
             blockConfigs: this.blockConfigs,
-            useCase: this.useCase
+            useCase: this.useCase,
+            onSave: this.onSave
         });
 
         await this.uiController.init();
@@ -109,6 +127,37 @@ export class BlockBuilderFacade {
 
         if (Object.keys(components).length > 0) {
             this.useCase.registerComponents(components);
+        }
+    }
+
+    /**
+     * Загружает начальные блоки в репозиторий
+     */
+    private async loadInitialBlocks(blocks: IBlockDto[]): Promise<void> {
+        try {
+            for (const block of blocks) {
+                // Нормализуем даты (они могут прийти как строки из JSON/localStorage)
+                const normalizedBlock = {
+                    ...block,
+                    visible: block.visible !== undefined ? block.visible : true,
+                    locked: block.locked !== undefined ? block.locked : false,
+                    metadata: block.metadata ? {
+                        ...block.metadata,
+                        createdAt: block.metadata.createdAt instanceof Date 
+                            ? block.metadata.createdAt 
+                            : new Date(block.metadata.createdAt),
+                        updatedAt: block.metadata.updatedAt instanceof Date 
+                            ? block.metadata.updatedAt 
+                            : new Date(block.metadata.updatedAt)
+                    } : undefined
+                };
+                
+                // Создаем блок с сохранением оригинального ID
+                await this.repository.create(normalizedBlock as ICreateBlockDto & { id: string });
+            }
+            console.log(`✅ Загружено ${blocks.length} блоков из начальных данных`);
+        } catch (error) {
+            console.error('Ошибка загрузки начальных блоков:', error);
         }
     }
 
@@ -389,6 +438,13 @@ export class BlockBuilderFacade {
      */
     async clearAllBlocksUI(): Promise<void> {
         await this.uiController?.clearAllBlocksUI();
+    }
+
+    /**
+     * UI: Сохранение всех блоков
+     */
+    async saveAllBlocksUI(): Promise<void> {
+        await this.uiController?.saveAllBlocksUI();
     }
 
     /**

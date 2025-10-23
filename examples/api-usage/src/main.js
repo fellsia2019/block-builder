@@ -69,12 +69,28 @@ const blockConfigs = {
   }
 }
 
+// Загрузка сохранённых блоков из localStorage
+const loadSavedBlocks = () => {
+  try {
+    const savedData = localStorage.getItem('saved-blocks')
+    if (savedData) {
+      const blocks = JSON.parse(savedData)
+      console.log(`📦 Найдено ${blocks.length} сохранённых блоков`)
+      return blocks
+    }
+  } catch (error) {
+    console.error('Ошибка загрузки сохранённых блоков:', error)
+  }
+  return []
+}
+
 // Инициализация BlockBuilder БЕЗ готового UI
 // Мы будем использовать только программный API
 const blockBuilder = new BlockBuilder({
   containerId: 'hidden-container', // Скрытый контейнер
   blockConfigs: blockConfigs,
-  autoRender: false // Отключаем автоматический UI
+  autoRender: false, // Отключаем автоматический UI
+  initialBlocks: loadSavedBlocks() // Загружаем сохранённые блоки
 })
 
 console.log('✅ BlockBuilder API инициализирован')
@@ -83,6 +99,7 @@ console.log('📦 Используется только программный A
 // Элементы DOM
 const addTextBtn = document.getElementById('addTextBlock')
 const addImageBtn = document.getElementById('addImageBlock')
+const saveBlocksBtn = document.getElementById('saveBlocks')
 const getAllBlocksBtn = document.getElementById('getAllBlocks')
 const clearBlocksBtn = document.getElementById('clearBlocks')
 const blocksJsonEl = document.getElementById('blocksJson')
@@ -154,6 +171,29 @@ addImageBtn.addEventListener('click', async () => {
   await updateDisplay()
 })
 
+// Сохранение блоков (пример пользовательской реализации)
+saveBlocksBtn.addEventListener('click', async () => {
+  try {
+    const blocks = await blockBuilder.getAllBlocks()
+    
+    // Пример 1: Сохранение в localStorage
+    localStorage.setItem('saved-blocks', JSON.stringify(blocks))
+    
+    // Пример 2: Отправка на сервер (раскомментируйте при наличии API)
+    // await fetch('/api/blocks', {
+    //   method: 'POST',
+    //   headers: { 'Content-Type': 'application/json' },
+    //   body: JSON.stringify(blocks)
+    // })
+    
+    console.log('✅ Блоки успешно сохранены:', blocks)
+    alert(`✅ Успешно сохранено блоков: ${blocks.length}`)
+  } catch (error) {
+    console.error('❌ Ошибка сохранения:', error)
+    alert('❌ Ошибка при сохранении блоков')
+  }
+})
+
 // Получение всех блоков
 getAllBlocksBtn.addEventListener('click', async () => {
   const blocks = await blockBuilder.getAllBlocks()
@@ -205,11 +245,14 @@ window.deleteBlock = async (id) => {
 // Начальное отображение
 updateDisplay()
 
-// Добавим пару примеров для демонстрации
-setTimeout(() => {
-  addTextBtn.click()
-  setTimeout(() => {
-    addImageBtn.click()
-  }, 100)
+// Если блоков нет, добавим пару примеров для демонстрации
+setTimeout(async () => {
+  const blocks = await blockBuilder.getAllBlocks()
+  if (blocks.length === 0) {
+    addTextBtn.click()
+    setTimeout(() => {
+      addImageBtn.click()
+    }, 100)
+  }
 }, 500)
 

@@ -3,6 +3,12 @@
     <!-- Панель управления -->
     <div class="block-builder-controls">
       <button
+        @click="handleSave"
+        class="block-builder-btn block-builder-btn--success"
+      >
+        💾 Сохранить
+      </button>
+      <button
         @click="handleClearAll"
         class="block-builder-btn block-builder-btn--danger"
       >
@@ -196,7 +202,7 @@
             >
               <label :for="'field-' + field.field" class="block-builder-form-label">
                 {{ field.label }}
-                <span v-if="field.rules?.some(r => r.type === 'required')" class="required">*</span>
+                <span v-if="hasRequiredRule(field)" class="required">*</span>
               </label>
               
               <!-- Text input -->
@@ -341,6 +347,7 @@ import { UniversalValidator } from '../../utils/universalValidation';
 interface IBlockType {
   type: string;
   label: string;
+  title?: string;
   icon?: string;
   render?: any;
   defaultSettings?: any;
@@ -354,6 +361,8 @@ interface IProps {
   };
   blockRepository?: IBlockRepository;
   componentRegistry?: IComponentRegistry;
+  onSave?: (blocks: IBlock[]) => Promise<boolean> | boolean;
+  initialBlocks?: IBlock[];
 }
 
 const props = withDefaults(defineProps<IProps>(), {
@@ -403,6 +412,22 @@ const loadBlocks = async () => {
   }
 };
 
+// Загрузка начальных блоков
+const loadInitialBlocks = async () => {
+  if (!props.initialBlocks || props.initialBlocks.length === 0) {
+    return;
+  }
+
+  try {
+    for (const block of props.initialBlocks) {
+      await blockService.createBlock(block as any);
+    }
+    console.log(`✅ Загружено ${props.initialBlocks.length} блоков из начальных данных`);
+  } catch (error) {
+    console.error('Ошибка загрузки начальных блоков:', error);
+  }
+};
+
 const isVueComponent = (block: IBlock) => {
   return block.render?.kind === 'component' && block.render?.framework === 'vue';
 };
@@ -426,8 +451,10 @@ const closeTypeSelectionModal = () => {
 
 // Выбрать тип блока из модалки
 const selectBlockType = (type: string) => {
+  // Сохраняем позицию перед закрытием модалки, т.к. closeTypeSelectionModal() сбрасывает её
+  const position = selectedPosition.value;
   closeTypeSelectionModal();
-  openCreateModal(type, selectedPosition.value);
+  openCreateModal(type, position);
 };
 
 // Открыть модалку создания
@@ -514,12 +541,39 @@ const createBlock = async (): Promise<boolean> => {
       render: blockType.render
     } as any);
     
+    console.log('🔵 Блок создан:', newBlock.id, 'Позиция для вставки:', selectedPosition.value);
+    
     // Если указана позиция, вставляем блок в нужное место
     if (selectedPosition.value !== undefined) {
-      blocks.value.splice(selectedPosition.value, 0, newBlock as any);
-    } else {
-      blocks.value.push(newBlock as any);
+      // Получаем все блоки и перемещаем новый блок на нужную позицию
+      const allBlocks = await blockService.getAllBlocks() as any[];
+      console.log('🔵 Все блоки до reorder:', allBlocks.map((b: any) => ({ id: b.id, order: b.order })));
+      
+      const blockIds = allBlocks.map((b: any) => b.id);
+      console.log('🔵 IDs блоков:', blockIds);
+      
+      // Удаляем новый блок из конца
+      const newBlockIndex = blockIds.indexOf(newBlock.id);
+      if (newBlockIndex !== -1) {
+        blockIds.splice(newBlockIndex, 1);
+      }
+      console.log('🔵 IDs после удаления нового блока:', blockIds);
+      
+      // Вставляем на нужную позицию
+      blockIds.splice(selectedPosition.value, 0, newBlock.id);
+      console.log('🔵 IDs после вставки на позицию', selectedPosition.value, ':', blockIds);
+      
+      // Обновляем порядок
+      const reorderResult = await blockService.reorderBlocks(blockIds);
+      console.log('🔵 Результат reorderBlocks:', reorderResult);
+      
+      // Проверяем, что порядок обновился
+      const allBlocksAfter = await blockService.getAllBlocks() as any[];
+      console.log('🔵 Все блоки после reorder:', allBlocksAfter.map((b: any) => ({ id: b.id, order: b.order })));
     }
+    
+    // Перезагружаем блоки
+    await loadBlocks();
     
     emit('block-added', newBlock as any);
     console.log('✅ Блок создан:', newBlock);
@@ -637,6 +691,11 @@ const getBlockConfig = (type: string) => {
   return availableBlockTypes.value.find((bt: IBlockType) => bt.type === type);
 };
 
+// Проверка наличия правила required у поля
+const hasRequiredRule = (field: any): boolean => {
+  return field.rules?.some((r: any) => r.type === 'required') || false;
+};
+
 // Работа с массивами в формах
 const addArrayItem = (field: any) => {
   if (!formData[field.field]) {
@@ -697,6 +756,28 @@ const showNotification = (message: string, type: 'success' | 'error' | 'info' = 
   }, 2000);
 };
 
+// Сохранение всех блоков
+const handleSave = async () => {
+  // Если колбэк сохранения не указан, показываем предупреждение
+  if (!props.onSave) {
+    showNotification('Функция сохранения не настроена. Передайте onSave в пропсы компонента.', 'error');
+    return;
+  }
+
+  try {
+    const result = await Promise.resolve(props.onSave(blocks.value));
+
+    if (result === true) {
+      showNotification('Данные успешно сохранены', 'success');
+    } else {
+      showNotification('Произошла ошибка при сохранении', 'error');
+    }
+  } catch (error) {
+    console.error('Ошибка при сохранении блоков:', error);
+    showNotification('Произошла ошибка при сохранении', 'error');
+  }
+};
+
 // Очистка всех блоков
 const handleClearAll = async () => {
   if (confirm('Удалить все блоки?')) {
@@ -712,6 +793,9 @@ const handleClearAll = async () => {
 
 // Загрузка блоков
 onMounted(async () => {
+  // Сначала загружаем начальные блоки (если есть)
+  await loadInitialBlocks();
+  // Затем загружаем все блоки для отображения
   await loadBlocks();
 });
 </script>

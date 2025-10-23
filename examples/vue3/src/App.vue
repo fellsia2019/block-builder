@@ -14,6 +14,8 @@
       <BlockBuilderComponent 
         :config="{ availableBlockTypes }"
         :component-registry="registry"
+        :on-save="handleSave"
+        :initial-blocks="initialBlocks"
       />
     </div>
   </div>
@@ -47,6 +49,48 @@ const availableBlockTypes = ref(
     }, {}) || {}
   }))
 )
+
+// Загрузка сохранённых блоков из localStorage
+const loadSavedBlocks = () => {
+  try {
+    const savedData = localStorage.getItem('saved-blocks')
+    if (savedData) {
+      const blocks = JSON.parse(savedData)
+      console.log(`📦 Найдено ${blocks.length} сохранённых блоков`)
+      return blocks
+    }
+  } catch (error) {
+    console.error('Ошибка загрузки сохранённых блоков:', error)
+  }
+  return []
+}
+
+// Начальные блоки для загрузки при инициализации
+const initialBlocks = ref(loadSavedBlocks())
+
+// Функция сохранения блоков
+const handleSave = async (blocks) => {
+  console.log('💾 Сохранение блоков:', blocks)
+  
+  try {
+    // Здесь вы можете сохранять блоки любым способом:
+    // 1. Отправить на сервер через API
+    // await fetch('/api/blocks', { method: 'POST', body: JSON.stringify(blocks) })
+    
+    // 2. Сохранить в localStorage
+    localStorage.setItem('saved-blocks', JSON.stringify(blocks))
+    
+    // 3. Сохранить в IndexedDB
+    // await saveToIndexedDB(blocks)
+    
+    // Возвращаем true при успешном сохранении
+    return true
+  } catch (error) {
+    console.error('Ошибка сохранения:', error)
+    // Возвращаем false при ошибке
+    return false
+  }
+}
 
 console.log('✅ Vue3 Example инициализирован')
 console.log('📦 Доступные блоки:', Object.keys(blockConfigs))
