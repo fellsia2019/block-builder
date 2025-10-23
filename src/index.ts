@@ -10,6 +10,10 @@
 // Core - DTO
 export * from './core/dto/BlockDto';
 
+// Core - Types
+export type { IFormFieldConfig, IFieldValidationConfig, IFormGenerationConfig, TFieldType } from './core/types/form';
+export type { IValidationRule, TValidationRuleType, IValidationResult } from './core/types/validation';
+
 // Core - Entities
 export * from './core/entities/Block';
 
@@ -26,9 +30,10 @@ export * from './core/use-cases/BlockManagementUseCase';
 export * from './core/use-cases/ComponentManagementUseCase';
 export * from './core/use-cases/FormGenerationUseCase';
 
-// Core - Main API (главный класс пакета) - применен паттерн Facade
-export { BlockBuilderFacade as BlockBuilder } from './core/BlockBuilderFacade';
-export type { IBlockBuilderOptions } from './core/BlockBuilderFacade';
+// Main API (главный класс пакета) - применен паттерн Facade
+// Facade находится вне core/, так как связывает все слои (core, infrastructure, ui)
+export { BlockBuilderFacade as BlockBuilder } from './BlockBuilderFacade';
+export type { IBlockBuilderOptions } from './BlockBuilderFacade';
 
 // UI Services (для расширенного использования)
 export { StyleManager } from './ui/services/StyleManager';

@@ -33,10 +33,10 @@ export class ModalManager {
             ${options.bodyHTML}
           </div>
           <div class="block-builder-modal-footer">
-            <button onclick="blockBuilder.closeModal()" class="block-builder-btn block-builder-btn-secondary">
+            <button onclick="blockBuilder.closeModal()" class="block-builder-btn block-builder-btn--secondary">
               ${options.cancelButtonText || 'Отмена'}
             </button>
-            <button onclick="blockBuilder.submitModal()" class="block-builder-btn block-builder-btn-primary">
+            <button onclick="blockBuilder.submitModal()" class="block-builder-btn block-builder-btn--primary">
               ${options.submitButtonText || 'Сохранить'}
             </button>
           </div>

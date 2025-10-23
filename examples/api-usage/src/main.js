@@ -72,8 +72,7 @@ const blockConfigs = {
 const blockBuilder = new BlockBuilder({
   containerId: 'hidden-container', // Скрытый контейнер
   blockConfigs: blockConfigs,
-  // Отключаем автоматический UI (если такая опция есть)
-  renderUI: false
+  autoRender: false // Отключаем автоматический UI
 })
 
 console.log('✅ BlockBuilder API инициализирован')
@@ -91,9 +90,9 @@ const blocksContainerEl = document.getElementById('blocksContainer')
 let blockCounter = 0
 
 // Функция обновления отображения
-function updateDisplay() {
+async function updateDisplay() {
   // Получаем все блоки через API
-  const blocks = blockBuilder.getAllBlocks()
+  const blocks = await blockBuilder.getAllBlocks()
   
   // Обновляем JSON представление
   blocksJsonEl.textContent = JSON.stringify(blocks, null, 2)
@@ -112,19 +111,20 @@ function updateDisplay() {
         <button class="btn btn-danger btn-sm" onclick="deleteBlock('${block.id}')">Удалить</button>
       </div>
       <strong>${block.type}</strong> (ID: ${block.id})<br>
-      <small>Data: ${JSON.stringify(block.data).substring(0, 100)}...</small>
+      <small>Props: ${JSON.stringify(block.props).substring(0, 100)}...</small>
     `
     blocksContainerEl.appendChild(blockEl)
   })
 }
 
 // Добавление текстового блока через API
-addTextBtn.addEventListener('click', () => {
+addTextBtn.addEventListener('click', async () => {
   blockCounter++
   
-  const newBlock = blockBuilder.createBlock({
+  const newBlock = await blockBuilder.createBlock({
     type: 'text',
-    data: {
+    settings: {},
+    props: {
       content: `Текстовый блок #${blockCounter}`,
       fontSize: 16 + Math.floor(Math.random() * 16),
       color: `#${Math.floor(Math.random()*16777215).toString(16)}`
@@ -132,70 +132,71 @@ addTextBtn.addEventListener('click', () => {
   })
   
   console.log('✅ Создан блок:', newBlock)
-  updateDisplay()
+  await updateDisplay()
 })
 
 // Добавление блока изображения через API
-addImageBtn.addEventListener('click', () => {
+addImageBtn.addEventListener('click', async () => {
   blockCounter++
   
-  const newBlock = blockBuilder.createBlock({
+  const newBlock = await blockBuilder.createBlock({
     type: 'image',
-    data: {
+    settings: {},
+    props: {
       src: `/${['1.jpeg', '2.jpg', '3.png', 'qw.jpg', 'bear.jpg'][(blockCounter - 1) % 5]}`,
       alt: `Изображение ${blockCounter}`
     }
   })
   
   console.log('✅ Создан блок:', newBlock)
-  updateDisplay()
+  await updateDisplay()
 })
 
 // Получение всех блоков
-getAllBlocksBtn.addEventListener('click', () => {
-  const blocks = blockBuilder.getAllBlocks()
+getAllBlocksBtn.addEventListener('click', async () => {
+  const blocks = await blockBuilder.getAllBlocks()
   console.log('📦 Все блоки:', blocks)
   alert(`Всего блоков: ${blocks.length}\n\nСмотрите консоль для деталей`)
 })
 
 // Очистка всех блоков
-clearBlocksBtn.addEventListener('click', () => {
+clearBlocksBtn.addEventListener('click', async () => {
   if (confirm('Удалить все блоки?')) {
-    const blocks = blockBuilder.getAllBlocks()
-    blocks.forEach(block => {
-      blockBuilder.deleteBlock(block.id)
-    })
+    const blocks = await blockBuilder.getAllBlocks()
+    for (const block of blocks) {
+      await blockBuilder.deleteBlock(block.id)
+    }
     console.log('🗑️ Все блоки удалены')
-    updateDisplay()
+    await updateDisplay()
   }
 })
 
 // Глобальные функции для кнопок в DOM
-window.editBlock = (id) => {
-  const block = blockBuilder.getBlock(id)
+window.editBlock = async (id) => {
+  const block = await blockBuilder.getBlock(id)
   if (!block) {
     alert('Блок не найден')
     return
   }
   
-  const newContent = prompt('Новое содержимое:', JSON.stringify(block.data, null, 2))
+  const newContent = prompt('Новое содержимое:', JSON.stringify(block.props, null, 2))
   if (newContent) {
     try {
-      const newData = JSON.parse(newContent)
-      blockBuilder.updateBlock(id, newData)
+      const newProps = JSON.parse(newContent)
+      await blockBuilder.updateBlock(id, { props: newProps })
       console.log('✏️ Блок обновлен:', id)
-      updateDisplay()
+      await updateDisplay()
     } catch (e) {
       alert('Ошибка парсинга JSON: ' + e.message)
     }
   }
 }
 
-window.deleteBlock = (id) => {
+window.deleteBlock = async (id) => {
   if (confirm(`Удалить блок ${id}?`)) {
-    blockBuilder.deleteBlock(id)
+    await blockBuilder.deleteBlock(id)
     console.log('🗑️ Блок удален:', id)
-    updateDisplay()
+    await updateDisplay()
   }
 }
 

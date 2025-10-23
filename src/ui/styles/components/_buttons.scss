@@ -58,18 +58,15 @@
   }
 
   /* Модификаторы цвета */
-  &--primary,
-  &-primary {
+  &--primary {
     @include btn-variant(var(--bb-color-primary), var(--bb-color-primary-dark));
   }
 
-  &--secondary,
-  &-secondary {
+  &--secondary {
     @include btn-variant(var(--bb-color-secondary), var(--bb-color-secondary-dark));
   }
 
-  &--danger,
-  &-danger {
+  &--danger {
     @include btn-variant(var(--bb-color-danger), var(--bb-color-danger-dark));
   }
 }

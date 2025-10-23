@@ -3,15 +3,10 @@
  * Принцип единой ответственности (SRP)
  */
 
-export interface IFieldConfig {
-  field: string;
-  label: string;
-  type: string;
-  placeholder?: string;
-  defaultValue?: any;
-  options?: Array<{ value: string; label: string }>;
-  rules?: Array<{ type: string; message: string; value?: any }>;
-}
+import { IFormFieldConfig } from '../../core/types/form';
+
+// Алиас для обратной совместимости
+export type IFieldConfig = IFormFieldConfig;
 
 export class FormBuilder {
   /**

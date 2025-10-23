@@ -48,12 +48,12 @@ export class UIRenderer {
     return Object.keys(this.config.blockConfigs).map(type => {
       const config = this.config.blockConfigs[type];
       return `
-        <button onclick="blockBuilder.showAddBlockForm('${type}')" class="block-builder-btn block-builder-btn-primary">
+        <button onclick="blockBuilder.showAddBlockForm('${type}')" class="block-builder-btn block-builder-btn--primary">
           📝 Добавить ${config.title}
         </button>
       `;
     }).join('') + `
-      <button onclick="blockBuilder.clearAllBlocksUI()" class="block-builder-btn block-builder-btn-danger">
+      <button onclick="blockBuilder.clearAllBlocksUI()" class="block-builder-btn block-builder-btn--danger">
         🗑️ Очистить все
       </button>
     `;
