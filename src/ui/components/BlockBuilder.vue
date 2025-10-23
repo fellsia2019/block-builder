@@ -1,103 +1,150 @@
 <template>
-  <div class="block-builder">
-    <!-- Панель добавления блоков -->
-    <div class="block-builder__toolbar">
-      <h2>Добавить блок</h2>
-      <div class="toolbar-buttons">
-        <button
-          v-for="blockType in availableBlockTypes"
-          :key="blockType.type"
-          @click="openCreateModal(blockType.type)"
-          class="toolbar-button"
-        >
-          + {{ blockType.label }}
-        </button>
-      </div>
+  <div class="block-builder-app">
+    <!-- Панель управления -->
+    <div class="block-builder-controls">
+      <button
+        v-for="blockType in availableBlockTypes"
+        :key="blockType.type"
+        @click="openCreateModal(blockType.type)"
+        class="block-builder-btn block-builder-btn--primary"
+      >
+        📝 Добавить {{ blockType.label }}
+      </button>
+    </div>
+
+    <!-- Статистика -->
+    <div class="block-builder-stats">
+      <p>Всего блоков: <span>{{ blocks.length }}</span></p>
     </div>
 
     <!-- Список блоков -->
-    <div class="block-builder__list">
-      <div v-if="blocks.length === 0" class="empty-state">
-        <p>Добавьте первый блок используя кнопки выше</p>
-      </div>
+    <div class="block-builder-blocks">
+      <p v-if="blocks.length === 0" style="text-align: center; color: #666; padding: 40px;">
+        Блоков пока нет. Добавьте первый блок!
+      </p>
 
       <div
         v-for="(block, index) in blocks"
         :key="block.id"
-        class="block-item"
+        class="block-builder-block"
+        :class="{ locked: block.locked, hidden: !block.visible }"
       >
-        <!-- Контролы блока -->
-        <div class="block-controls">
-          <button 
-            @click="handleMoveUp(block.id)" 
-            class="control-btn" 
-            title="Переместить вверх"
-            :disabled="index === 0"
-          >
-            ⬆️
-          </button>
-          <button 
-            @click="handleMoveDown(block.id)" 
-            class="control-btn" 
-            title="Переместить вниз"
-            :disabled="index === blocks.length - 1"
-          >
-            ⬇️
-          </button>
-          <button @click="openEditModal(block)" class="control-btn" title="Редактировать">
-            ✏️
-          </button>
-          <button @click="handleDuplicateBlock(block.id)" class="control-btn" title="Дублировать">
-            📋
-          </button>
-          <button @click="handleDeleteBlock(block.id)" class="control-btn delete" title="Удалить">
-            🗑️
-          </button>
+        <!-- Заголовок блока -->
+        <div class="block-builder-block-header">
+          <div class="block-builder-block-info">
+            <span>📦 {{ getBlockConfig(block.type)?.title || block.type }}</span>
+            <small>ID: {{ block.id }}</small>
+            <span v-if="block.locked" class="locked-indicator">🔒</span>
+            <span v-if="!block.visible" class="hidden-indicator">👁️‍🗨️</span>
+          </div>
+          <div class="block-builder-block-controls">
+            <button 
+              @click="handleMoveUp(block.id)" 
+              class="block-builder-control-btn" 
+              title="Переместить вверх"
+              :disabled="index === 0"
+            >
+              ⬆️
+            </button>
+            <button 
+              @click="handleMoveDown(block.id)" 
+              class="block-builder-control-btn" 
+              title="Переместить вниз"
+              :disabled="index === blocks.length - 1"
+            >
+              ⬇️
+            </button>
+            <button 
+              @click="openEditModal(block)" 
+              class="block-builder-control-btn" 
+              title="Редактировать"
+            >
+              ✏️
+            </button>
+            <button 
+              @click="handleDuplicateBlock(block.id)" 
+              class="block-builder-control-btn" 
+              title="Дублировать"
+            >
+              📋
+            </button>
+            <button 
+              @click="handleToggleLock(block.id)" 
+              class="block-builder-control-btn" 
+              :title="block.locked ? 'Разблокировать' : 'Заблокировать'"
+            >
+              {{ block.locked ? '🔓' : '🔒' }}
+            </button>
+            <button 
+              @click="handleToggleVisibility(block.id)" 
+              class="block-builder-control-btn" 
+              :title="block.visible ? 'Скрыть' : 'Показать'"
+            >
+              {{ block.visible ? '👁️' : '👁️‍🗨️' }}
+            </button>
+            <button 
+              @click="handleDeleteBlock(block.id)" 
+              class="block-builder-control-btn" 
+              title="Удалить"
+            >
+              🗑️
+            </button>
+          </div>
         </div>
 
-        <!-- Рендер блока -->
-        <div class="block-content">
+        <!-- Содержимое блока -->
+        <div class="block-builder-block-content">
           <component
             v-if="isVueComponent(block)"
             :is="getVueComponent(block)"
             v-bind="block.props"
           />
-          <div v-else>Блок {{ block.type }}</div>
+          <div v-else class="block-content-fallback">
+            <strong>{{ getBlockConfig(block.type)?.title || block.type }}</strong>
+            <pre>{{ JSON.stringify(block.props, null, 2) }}</pre>
+          </div>
         </div>
       </div>
     </div>
 
     <!-- Модальное окно создания/редактирования -->
-    <div v-if="showModal" class="modal-overlay" @click="closeModal">
-      <div class="modal" @click.stop>
-        <div class="modal-header">
+    <div v-if="showModal" class="block-builder-modal" @click="closeModal">
+      <div class="block-builder-modal-content" @click.stop>
+        <div class="block-builder-modal-header">
           <h3>{{ modalMode === 'create' ? 'Создать' : 'Редактировать' }} {{ currentBlockType?.label }}</h3>
-          <button @click="closeModal" class="close-btn">×</button>
+          <button @click="closeModal" class="block-builder-modal-close">×</button>
         </div>
         
-        <div class="modal-body">
-          <form @submit.prevent="handleSubmit">
+        <div class="block-builder-modal-body">
+          <form @submit.prevent="handleSubmit" class="block-builder-form">
             <div
               v-for="field in currentBlockFields"
               :key="field.field"
-              class="form-field"
+              class="block-builder-form-group"
             >
-              <label>{{ field.label }}</label>
+              <label :for="'field-' + field.field" class="block-builder-form-label">
+                {{ field.label }}
+                <span v-if="field.rules?.some(r => r.type === 'required')" class="required">*</span>
+              </label>
               
               <!-- Text input -->
               <input
                 v-if="field.type === 'text'"
                 v-model="formData[field.field]"
                 type="text"
+                :id="'field-' + field.field"
                 :placeholder="field.placeholder"
+                class="block-builder-form-control"
               />
               
               <!-- Textarea -->
               <textarea
                 v-else-if="field.type === 'textarea'"
                 v-model="formData[field.field]"
+                :id="'field-' + field.field"
                 :placeholder="field.placeholder"
                 rows="4"
+                class="block-builder-form-control"
               ></textarea>
               
               <!-- Number -->
@@ -105,6 +152,9 @@
                 v-else-if="field.type === 'number'"
                 v-model.number="formData[field.field]"
                 type="number"
+                :id="'field-' + field.field"
+                :placeholder="field.placeholder"
+                class="block-builder-form-control"
               />
               
               <!-- Color -->
@@ -112,13 +162,18 @@
                 v-else-if="field.type === 'color'"
                 v-model="formData[field.field]"
                 type="color"
+                :id="'field-' + field.field"
+                class="block-builder-form-control"
               />
               
               <!-- Select -->
               <select
                 v-else-if="field.type === 'select'"
                 v-model="formData[field.field]"
+                :id="'field-' + field.field"
+                class="block-builder-form-control"
               >
+                <option value="">Выберите...</option>
                 <option
                   v-for="option in field.options"
                   :key="option.value"
@@ -129,12 +184,14 @@
               </select>
               
               <!-- Checkbox -->
-              <label v-else-if="field.type === 'checkbox'" class="checkbox-label">
+              <label v-else-if="field.type === 'checkbox'" class="block-builder-form-checkbox">
                 <input
                   v-model="formData[field.field]"
                   type="checkbox"
+                  :id="'field-' + field.field"
+                  class="block-builder-form-checkbox-input"
                 />
-                <span>{{ field.label }}</span>
+                <span class="block-builder-form-checkbox-label">{{ field.label }}</span>
               </label>
 
               <!-- Array (для cards) -->
@@ -173,16 +230,16 @@
                 </button>
               </div>
             </div>
-
-            <div class="modal-actions">
-              <button type="button" @click="closeModal" class="btn-secondary">
-                Отмена
-              </button>
-              <button type="submit" class="btn-primary">
-                {{ modalMode === 'create' ? 'Создать' : 'Сохранить' }}
-              </button>
-            </div>
           </form>
+        </div>
+
+        <div class="block-builder-modal-footer">
+          <button type="button" @click="closeModal" class="block-builder-btn block-builder-btn--secondary">
+            Отмена
+          </button>
+          <button type="submit" @click="handleSubmit" class="block-builder-btn block-builder-btn--primary">
+            {{ modalMode === 'create' ? 'Создать' : 'Сохранить' }}
+          </button>
         </div>
       </div>
     </div>
@@ -250,6 +307,14 @@ const currentBlockFields = computed(() => {
 });
 
 // Методы для работы с блоками
+const loadBlocks = async () => {
+  try {
+    blocks.value = await blockService.getAllBlocks() as any;
+  } catch (error) {
+    console.error('Ошибка загрузки блоков:', error);
+  }
+};
+
 const isVueComponent = (block: IBlock) => {
   return block.render?.kind === 'component' && block.render?.framework === 'vue';
 };
@@ -397,6 +462,29 @@ const handleMoveDown = (id: TBlockId) => {
   }
 };
 
+// Переключить блокировку блока
+const handleToggleLock = async (blockId: TBlockId) => {
+  const block = blocks.value.find((b) => b.id === blockId);
+  if (!block) return;
+  
+  await blockService.setBlockLocked(blockId, !block.locked);
+  await loadBlocks();
+};
+
+// Переключить видимость блока
+const handleToggleVisibility = async (blockId: TBlockId) => {
+  const block = blocks.value.find((b) => b.id === blockId);
+  if (!block) return;
+  
+  await blockService.setBlockVisible(blockId, !block.visible);
+  await loadBlocks();
+};
+
+// Получить конфигурацию блока по типу
+const getBlockConfig = (type: string) => {
+  return availableBlockTypes.value.find((bt: IBlockType) => bt.type === type);
+};
+
 // Работа с массивами в формах
 const addArrayItem = (field: any) => {
   if (!formData[field.field]) {
@@ -417,326 +505,13 @@ const removeArrayItem = (fieldName: string, index: number) => {
 
 // Загрузка блоков
 onMounted(async () => {
-  try {
-    blocks.value = (await blockService.getAllBlocks()) as any;
-  } catch (error) {
-    console.error('Ошибка загрузки блоков:', error);
-  }
+  await loadBlocks();
 });
 </script>
 
-<style scoped>
-.block-builder {
-  width: 100%;
-  background: #f8f9fa;
-}
+<style lang="scss">
+/* Импортируем общие стили Block Builder */
+@use '../styles/index.scss';
 
-/* Toolbar */
-.block-builder__toolbar {
-  background: white;
-  padding: 1.5rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  margin-bottom: 2rem;
-}
-
-.block-builder__toolbar h2 {
-  margin: 0 0 1rem 0;
-  font-size: 1.25rem;
-  color: #2c3e50;
-}
-
-.toolbar-buttons {
-  display: flex;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-}
-
-.toolbar-button {
-  padding: 0.75rem 1.5rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: 0.95rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.toolbar-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-}
-
-/* Block list */
-.block-builder__list {
-  min-height: 400px;
-}
-
-.empty-state {
-  text-align: center;
-  padding: 4rem 2rem;
-  color: #999;
-  font-size: 1.1rem;
-  background: white;
-  border-radius: 8px;
-}
-
-.block-item {
-  position: relative;
-  margin-bottom: 2rem;
-  background: white;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: all 0.2s ease;
-}
-
-.block-item:hover {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-}
-
-.block-item:hover .block-controls {
-  opacity: 1;
-}
-
-.block-controls {
-  position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
-  display: flex;
-  gap: 0.25rem;
-  opacity: 0;
-  transition: opacity 0.2s ease;
-  z-index: 10;
-}
-
-.control-btn {
-  padding: 0.5rem;
-  background: white;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 1.2rem;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.control-btn:hover {
-  background: #f0f0f0;
-  transform: scale(1.1);
-}
-
-.control-btn.delete:hover {
-  background: #fee;
-  border-color: #fcc;
-}
-
-.control-btn:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
-  pointer-events: none;
-}
-
-/* Modal */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  backdrop-filter: blur(4px);
-}
-
-.modal {
-  background: white;
-  border-radius: 12px;
-  max-width: 600px;
-  width: 90%;
-  max-height: 90vh;
-  overflow-y: auto;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-  animation: slideIn 0.3s ease;
-}
-
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: scale(0.9) translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-}
-
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1.5rem 2rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-}
-
-.modal-header h3 {
-  margin: 0;
-  font-size: 1.5rem;
-}
-
-.close-btn {
-  background: none;
-  border: none;
-  color: white;
-  font-size: 2rem;
-  cursor: pointer;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  transition: background 0.2s;
-}
-
-.close-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
-}
-
-.modal-body {
-  padding: 2rem;
-}
-
-/* Form */
-.form-field {
-  margin-bottom: 1.5rem;
-}
-
-.form-field label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 500;
-  color: #2c3e50;
-}
-
-.form-field input[type="text"],
-.form-field input[type="number"],
-.form-field textarea,
-.form-field select {
-  width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 1rem;
-  transition: border-color 0.2s;
-}
-
-.form-field input[type="text"]:focus,
-.form-field input[type="number"]:focus,
-.form-field textarea:focus,
-.form-field select:focus {
-  outline: none;
-  border-color: #667eea;
-}
-
-.form-field input[type="color"] {
-  width: 100px;
-  height: 40px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.checkbox-label {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  cursor: pointer;
-}
-
-.checkbox-label input[type="checkbox"] {
-  width: 20px;
-  height: 20px;
-  cursor: pointer;
-}
-
-.array-item {
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  padding: 1rem;
-  margin-bottom: 1rem;
-}
-
-.array-item h4 {
-  margin: 0 0 1rem 0;
-  color: #667eea;
-}
-
-.btn-remove,
-.btn-add {
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 4px;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.btn-remove {
-  background: #fee;
-  color: #c00;
-}
-
-.btn-remove:hover {
-  background: #fcc;
-}
-
-.btn-add {
-  background: #e0f0ff;
-  color: #007bff;
-}
-
-.btn-add:hover {
-  background: #c0e0ff;
-}
-
-.modal-actions {
-  display: flex;
-  gap: 1rem;
-  justify-content: flex-end;
-  margin-top: 2rem;
-}
-
-.btn-primary,
-.btn-secondary {
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 6px;
-  font-size: 1rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.btn-primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-}
-
-.btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-}
-
-.btn-secondary {
-  background: #e0e0e0;
-  color: #333;
-}
-
-.btn-secondary:hover {
-  background: #d0d0d0;
-}
+/* Все стили уже в SCSS - дополнительные специфичные стили не нужны */
 </style>

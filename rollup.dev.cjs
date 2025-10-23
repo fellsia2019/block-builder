@@ -1,31 +1,61 @@
 const resolve = require('@rollup/plugin-node-resolve');
 const commonjs = require('@rollup/plugin-commonjs');
 const typescript = require('@rollup/plugin-typescript');
-const terser = require('@rollup/plugin-terser');
+const dts = require('rollup-plugin-dts').default;
+const postcss = require('rollup-plugin-postcss');
+const postcssImport = require('postcss-import');
 
 const packageJson = require('./package.json');
 
-module.exports = {
-  input: 'src/index.ts',
-  output: [
-    {
-      file: packageJson.main,
-      format: 'cjs',
-      sourcemap: true,
-    },
-    {
-      file: packageJson.module,
-      format: 'esm',
-      sourcemap: true,
-    },
-  ],
-  plugins: [
-    resolve({ browser: true }),
-    commonjs(),
-    typescript({ tsconfig: './tsconfig.json' }),
-    terser(),
-  ],
-  external: ['vue'],
-};
-
-
+module.exports = [
+  {
+    input: 'src/index.ts',
+    output: [
+      {
+        file: packageJson.main,
+        format: 'cjs',
+        sourcemap: true,
+      },
+      {
+        file: packageJson.module,
+        format: 'esm',
+        sourcemap: true,
+      },
+    ],
+    plugins: [
+      // Обработка CSS/SCSS - инлайним в JS
+      postcss({
+        extensions: ['.css', '.scss'],
+        inject: false,
+        extract: false,
+        minimize: false, // В dev режиме не минимизируем
+        modules: false,
+        use: {
+          sass: {
+            api: 'modern-compiler',
+            silenceDeprecations: ['legacy-js-api'],
+          }
+        },
+        plugins: [postcssImport()],
+      }),
+      resolve({
+        browser: true,
+        extensions: ['.js', '.ts', '.css', '.scss'],
+      }),
+      commonjs(),
+      typescript({
+        tsconfig: './tsconfig.json',
+        declaration: true,
+        declarationDir: './dist',
+        declarationMap: true,
+      }),
+    ],
+    external: ['vue'],
+  },
+  {
+    input: './dist/index.d.ts',
+    output: [{ file: 'dist/index.d.ts', format: 'esm' }],
+    plugins: [dts()],
+    external: [/\.css$/, /\.scss$/],
+  },
+];

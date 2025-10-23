@@ -1,0 +1,99 @@
+/**
+ * Стили модальных окон по БЭМ с использованием SCSS
+ */
+
+// Анимации
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideIn {
+  from { 
+    transform: translateY(-50px); 
+    opacity: 0; 
+  }
+  to { 
+    transform: translateY(0); 
+    opacity: 1; 
+  }
+}
+
+/* Оверлей модального окна */
+.block-builder-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--bb-bg-overlay);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: var(--bb-z-index-modal);
+  animation: fadeIn var(--bb-transition-slow);
+}
+
+/* Контент модального окна */
+.block-builder-modal-content {
+  background: white;
+  border-radius: var(--bb-radius-lg);
+  box-shadow: var(--bb-shadow-lg);
+  max-width: 500px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  animation: slideIn var(--bb-transition-slow);
+}
+
+/* Заголовок модального окна */
+.block-builder-modal-header {
+  padding: var(--bb-spacing-xl);
+  border-bottom: 1px solid var(--bb-border-color-light);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  h3 {
+    margin: 0;
+    color: var(--bb-text-primary);
+    font-size: 1.25rem;
+  }
+}
+
+/* Кнопка закрытия модального окна */
+.block-builder-modal-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: var(--bb-text-tertiary);
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--bb-radius-sm);
+
+  &:hover {
+    background: var(--bb-bg-secondary);
+    color: var(--bb-text-primary);
+  }
+}
+
+/* Тело модального окна */
+.block-builder-modal-body {
+  padding: var(--bb-spacing-xl);
+}
+
+/* Footer модального окна */
+.block-builder-modal-footer {
+  padding: var(--bb-spacing-xl);
+  border-top: 1px solid var(--bb-border-color-light);
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+

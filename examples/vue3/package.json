@@ -10,12 +10,12 @@
   },
   "dependencies": {
     "block-builder": "file:../..",
-    "vue": "^3.5.22",
-    "swiper": "^11.1.15"
+    "swiper": "^11.1.15",
+    "vue": "^3.5.22"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.2.1",
+    "sass": "^1.93.2",
     "vite": "^6.0.5"
   }
 }
-
