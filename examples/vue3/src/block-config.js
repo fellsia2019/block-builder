@@ -19,6 +19,7 @@ import GallerySliderBlock from './components/GallerySliderBlock.vue'
 export const blockConfigs = {
   text: {
     title: 'Текстовый блок',
+    icon: '📝',
     description: 'Добавьте текстовый контент на страницу',
     render: {
       kind: 'component',
@@ -72,6 +73,7 @@ export const blockConfigs = {
 
   image: {
     title: 'Изображение',
+    icon: '🖼️',
     description: 'Добавьте изображение на страницу',
     render: {
       kind: 'component',
@@ -113,6 +115,7 @@ export const blockConfigs = {
 
   button: {
     title: 'Кнопка',
+    icon: '🔘',
     description: 'Добавьте интерактивную кнопку',
     render: {
       kind: 'component',
@@ -168,6 +171,7 @@ export const blockConfigs = {
 
   hero: {
     title: 'Hero секция',
+    icon: '🎯',
     description: 'Главная секция с заголовком и призывом к действию',
     render: {
       kind: 'component',
@@ -273,6 +277,7 @@ export const blockConfigs = {
 
   cardList: {
     title: 'Список карточек',
+    icon: '🃏',
     description: 'Сетка из карточек с изображениями и описаниями',
     render: {
       kind: 'component',
@@ -449,6 +454,7 @@ export const blockConfigs = {
 
   gallerySlider: {
     title: 'Слайдер галереи',
+    icon: '🎠',
     description: '✅ НАСТОЯЩИЙ Swiper из npm пакета! (только с полноценной сборкой)',
     render: {
       kind: 'component',

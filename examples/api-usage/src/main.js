@@ -5,6 +5,7 @@ import { BlockBuilder } from 'block-builder'
 const blockConfigs = {
   text: {
     title: 'Текстовый блок',
+    icon: '📝',
     description: 'Простой текстовый блок',
     render: {
       kind: 'html',
@@ -39,6 +40,7 @@ const blockConfigs = {
   },
   image: {
     title: 'Блок изображения',
+    icon: '🖼️',
     description: 'Простой блок с изображением',
     render: {
       kind: 'html',

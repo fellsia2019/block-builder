@@ -45,17 +45,28 @@ export class UIRenderer {
    * Рендеринг кнопок управления
    */
   private renderControlButtons(): string {
-    return Object.keys(this.config.blockConfigs).map(type => {
-      const config = this.config.blockConfigs[type];
-      return `
-        <button onclick="blockBuilder.showAddBlockForm('${type}')" class="block-builder-btn block-builder-btn--primary">
-          📝 Добавить ${config.title}
-        </button>
-      `;
-    }).join('') + `
+    return `
       <button onclick="blockBuilder.clearAllBlocksUI()" class="block-builder-btn block-builder-btn--danger">
         🗑️ Очистить все
       </button>
+    `;
+  }
+
+  /**
+   * Рендеринг кнопки добавления блока
+   */
+  private renderAddBlockButton(position: number): string {
+    return `
+      <div class="block-builder-add-block-separator">
+        <button 
+          onclick="blockBuilder.showBlockTypeSelectionModal(${position})" 
+          class="block-builder-add-block-btn"
+          title="Добавить блок"
+        >
+          <span class="block-builder-add-block-btn__icon">+</span>
+          <span class="block-builder-add-block-btn__text">Добавить блок</span>
+        </button>
+      </div>
     `;
   }
 
@@ -72,12 +83,28 @@ export class UIRenderer {
     countElement.textContent = blocks.length.toString();
 
     if (blocks.length === 0) {
-      blocksContainer.innerHTML = '<p style="text-align: center; color: #666; padding: 40px;">Блоков пока нет. Добавьте первый блок!</p>';
+      // Если блоков нет, показываем только одну кнопку добавления
+      blocksContainer.innerHTML = `
+        <div class="block-builder-empty-state">
+          ${this.renderAddBlockButton(0)}
+        </div>
+      `;
       return;
     }
 
-    // Рендерим блоки
-    blocksContainer.innerHTML = blocks.map(block => this.renderBlock(block)).join('');
+    // Рендерим блоки с кнопками добавления между ними
+    const blocksHTML: string[] = [];
+    
+    // Кнопка перед первым блоком
+    blocksHTML.push(this.renderAddBlockButton(0));
+    
+    // Блоки с кнопками после каждого
+    blocks.forEach((block, index) => {
+      blocksHTML.push(this.renderBlock(block));
+      blocksHTML.push(this.renderAddBlockButton(index + 1));
+    });
+
+    blocksContainer.innerHTML = blocksHTML.join('');
 
     // Инициализируем custom блоки после рендеринга
     setTimeout(() => {
@@ -263,4 +290,5 @@ export class UIRenderer {
     });
   }
 }
+
 

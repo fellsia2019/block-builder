@@ -14,6 +14,7 @@ import 'swiper/css/pagination'
 export const blockConfigs = {
   text: {
     title: 'Текстовый блок',
+    icon: '📝',
     description: 'Добавьте текстовый контент',
     render: {
       kind: 'html',
@@ -79,6 +80,7 @@ export const blockConfigs = {
 
   image: {
     title: 'Изображение',
+    icon: '🖼️',
     description: 'Добавьте изображение',
     render: {
       kind: 'html',
@@ -134,6 +136,7 @@ export const blockConfigs = {
 
   button: {
     title: 'Кнопка',
+    icon: '🔘',
     description: 'Интерактивная кнопка',
     render: {
       kind: 'html',
@@ -210,6 +213,7 @@ export const blockConfigs = {
 
   gallerySlider: {
     title: 'Слайдер галереи',
+    icon: '🎠',
     description: '✅ НАСТОЯЩИЙ Swiper из npm! (только с Vite сборкой)',
     render: {
       kind: 'custom',

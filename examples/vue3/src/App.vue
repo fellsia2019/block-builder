@@ -37,6 +37,7 @@ const availableBlockTypes = ref(
   Object.entries(blockConfigs).map(([type, cfg]) => ({
     type,
     label: cfg.title,
+    icon: cfg.icon, // Добавляем иконку
     render: cfg.render,
     fields: cfg.fields, // Передаем поля для форм
     defaultSettings: {},

@@ -3,12 +3,10 @@
     <!-- Панель управления -->
     <div class="block-builder-controls">
       <button
-        v-for="blockType in availableBlockTypes"
-        :key="blockType.type"
-        @click="openCreateModal(blockType.type)"
-        class="block-builder-btn block-builder-btn--primary"
+        @click="handleClearAll"
+        class="block-builder-btn block-builder-btn--danger"
       >
-        📝 Добавить {{ blockType.label }}
+        🗑️ Очистить все
       </button>
     </div>
 
@@ -19,89 +17,154 @@
 
     <!-- Список блоков -->
     <div class="block-builder-blocks">
-      <p v-if="blocks.length === 0" style="text-align: center; color: #666; padding: 40px;">
-        Блоков пока нет. Добавьте первый блок!
-      </p>
+      <!-- Пустое состояние -->
+      <div v-if="blocks.length === 0" class="block-builder-empty-state">
+        <div class="block-builder-add-block-separator">
+          <button 
+            @click="openBlockTypeSelectionModal(0)" 
+            class="block-builder-add-block-btn"
+            title="Добавить блок"
+          >
+            <span class="block-builder-add-block-btn__icon">+</span>
+            <span class="block-builder-add-block-btn__text">Добавить блок</span>
+          </button>
+        </div>
+      </div>
 
-      <div
-        v-for="(block, index) in blocks"
-        :key="block.id"
-        class="block-builder-block"
-        :class="{ locked: block.locked, hidden: !block.visible }"
-      >
-        <!-- Заголовок блока -->
-        <div class="block-builder-block-header">
-          <div class="block-builder-block-info">
-            <span>📦 {{ getBlockConfig(block.type)?.title || block.type }}</span>
-            <small>ID: {{ block.id }}</small>
-            <span v-if="block.locked" class="locked-indicator">🔒</span>
-            <span v-if="!block.visible" class="hidden-indicator">👁️‍🗨️</span>
-          </div>
-          <div class="block-builder-block-controls">
-            <button 
-              @click="handleMoveUp(block.id)" 
-              class="block-builder-control-btn" 
-              title="Переместить вверх"
-              :disabled="index === 0"
-            >
-              ⬆️
-            </button>
-            <button 
-              @click="handleMoveDown(block.id)" 
-              class="block-builder-control-btn" 
-              title="Переместить вниз"
-              :disabled="index === blocks.length - 1"
-            >
-              ⬇️
-            </button>
-            <button 
-              @click="openEditModal(block)" 
-              class="block-builder-control-btn" 
-              title="Редактировать"
-            >
-              ✏️
-            </button>
-            <button 
-              @click="handleDuplicateBlock(block.id)" 
-              class="block-builder-control-btn" 
-              title="Дублировать"
-            >
-              📋
-            </button>
-            <button 
-              @click="handleToggleLock(block.id)" 
-              class="block-builder-control-btn" 
-              :title="block.locked ? 'Разблокировать' : 'Заблокировать'"
-            >
-              {{ block.locked ? '🔓' : '🔒' }}
-            </button>
-            <button 
-              @click="handleToggleVisibility(block.id)" 
-              class="block-builder-control-btn" 
-              :title="block.visible ? 'Скрыть' : 'Показать'"
-            >
-              {{ block.visible ? '👁️' : '👁️‍🗨️' }}
-            </button>
-            <button 
-              @click="handleDeleteBlock(block.id)" 
-              class="block-builder-control-btn" 
-              title="Удалить"
-            >
-              🗑️
-            </button>
-          </div>
+      <!-- Блоки с кнопками добавления -->
+      <template v-else>
+        <!-- Кнопка перед первым блоком -->
+        <div class="block-builder-add-block-separator">
+          <button 
+            @click="openBlockTypeSelectionModal(0)" 
+            class="block-builder-add-block-btn"
+            title="Добавить блок"
+          >
+            <span class="block-builder-add-block-btn__icon">+</span>
+            <span class="block-builder-add-block-btn__text">Добавить блок</span>
+          </button>
         </div>
 
-        <!-- Содержимое блока -->
-        <div class="block-builder-block-content">
-          <component
-            v-if="isVueComponent(block)"
-            :is="getVueComponent(block)"
-            v-bind="block.props"
-          />
-          <div v-else class="block-content-fallback">
-            <strong>{{ getBlockConfig(block.type)?.title || block.type }}</strong>
-            <pre>{{ JSON.stringify(block.props, null, 2) }}</pre>
+        <template v-for="(block, index) in blocks" :key="block.id">
+          <div
+            class="block-builder-block"
+            :class="{ locked: block.locked, hidden: !block.visible }"
+          >
+            <!-- Заголовок блока -->
+            <div class="block-builder-block-header">
+              <div class="block-builder-block-info">
+                <span>📦 {{ getBlockConfig(block.type)?.title || block.type }}</span>
+                <small>ID: {{ block.id }}</small>
+                <span v-if="block.locked" class="locked-indicator">🔒</span>
+                <span v-if="!block.visible" class="hidden-indicator">👁️‍🗨️</span>
+              </div>
+              <div class="block-builder-block-controls">
+                <button 
+                  @click="handleMoveUp(block.id)" 
+                  class="block-builder-control-btn" 
+                  title="Переместить вверх"
+                  :disabled="index === 0"
+                >
+                  ⬆️
+                </button>
+                <button 
+                  @click="handleMoveDown(block.id)" 
+                  class="block-builder-control-btn" 
+                  title="Переместить вниз"
+                  :disabled="index === blocks.length - 1"
+                >
+                  ⬇️
+                </button>
+                <button 
+                  @click="openEditModal(block)" 
+                  class="block-builder-control-btn" 
+                  title="Редактировать"
+                >
+                  ✏️
+                </button>
+                <button 
+                  @click="handleDuplicateBlock(block.id)" 
+                  class="block-builder-control-btn" 
+                  title="Дублировать"
+                >
+                  📋
+                </button>
+                <button 
+                  @click="handleToggleLock(block.id)" 
+                  class="block-builder-control-btn" 
+                  :title="block.locked ? 'Разблокировать' : 'Заблокировать'"
+                >
+                  {{ block.locked ? '🔓' : '🔒' }}
+                </button>
+                <button 
+                  @click="handleToggleVisibility(block.id)" 
+                  class="block-builder-control-btn" 
+                  :title="block.visible ? 'Скрыть' : 'Показать'"
+                >
+                  {{ block.visible ? '👁️' : '👁️‍🗨️' }}
+                </button>
+                <button 
+                  @click="handleDeleteBlock(block.id)" 
+                  class="block-builder-control-btn" 
+                  title="Удалить"
+                >
+                  🗑️
+                </button>
+              </div>
+            </div>
+
+            <!-- Содержимое блока -->
+            <div class="block-builder-block-content">
+              <component
+                v-if="isVueComponent(block)"
+                :is="getVueComponent(block)"
+                v-bind="block.props"
+              />
+              <div v-else class="block-content-fallback">
+                <strong>{{ getBlockConfig(block.type)?.title || block.type }}</strong>
+                <pre>{{ JSON.stringify(block.props, null, 2) }}</pre>
+              </div>
+            </div>
+          </div>
+
+          <!-- Кнопка после каждого блока -->
+          <div class="block-builder-add-block-separator">
+            <button 
+              @click="openBlockTypeSelectionModal(index + 1)" 
+              class="block-builder-add-block-btn"
+              title="Добавить блок"
+            >
+              <span class="block-builder-add-block-btn__icon">+</span>
+              <span class="block-builder-add-block-btn__text">Добавить блок</span>
+            </button>
+          </div>
+        </template>
+      </template>
+    </div>
+
+    <!-- Модальное окно выбора типа блока -->
+    <div v-if="showTypeSelectionModal" class="block-builder-modal" @click="closeTypeSelectionModal">
+      <div class="block-builder-modal-content" @click.stop>
+        <div class="block-builder-modal-header">
+          <h3>Выберите тип блока</h3>
+          <button @click="closeTypeSelectionModal" class="block-builder-modal-close">×</button>
+        </div>
+        
+        <div class="block-builder-modal-body">
+          <div class="block-builder-block-type-selection">
+            <button
+              v-for="blockType in availableBlockTypes"
+              :key="blockType.type"
+              @click="selectBlockType(blockType.type)"
+              class="block-builder-block-type-card"
+            >
+              <span class="block-builder-block-type-card__icon">
+                {{ getBlockConfig(blockType.type)?.icon || '📦' }}
+              </span>
+              <span class="block-builder-block-type-card__title">
+                {{ blockType.label }}
+              </span>
+            </button>
           </div>
         </div>
       </div>
@@ -257,6 +320,7 @@ import { MemoryBlockRepositoryImpl } from '../../infrastructure/repositories/Mem
 interface IBlockType {
   type: string;
   label: string;
+  icon?: string;
   render?: any;
   defaultSettings?: any;
   defaultProps?: any;
@@ -289,9 +353,11 @@ const blockService = new BlockManagementUseCase(blockRepository, componentRegist
 // Состояние
 const blocks = ref<IBlock[]>([]);
 const showModal = ref(false);
+const showTypeSelectionModal = ref(false);
 const modalMode = ref<'create' | 'edit'>('create');
 const currentType = ref<string | null>(null);
 const currentBlockId = ref<TBlockId | null>(null);
+const selectedPosition = ref<number | undefined>(undefined);
 const formData = reactive<Record<string, any>>({});
 
 // Вычисляемые свойства
@@ -324,11 +390,30 @@ const getVueComponent = (block: IBlock) => {
   return componentRegistry.get(block.type);
 };
 
+// Открыть модалку выбора типа блока
+const openBlockTypeSelectionModal = (position?: number) => {
+  selectedPosition.value = position;
+  showTypeSelectionModal.value = true;
+};
+
+// Закрыть модалку выбора типа блока
+const closeTypeSelectionModal = () => {
+  showTypeSelectionModal.value = false;
+  selectedPosition.value = undefined;
+};
+
+// Выбрать тип блока из модалки
+const selectBlockType = (type: string) => {
+  closeTypeSelectionModal();
+  openCreateModal(type, selectedPosition.value);
+};
+
 // Открыть модалку создания
-const openCreateModal = (type: string) => {
+const openCreateModal = (type: string, position?: number) => {
   modalMode.value = 'create';
   currentType.value = type;
   currentBlockId.value = null;
+  selectedPosition.value = position;
   
   // Заполняем форму дефолтными значениями
   Object.keys(formData).forEach(key => delete formData[key]);
@@ -386,7 +471,13 @@ const createBlock = async () => {
       render: blockType.render
     } as any);
     
-    blocks.value.push(newBlock as any);
+    // Если указана позиция, вставляем блок в нужное место
+    if (selectedPosition.value !== undefined) {
+      blocks.value.splice(selectedPosition.value, 0, newBlock as any);
+    } else {
+      blocks.value.push(newBlock as any);
+    }
+    
     emit('block-added', newBlock as any);
     console.log('✅ Блок создан:', newBlock);
   } catch (error) {
@@ -501,6 +592,19 @@ const addArrayItem = (field: any) => {
 
 const removeArrayItem = (fieldName: string, index: number) => {
   formData[fieldName].splice(index, 1);
+};
+
+// Очистка всех блоков
+const handleClearAll = async () => {
+  if (confirm('Удалить все блоки?')) {
+    try {
+      await blockRepository.clear();
+      blocks.value = [];
+      console.log('✅ Все блоки удалены');
+    } catch (error) {
+      console.error('Ошибка очистки блоков:', error);
+    }
+  }
 };
 
 // Загрузка блоков

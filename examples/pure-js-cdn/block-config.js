@@ -8,6 +8,7 @@
 export const blockConfigs = {
   text: {
     title: 'Текстовый блок',
+    icon: '📝',
     description: 'Добавьте текстовый контент на страницу',
     // HTML template для рендеринга блока
     template: (props) => `
@@ -92,6 +93,7 @@ export const blockConfigs = {
 
   image: {
     title: 'Блок изображения',
+    icon: '🖼️',
     description: 'Добавьте изображение на страницу',
     // HTML template для рендеринга блока
     template: (props) => `
@@ -144,6 +146,7 @@ export const blockConfigs = {
 
   button: {
     title: 'Кнопка',
+    icon: '🔘',
     description: 'Добавьте интерактивную кнопку',
     fields: [
       {
@@ -210,6 +213,7 @@ export const blockConfigs = {
 
   cardlist: {
     title: 'Список карточек',
+    icon: '🃏',
     description: 'Создайте список карточек с информацией',
     // HTML template для pure-js рендера
     template: (props) => {
@@ -467,6 +471,7 @@ export const blockConfigs = {
 
   gallerySlider: {
     title: 'Галерея со слайдером',
+    icon: '🎠',
     description: 'Слайдер изображений с использованием Swiper.js',
     template: (props) => {
       const title = props.title || '';

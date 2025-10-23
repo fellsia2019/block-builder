@@ -10,6 +10,7 @@ export interface IModalOptions {
   onCancel: () => void;
   submitButtonText?: string;
   cancelButtonText?: string;
+  hideSubmitButton?: boolean;
 }
 
 export class ModalManager {
@@ -22,6 +23,19 @@ export class ModalManager {
     // Удаляем существующее модальное окно
     this.closeModal();
 
+    const footerHTML = options.hideSubmitButton 
+      ? '' 
+      : `
+        <div class="block-builder-modal-footer">
+          <button onclick="blockBuilder.closeModal()" class="block-builder-btn block-builder-btn--secondary">
+            ${options.cancelButtonText || 'Отмена'}
+          </button>
+          <button onclick="blockBuilder.submitModal()" class="block-builder-btn block-builder-btn--primary">
+            ${options.submitButtonText || 'Сохранить'}
+          </button>
+        </div>
+      `;
+
     const modalHTML = `
       <div id="${ModalManager.MODAL_ID}" class="block-builder-modal">
         <div class="block-builder-modal-content">
@@ -32,14 +46,7 @@ export class ModalManager {
           <div class="block-builder-modal-body">
             ${options.bodyHTML}
           </div>
-          <div class="block-builder-modal-footer">
-            <button onclick="blockBuilder.closeModal()" class="block-builder-btn block-builder-btn--secondary">
-              ${options.cancelButtonText || 'Отмена'}
-            </button>
-            <button onclick="blockBuilder.submitModal()" class="block-builder-btn block-builder-btn--primary">
-              ${options.submitButtonText || 'Сохранить'}
-            </button>
-          </div>
+          ${footerHTML}
         </div>
       </div>
     `;

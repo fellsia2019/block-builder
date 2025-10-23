@@ -138,4 +138,122 @@
   color: var(--bb-text-secondary);
 }
 
+/* Кнопка добавления блока */
+.block-builder-add-block-separator {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: var(--bb-spacing-xl) 0;
+  opacity: 0.3;
+  transition: opacity var(--bb-transition-base);
+
+  &:hover {
+    opacity: 1;
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(to right, transparent, var(--bb-border-color-light) 20%, var(--bb-border-color-light) 80%, transparent);
+    z-index: 0;
+  }
+}
+
+.block-builder-add-block-btn {
+  position: relative;
+  z-index: 1;
+  background: var(--bb-bg-primary);
+  border: 2px dashed var(--bb-color-primary);
+  border-radius: var(--bb-radius-md);
+  padding: 12px 24px;
+  cursor: pointer;
+  font-size: var(--bb-font-size-sm);
+  font-weight: 500;
+  color: var(--bb-color-primary);
+  transition: all var(--bb-transition-base);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  &__icon {
+    font-size: 20px;
+    font-weight: bold;
+    line-height: 1;
+  }
+
+  &__text {
+    font-family: var(--bb-font-family);
+  }
+
+  &:hover {
+    background: var(--bb-color-primary);
+    color: white;
+    border-style: solid;
+    transform: translateY(-2px);
+    box-shadow: var(--bb-shadow-md);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+/* Пустое состояние (когда блоков нет) */
+.block-builder-empty-state {
+  text-align: center;
+  padding: var(--bb-spacing-2xl) 0;
+}
+
+/* Модалка выбора типа блока */
+.block-builder-block-type-selection {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: var(--bb-spacing-md);
+  padding: var(--bb-spacing-md) 0;
+}
+
+.block-builder-block-type-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--bb-spacing-sm);
+  padding: var(--bb-spacing-xl);
+  border: 2px solid var(--bb-border-color-light);
+  border-radius: var(--bb-radius-md);
+  background: var(--bb-bg-primary);
+  cursor: pointer;
+  transition: all var(--bb-transition-base);
+  min-height: 120px;
+  text-align: center;
+
+  &__icon {
+    font-size: 32px;
+    line-height: 1;
+  }
+
+  &__title {
+    font-size: var(--bb-font-size-sm);
+    font-weight: 500;
+    color: var(--bb-text-primary);
+    font-family: var(--bb-font-family);
+  }
+
+  &:hover {
+    border-color: var(--bb-color-primary);
+    background: var(--bb-color-primary-light);
+    transform: translateY(-2px);
+    box-shadow: var(--bb-shadow-md);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
 

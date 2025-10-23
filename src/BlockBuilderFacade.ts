@@ -329,6 +329,20 @@ export class BlockBuilderFacade {
     // ===== UI МЕТОДЫ (делегируем UI контроллеру) =====
 
     /**
+     * Показать модалку выбора типа блока
+     */
+    showBlockTypeSelectionModal(position?: number): void {
+        this.uiController?.showBlockTypeSelectionModal(position);
+    }
+
+    /**
+     * Показать форму добавления блока на определенной позиции
+     */
+    showAddBlockFormAtPosition(type: string, position?: number): void {
+        this.uiController?.showAddBlockFormAtPosition(type, position);
+    }
+
+    /**
      * Показать форму добавления блока
      */
     showAddBlockForm(type: string): void {

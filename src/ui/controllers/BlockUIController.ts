@@ -62,9 +62,49 @@ export class BlockUIController {
   }
 
   /**
-   * Показать форму добавления блока
+   * Показать модалку выбора типа блока
    */
-  showAddBlockForm(type: string): void {
+  showBlockTypeSelectionModal(position?: number): void {
+    const blockTypesHTML = Object.entries(this.config.blockConfigs)
+      .map(([type, config]) => {
+        const title = config.title || type;
+        const icon = config.icon || '📦';
+        return `
+          <button 
+            onclick="blockBuilder.showAddBlockFormAtPosition('${type}', ${position !== undefined ? position : 'undefined'})" 
+            class="block-builder-block-type-card"
+          >
+            <span class="block-builder-block-type-card__icon">${icon}</span>
+            <span class="block-builder-block-type-card__title">${title}</span>
+          </button>
+        `;
+      })
+      .join('');
+
+    const bodyHTML = `
+      <div class="block-builder-block-type-selection">
+        ${blockTypesHTML}
+      </div>
+    `;
+
+    this.styleManager.injectModalStyles();
+    this.modalManager.showModal({
+      title: 'Выберите тип блока',
+      bodyHTML,
+      onSubmit: () => this.modalManager.closeModal(),
+      onCancel: () => this.modalManager.closeModal(),
+      submitButtonText: 'Отмена',
+      hideSubmitButton: true
+    });
+  }
+
+  /**
+   * Показать форму добавления блока на определенной позиции
+   */
+  showAddBlockFormAtPosition(type: string, position?: number): void {
+    // Закрываем модалку выбора типа
+    this.modalManager.closeModal();
+
     const config = this.config.blockConfigs[type];
     if (!config) {
       alert(`Конфигурация для типа "${type}" не найдена`);
@@ -82,16 +122,23 @@ export class BlockUIController {
     this.modalManager.showModal({
       title: `Добавить ${config.title}`,
       bodyHTML: formHTML,
-      onSubmit: () => this.handleCreateBlock(type, fields),
+      onSubmit: () => this.handleCreateBlock(type, fields, position),
       onCancel: () => this.modalManager.closeModal(),
       submitButtonText: 'Добавить'
     });
   }
 
   /**
+   * Показать форму добавления блока (старый метод для обратной совместимости)
+   */
+  showAddBlockForm(type: string): void {
+    this.showAddBlockFormAtPosition(type);
+  }
+
+  /**
    * Обработка создания блока
    */
-  private async handleCreateBlock(type: string, fields: IFieldConfig[]): Promise<void> {
+  private async handleCreateBlock(type: string, fields: IFieldConfig[], position?: number): Promise<void> {
     const props = this.modalManager.getFormData('block-builder-form');
 
     // Валидация
@@ -120,7 +167,12 @@ export class BlockUIController {
       }
 
       // Создаем блок через use case
-      await this.config.useCase.createBlock(createData);
+      const newBlock = await this.config.useCase.createBlock(createData);
+
+      // Если указана позиция, перемещаем блок на нужное место
+      if (position !== undefined && newBlock) {
+        await this.insertBlockAtPosition(newBlock.id, position);
+      }
 
       this.modalManager.closeModal();
       await this.refreshBlocks();
@@ -128,6 +180,26 @@ export class BlockUIController {
       const errorMessage = error instanceof Error ? error.message : String(error);
       alert(`Ошибка создания блока: ${errorMessage}`);
     }
+  }
+
+  /**
+   * Вставка блока на определенную позицию
+   */
+  private async insertBlockAtPosition(blockId: string, position: number): Promise<void> {
+    const allBlocks = await this.config.useCase.getAllBlocks();
+    const blockIds = allBlocks.map(b => b.id);
+    
+    // Удаляем новый блок из конца
+    const newBlockIndex = blockIds.indexOf(blockId);
+    if (newBlockIndex !== -1) {
+      blockIds.splice(newBlockIndex, 1);
+    }
+    
+    // Вставляем на нужную позицию
+    blockIds.splice(position, 0, blockId);
+    
+    // Обновляем порядок
+    await this.config.useCase.reorderBlocks(blockIds);
   }
 
   /**
