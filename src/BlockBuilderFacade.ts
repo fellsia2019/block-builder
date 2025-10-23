@@ -406,6 +406,13 @@ export class BlockBuilderFacade {
     }
 
     /**
+     * Копирование ID блока в буфер обмена
+     */
+    copyBlockId(blockId: string): void {
+        this.uiController?.copyBlockId(blockId);
+    }
+
+    /**
      * Закрытие модального окна
      */
     closeModal(): void {

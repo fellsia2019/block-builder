@@ -54,7 +54,16 @@
             <div class="block-builder-block-header">
               <div class="block-builder-block-info">
                 <span>📦 {{ getBlockConfig(block.type)?.title || block.type }}</span>
-                <small>ID: {{ block.id }}</small>
+                <small class="block-builder-block-id">
+                  ID: {{ block.id }}
+                  <button 
+                    @click="handleCopyId(block.id)" 
+                    class="block-builder-copy-id-btn" 
+                    title="Копировать ID"
+                  >
+                    📋
+                  </button>
+                </small>
                 <span v-if="block.locked" class="locked-indicator">🔒</span>
                 <span v-if="!block.visible" class="hidden-indicator">👁️‍🗨️</span>
               </div>
@@ -198,6 +207,7 @@
                 :id="'field-' + field.field"
                 :placeholder="field.placeholder"
                 class="block-builder-form-control"
+                :class="{ 'error': formErrors[field.field] }"
               />
               
               <!-- Textarea -->
@@ -208,6 +218,7 @@
                 :placeholder="field.placeholder"
                 rows="4"
                 class="block-builder-form-control"
+                :class="{ 'error': formErrors[field.field] }"
               ></textarea>
               
               <!-- Number -->
@@ -218,6 +229,7 @@
                 :id="'field-' + field.field"
                 :placeholder="field.placeholder"
                 class="block-builder-form-control"
+                :class="{ 'error': formErrors[field.field] }"
               />
               
               <!-- Color -->
@@ -227,6 +239,7 @@
                 type="color"
                 :id="'field-' + field.field"
                 class="block-builder-form-control"
+                :class="{ 'error': formErrors[field.field] }"
               />
               
               <!-- Select -->
@@ -235,6 +248,7 @@
                 v-model="formData[field.field]"
                 :id="'field-' + field.field"
                 class="block-builder-form-control"
+                :class="{ 'error': formErrors[field.field] }"
               >
                 <option value="">Выберите...</option>
                 <option
@@ -292,6 +306,11 @@
                   + Добавить {{ field.itemLabel || 'элемент' }}
                 </button>
               </div>
+              
+              <!-- Ошибки валидации (общие для всех типов полей) -->
+              <div v-if="formErrors[field.field]" class="block-builder-form-errors">
+                <span v-for="error in formErrors[field.field]" :key="error" class="error">{{ error }}</span>
+              </div>
             </div>
           </form>
         </div>
@@ -316,6 +335,8 @@ import { BlockManagementUseCase } from '../../core/use-cases/BlockManagementUseC
 import { IBlockRepository } from '../../core/ports/BlockRepository';
 import { IComponentRegistry } from '../../core/ports/ComponentRegistry';
 import { MemoryBlockRepositoryImpl } from '../../infrastructure/repositories/MemoryBlockRepositoryImpl';
+import { copyToClipboard } from '../../utils/copyToClipboard';
+import { UniversalValidator } from '../../utils/universalValidation';
 
 interface IBlockType {
   type: string;
@@ -359,6 +380,7 @@ const currentType = ref<string | null>(null);
 const currentBlockId = ref<TBlockId | null>(null);
 const selectedPosition = ref<number | undefined>(undefined);
 const formData = reactive<Record<string, any>>({});
+const formErrors = reactive<Record<string, string[]>>({});
 
 // Вычисляемые свойства
 const availableBlockTypes = computed(() => props.config?.availableBlockTypes || []);
@@ -444,24 +466,45 @@ const closeModal = () => {
   currentType.value = null;
   currentBlockId.value = null;
   Object.keys(formData).forEach(key => delete formData[key]);
+  Object.keys(formErrors).forEach(key => delete formErrors[key]);
 };
 
 // Отправка формы
 const handleSubmit = async () => {
+  let success = false;
+  
   if (modalMode.value === 'create') {
-    await createBlock();
+    success = await createBlock();
   } else {
-    await updateBlock();
+    success = await updateBlock();
   }
-  closeModal();
+  
+  // Закрываем модалку только если успешно
+  if (success) {
+    closeModal();
+  }
 };
 
 // Создание блока
-const createBlock = async () => {
-  if (!currentType.value) return;
+const createBlock = async (): Promise<boolean> => {
+  if (!currentType.value) return false;
   
   const blockType = currentBlockType.value;
-  if (!blockType) return;
+  if (!blockType) return false;
+  
+  // Валидация формы с помощью UniversalValidator
+  const fields = currentBlockFields.value;
+  const validation = UniversalValidator.validateForm(formData, fields);
+  
+  // Очищаем старые ошибки
+  Object.keys(formErrors).forEach(key => delete formErrors[key]);
+  
+  if (!validation.isValid) {
+    // Копируем ошибки в reactive объект
+    Object.assign(formErrors, validation.errors);
+    console.log('❌ Ошибки валидации:', validation.errors);
+    return false;
+  }
   
   try {
     const newBlock = await blockService.createBlock({
@@ -480,15 +523,31 @@ const createBlock = async () => {
     
     emit('block-added', newBlock as any);
     console.log('✅ Блок создан:', newBlock);
+    return true;
   } catch (error) {
     console.error('Ошибка создания блока:', error);
     alert('Ошибка создания блока: ' + (error as Error).message);
+    return false;
   }
 };
 
 // Обновление блока
-const updateBlock = async () => {
-  if (!currentBlockId.value) return;
+const updateBlock = async (): Promise<boolean> => {
+  if (!currentBlockId.value) return false;
+  
+  // Валидация формы с помощью UniversalValidator
+  const fields = currentBlockFields.value;
+  const validation = UniversalValidator.validateForm(formData, fields);
+  
+  // Очищаем старые ошибки
+  Object.keys(formErrors).forEach(key => delete formErrors[key]);
+  
+  if (!validation.isValid) {
+    // Копируем ошибки в reactive объект
+    Object.assign(formErrors, validation.errors);
+    console.log('❌ Ошибки валидации:', validation.errors);
+    return false;
+  }
   
   try {
     const updated = await blockService.updateBlock(currentBlockId.value, {
@@ -502,9 +561,11 @@ const updateBlock = async () => {
     
     emit('block-updated', updated as any);
     console.log('✅ Блок обновлен:', updated);
+    return true;
   } catch (error) {
     console.error('Ошибка обновления блока:', error);
     alert('Ошибка обновления блока: ' + (error as Error).message);
+    return false;
   }
 };
 
@@ -594,6 +655,48 @@ const removeArrayItem = (fieldName: string, index: number) => {
   formData[fieldName].splice(index, 1);
 };
 
+// Копирование ID блока
+const handleCopyId = (blockId: TBlockId) => {
+  const success = copyToClipboard(blockId as string);
+  if (success) {
+    showNotification(`ID скопирован: ${blockId}`, 'success');
+  }
+};
+
+// Показать уведомление
+const showNotification = (message: string, type: 'success' | 'error' | 'info' = 'info') => {
+  const notification = document.createElement('div');
+  notification.className = 'block-builder-notification';
+  notification.textContent = message;
+  
+  const colors = {
+    success: '#4caf50',
+    error: '#dc3545',
+    info: '#007bff'
+  };
+  
+  notification.style.cssText = `
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: ${colors[type]};
+    color: white;
+    padding: 12px 20px;
+    border-radius: 4px;
+    z-index: 10000;
+    font-size: 14px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    animation: fadeIn 0.3s ease-in-out;
+  `;
+  document.body.appendChild(notification);
+
+  // Удаляем уведомление через 2 секунды
+  setTimeout(() => {
+    notification.style.animation = 'fadeOut 0.3s ease-in-out';
+    setTimeout(() => notification.remove(), 300);
+  }, 2000);
+};
+
 // Очистка всех блоков
 const handleClearAll = async () => {
   if (confirm('Удалить все блоки?')) {
@@ -617,5 +720,24 @@ onMounted(async () => {
 /* Импортируем общие стили Block Builder */
 @use '../styles/index.scss';
 
-/* Все стили уже в SCSS - дополнительные специфичные стили не нужны */
+/* Стили для ошибок валидации */
+.block-builder-form-errors {
+  margin-top: 4px;
+  font-size: 12px;
+  
+  .error {
+    display: block;
+    color: var(--bb-color-danger, #dc3545);
+    margin-bottom: 2px;
+  }
+}
+
+.block-builder-form-control.error {
+  border-color: var(--bb-color-danger, #dc3545);
+  
+  &:focus {
+    border-color: var(--bb-color-danger, #dc3545);
+    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+  }
+}
 </style>

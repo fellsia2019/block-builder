@@ -126,7 +126,14 @@ export class UIRenderer {
         <div class="block-builder-block-header">
           <div class="block-builder-block-info">
             <span>📦 ${config.title}</span>
-            <small>ID: ${block.id}</small>
+            <small class="block-builder-block-id">
+              ID: ${block.id}
+              <button 
+                onclick="blockBuilder.copyBlockId('${block.id}')" 
+                class="block-builder-copy-id-btn" 
+                title="Копировать ID"
+              >📋</button>
+            </small>
             ${block.locked ? '<span class="locked-indicator">🔒</span>' : ''}
             ${!block.visible ? '<span class="hidden-indicator">👁️‍🗨️</span>' : ''}
           </div>

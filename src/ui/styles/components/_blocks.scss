@@ -56,6 +56,36 @@
   gap: 10px;
 }
 
+/* ID блока с кнопкой копирования */
+.block-builder-block-id {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* Кнопка копирования ID */
+.block-builder-copy-id-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: var(--bb-font-size-xs);
+  padding: 2px 4px;
+  border-radius: var(--bb-radius-sm);
+  transition: all var(--bb-transition-fast);
+  opacity: 0.6;
+  line-height: 1;
+
+  &:hover {
+    opacity: 1;
+    background: rgba(var(--bb-color-primary-rgb, 102, 126, 234), 0.1);
+    transform: scale(1.1);
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
 .block-builder-block-controls {
   display: flex;
   gap: 5px;
@@ -253,6 +283,31 @@
 
   &:active {
     transform: translateY(0);
+  }
+}
+
+/* Уведомления (для копирования ID и других действий) */
+.block-builder-notification {
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateX(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes fadeOut {
+    from {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    to {
+      opacity: 0;
+      transform: translateX(20px);
+    }
   }
 }
 

@@ -61,6 +61,27 @@
   &:invalid {
     border-color: var(--bb-color-danger);
   }
+
+  &.error {
+    border-color: var(--bb-color-danger);
+
+    &:focus {
+      border-color: var(--bb-color-danger);
+      box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+    }
+  }
+}
+
+/* Ошибки валидации */
+.block-builder-form-errors {
+  margin-top: 4px;
+  font-size: 12px;
+
+  .error {
+    display: block;
+    color: var(--bb-color-danger);
+    margin-bottom: 2px;
+  }
 }
 
 /* Checkbox */

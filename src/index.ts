@@ -68,3 +68,6 @@ export { buildBlockHierarchy, cloneBlock, getAllChildren, isChildOf } from './ut
 
 // Экспорт генератора/валидатора форм под уникальными именами
 export { JavaScriptValidator as UtilsJavaScriptValidator, JavaScriptFormGenerator as UtilsJavaScriptFormGenerator } from './utils/validation';
+
+// Утилита для копирования в буфер обмена
+export { copyToClipboard } from './utils/copyToClipboard';

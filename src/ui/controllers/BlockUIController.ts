@@ -10,6 +10,8 @@ import { UIRenderer } from '../services/UIRenderer';
 import { FormBuilder, IFieldConfig } from '../services/FormBuilder';
 import { ModalManager } from '../services/ModalManager';
 import { StyleManager } from '../services/StyleManager';
+import { copyToClipboard } from '../../utils/copyToClipboard';
+import { UniversalValidator } from '../../utils/universalValidation';
 
 export interface IBlockUIControllerConfig {
   containerId: string;
@@ -107,7 +109,7 @@ export class BlockUIController {
 
     const config = this.config.blockConfigs[type];
     if (!config) {
-      alert(`Конфигурация для типа "${type}" не найдена`);
+      this.showError(`Конфигурация для типа "${type}" не найдена`);
       return;
     }
 
@@ -123,7 +125,7 @@ export class BlockUIController {
       title: `Добавить ${config.title}`,
       bodyHTML: formHTML,
       onSubmit: () => this.handleCreateBlock(type, fields, position),
-      onCancel: () => this.modalManager.closeModal(),
+      onCancel: () => this.closeModalWithCleanup(),
       submitButtonText: 'Добавить'
     });
   }
@@ -141,10 +143,10 @@ export class BlockUIController {
   private async handleCreateBlock(type: string, fields: IFieldConfig[], position?: number): Promise<void> {
     const props = this.modalManager.getFormData('block-builder-form');
 
-    // Валидация
-    const validation = this.formBuilder.validateForm(props, fields);
-    if (!validation.valid) {
-      alert(validation.message);
+    // Валидация с помощью UniversalValidator
+    const validation = UniversalValidator.validateForm(props, fields);
+    if (!validation.isValid) {
+      this.showValidationErrors(validation.errors);
       return;
     }
 
@@ -178,7 +180,7 @@ export class BlockUIController {
       await this.refreshBlocks();
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      alert(`Ошибка создания блока: ${errorMessage}`);
+      this.showError(`Ошибка создания блока: ${errorMessage}`);
     }
   }
 
@@ -211,7 +213,7 @@ export class BlockUIController {
 
     const config = this.config.blockConfigs[block.type];
     if (!config) {
-      alert(`Конфигурация для типа "${block.type}" не найдена`);
+      this.showError(`Конфигурация для типа "${block.type}" не найдена`);
       return;
     }
 
@@ -227,7 +229,7 @@ export class BlockUIController {
       title: `Редактировать ${config.title}`,
       bodyHTML: formHTML,
       onSubmit: () => this.handleUpdateBlock(blockId, block.type, fields),
-      onCancel: () => this.modalManager.closeModal(),
+      onCancel: () => this.closeModalWithCleanup(),
       submitButtonText: 'Сохранить'
     });
   }
@@ -238,10 +240,10 @@ export class BlockUIController {
   private async handleUpdateBlock(blockId: string, type: string, fields: IFieldConfig[]): Promise<void> {
     const props = this.modalManager.getFormData('block-builder-form');
 
-    // Валидация
-    const validation = this.formBuilder.validateForm(props, fields);
-    if (!validation.valid) {
-      alert(validation.message);
+    // Валидация с помощью UniversalValidator
+    const validation = UniversalValidator.validateForm(props, fields);
+    if (!validation.isValid) {
+      this.showValidationErrors(validation.errors);
       return;
     }
 
@@ -253,7 +255,7 @@ export class BlockUIController {
       await this.refreshBlocks();
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      alert(`Ошибка обновления блока: ${errorMessage}`);
+      this.showError(`Ошибка обновления блока: ${errorMessage}`);
     }
   }
 
@@ -347,10 +349,118 @@ export class BlockUIController {
   }
 
   /**
+   * Копирование ID блока в буфер обмена
+   */
+  copyBlockId(blockId: string): void {
+    const success = copyToClipboard(blockId);
+    if (success) {
+      this.showNotification(`ID скопирован: ${blockId}`, 'success');
+    }
+  }
+
+  /**
+   * Показать уведомление (универсальный метод)
+   */
+  private showNotification(message: string, type: 'success' | 'error' | 'info' = 'info'): void {
+    const notification = document.createElement('div');
+    notification.className = 'block-builder-notification';
+    notification.textContent = message;
+    
+    const colors = {
+      success: '#4caf50',
+      error: '#dc3545',
+      info: '#007bff'
+    };
+    
+    notification.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: ${colors[type]};
+      color: white;
+      padding: 12px 20px;
+      border-radius: 4px;
+      z-index: 10000;
+      font-size: 14px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      animation: fadeIn 0.3s ease-in-out;
+    `;
+    document.body.appendChild(notification);
+
+    // Удаляем уведомление через 2 секунды
+    setTimeout(() => {
+      notification.style.animation = 'fadeOut 0.3s ease-in-out';
+      setTimeout(() => notification.remove(), 300);
+    }, 2000);
+  }
+
+  /**
+   * Показать ошибки валидации в форме
+   */
+  private showValidationErrors(errors: Record<string, string[]>): void {
+    // Сначала очищаем все старые ошибки
+    this.clearValidationErrors();
+
+    // Добавляем новые ошибки
+    Object.entries(errors).forEach(([fieldName, fieldErrors]) => {
+      const input = document.querySelector(`[name="${fieldName}"]`) as HTMLElement;
+      if (input) {
+        // Добавляем класс ошибки к полю
+        input.classList.add('error');
+
+        // Создаем контейнер для ошибок
+        const errorContainer = document.createElement('div');
+        errorContainer.className = 'block-builder-form-errors';
+        errorContainer.setAttribute('data-field', fieldName);
+
+        fieldErrors.forEach(error => {
+          const errorSpan = document.createElement('span');
+          errorSpan.className = 'error';
+          errorSpan.textContent = error;
+          errorContainer.appendChild(errorSpan);
+        });
+
+        // Вставляем контейнер с ошибками после поля
+        input.parentElement?.appendChild(errorContainer);
+      }
+    });
+  }
+
+  /**
+   * Очистить все ошибки валидации
+   */
+  private clearValidationErrors(): void {
+    // Убираем класс error у всех полей
+    document.querySelectorAll('.block-builder-form-control.error').forEach(input => {
+      input.classList.remove('error');
+    });
+
+    // Удаляем все контейнеры с ошибками
+    document.querySelectorAll('.block-builder-form-errors').forEach(container => {
+      container.remove();
+    });
+  }
+
+  /**
+   * Показать ошибку
+   */
+  private showError(message: string): void {
+    this.showNotification(message, 'error');
+  }
+
+  /**
+   * Закрытие модального окна с очисткой ошибок
+   */
+  private closeModalWithCleanup(): void {
+    this.clearValidationErrors();
+    this.modalManager.closeModal();
+  }
+
+  /**
    * Закрытие модального окна (публичный метод)
    */
   closeModal(): void {
-    this.modalManager.closeModal();
+    this.closeModalWithCleanup();
   }
 
   /**
