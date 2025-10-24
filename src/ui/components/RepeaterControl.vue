@@ -76,6 +76,7 @@
             v-for="field in fields"
             :key="field.field"
             class="repeater-control__field"
+            :class="{ 'error': hasFieldError(index, field.field) }"
           >
             <label
               :for="getFieldId(item._id, field.field)"
@@ -443,6 +444,20 @@ export default {
       initializeItems();
     });
 
+    // Expose метод для программного раскрытия элемента (для скролла к ошибкам)
+    const expandItem = (index) => {
+      const item = items.value[index];
+      if (item && collapsedItems.value[item._id]) {
+        delete collapsedItems.value[item._id];
+      }
+    };
+
+    // Expose метод для проверки, свернут ли элемент
+    const isItemCollapsed = (index) => {
+      const item = items.value[index];
+      return item ? !!collapsedItems.value[item._id] : false;
+    };
+
     return {
       items,
       collapsedItems,
@@ -460,7 +475,9 @@ export default {
       isFieldRequired,
       getItemCountLabel,
       getFieldErrors,
-      hasFieldError
+      hasFieldError,
+      expandItem,
+      isItemCollapsed
     };
   }
 };

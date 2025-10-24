@@ -19,6 +19,7 @@ import HeroBlock from './components/HeroBlock.vue'
 import FeatureCard from './components/FeatureCard.vue'
 import GallerySliderBlock from './components/GallerySliderBlock.vue'
 import SpacedContentBlock from './components/SpacedContentBlock.vue'
+import RichCardListBlock from './components/RichCardListBlock.vue'
 
 // ✅ АСИНХРОННЫЙ импорт компонента (загружается по требованию)
 const Counter = defineAsyncComponent(() => import('./components/Counter.vue'))
@@ -865,6 +866,344 @@ export const blockConfigs = {
         }
       }
     ]
+  },
+
+  richCardList: {
+    title: '🎯 Богатые карточки (тест)',
+    icon: '💎',
+    description: 'Тестовый блок с множеством полей в каждой карточке',
+    render: {
+      kind: 'component',
+      framework: 'vue',
+      component: RichCardListBlock
+    },
+    fields: [
+      {
+        field: 'sectionTitle',
+        label: 'Заголовок секции',
+        type: 'text',
+        placeholder: 'Наши продукты',
+        rules: [],
+        defaultValue: 'Наши продукты'
+      },
+      {
+        field: 'titleColor',
+        label: 'Цвет заголовка секции',
+        type: 'color',
+        rules: [],
+        defaultValue: '#333333'
+      },
+      {
+        field: 'titleSize',
+        label: 'Размер заголовка секции (px)',
+        type: 'number',
+        rules: [
+          { type: 'min', value: 16, message: 'Минимум: 16px' },
+          { type: 'max', value: 72, message: 'Максимум: 72px' }
+        ],
+        defaultValue: 32
+      },
+      {
+        field: 'titleAlign',
+        label: 'Выравнивание заголовка',
+        type: 'select',
+        options: [
+          { value: 'left', label: 'По левому краю' },
+          { value: 'center', label: 'По центру' },
+          { value: 'right', label: 'По правому краю' }
+        ],
+        rules: [],
+        defaultValue: 'center'
+      },
+      
+      // Карточки через repeater
+      {
+        field: 'cards',
+        label: 'Карточки',
+        type: 'repeater',
+        defaultValue: [
+          {
+            title: 'Премиум продукт',
+            subtitle: 'Лучшее решение 2024',
+            text: 'Инновационный продукт с передовыми технологиями для вашего бизнеса',
+            detailedText: 'Полное описание включает все особенности и преимущества данного продукта. Идеально подходит для малого и среднего бизнеса.',
+            link: 'https://example.com/product-1',
+            linkTarget: '_blank',
+            buttonText: 'Узнать подробнее',
+            image: '/1.jpeg',
+            imageMobile: '/1.jpeg',
+            imageAlt: 'Премиум продукт',
+            backgroundColor: '#ffffff',
+            textColor: '#333333',
+            meetingPlace: 'Конференц-зал "Альфа", БЦ "Столица"',
+            meetingTime: '15:00, 25 октября 2024',
+            participantsCount: '50'
+          },
+          {
+            title: 'Стандарт версия',
+            subtitle: 'Оптимальный выбор',
+            text: 'Проверенное решение для ежедневных задач с отличным соотношением цены и качества',
+            detailedText: 'Включает базовый функционал, необходимый для эффективной работы. Легко масштабируется при росте вашего бизнеса.',
+            link: 'https://example.com/product-2',
+            linkTarget: '_self',
+            buttonText: 'Подробности',
+            image: '/2.jpg',
+            imageMobile: '/2.jpg',
+            imageAlt: 'Стандарт версия',
+            backgroundColor: '#f8f9fa',
+            textColor: '#212529',
+            meetingPlace: 'Офис компании, 3 этаж',
+            meetingTime: '10:30, 26 октября 2024',
+            participantsCount: '25'
+          },
+          {
+            title: 'Корпоративное решение',
+            subtitle: 'Для крупного бизнеса',
+            text: 'Масштабируемое решение с расширенными возможностями для корпоративного уровня',
+            detailedText: 'Полная кастомизация, интеграция с существующими системами, приоритетная техническая поддержка 24/7.',
+            link: 'https://example.com/product-3',
+            linkTarget: '_blank',
+            buttonText: 'Связаться с нами',
+            image: '/3.png',
+            imageMobile: '/3.png',
+            imageAlt: 'Корпоративное решение',
+            backgroundColor: '#e7f3ff',
+            textColor: '#004085',
+            meetingPlace: 'Гостиница "Метрополь", зал "Премьер"',
+            meetingTime: '14:00, 27 октября 2024',
+            participantsCount: '100'
+          }
+        ],
+        repeaterConfig: {
+          itemTitle: 'Карточка',
+          addButtonText: 'Добавить карточку',
+          removeButtonText: 'Удалить',
+          min: 1,
+          max: 20,
+          collapsible: true,
+          fields: [
+            {
+              field: 'title',
+              label: 'Заголовок',
+              type: 'text',
+              placeholder: 'Название продукта',
+              rules: [{ type: 'required', message: 'Заголовок обязателен' }],
+              defaultValue: ''
+            },
+            {
+              field: 'subtitle',
+              label: 'Подзаголовок',
+              type: 'text',
+              placeholder: 'Краткое описание',
+              rules: [],
+              defaultValue: ''
+            },
+            {
+              field: 'text',
+              label: 'Основной текст',
+              type: 'textarea',
+              placeholder: 'Основное описание продукта...',
+              rules: [{ type: 'required', message: 'Основной текст обязателен' }],
+              defaultValue: ''
+            },
+            {
+              field: 'detailedText',
+              label: 'Детальное описание',
+              type: 'textarea',
+              placeholder: 'Подробное описание со всеми деталями...',
+              rules: [],
+              defaultValue: ''
+            },
+            {
+              field: 'link',
+              label: 'Ссылка',
+              type: 'text',
+              placeholder: 'https://example.com',
+              rules: [
+                { type: 'required', message: 'Ссылка обязательна' },
+                { type: 'pattern', value: '^https?://', message: 'Ссылка должна начинаться с http:// или https://' }
+              ],
+              defaultValue: 'https://example.com'
+            },
+            {
+              field: 'linkTarget',
+              label: 'Открытие ссылки',
+              type: 'select',
+              options: [
+                { value: '_self', label: 'В текущей вкладке' },
+                { value: '_blank', label: 'В новой вкладке' }
+              ],
+              rules: [],
+              defaultValue: '_blank'
+            },
+            {
+              field: 'buttonText',
+              label: 'Текст кнопки',
+              type: 'text',
+              placeholder: 'Подробнее',
+              rules: [{ type: 'required', message: 'Текст кнопки обязателен' }],
+              defaultValue: 'Подробнее'
+            },
+            {
+              field: 'image',
+              label: 'Изображение (десктоп)',
+              type: 'text',
+              placeholder: '/путь/к/изображению.jpg',
+              rules: [],
+              defaultValue: '/2.jpg'
+            },
+            {
+              field: 'imageMobile',
+              label: 'Изображение (мобильное)',
+              type: 'text',
+              placeholder: '/путь/к/мобильному-изображению.jpg',
+              rules: [],
+              defaultValue: '/2.jpg'
+            },
+            {
+              field: 'imageAlt',
+              label: 'Альтернативный текст изображения',
+              type: 'text',
+              placeholder: 'Описание изображения для доступности',
+              rules: [],
+              defaultValue: ''
+            },
+            {
+              field: 'backgroundColor',
+              label: 'Цвет фона карточки',
+              type: 'color',
+              rules: [],
+              defaultValue: '#ffffff'
+            },
+            {
+              field: 'textColor',
+              label: 'Цвет текста карточки',
+              type: 'color',
+              rules: [],
+              defaultValue: '#333333'
+            },
+            {
+              field: 'meetingPlace',
+              label: 'Место встречи',
+              type: 'text',
+              placeholder: 'Конференц-зал, офис...',
+              rules: [{ type: 'required', message: 'Место встречи обязательно' }],
+              defaultValue: ''
+            },
+            {
+              field: 'meetingTime',
+              label: 'Время встречи',
+              type: 'text',
+              placeholder: '15:00, 25 октября 2024',
+              rules: [{ type: 'required', message: 'Время встречи обязательно' }],
+              defaultValue: ''
+            },
+            {
+              field: 'participantsCount',
+              label: 'Количество участников',
+              type: 'number',
+              placeholder: '50',
+              rules: [
+                { type: 'required', message: 'Количество участников обязательно' },
+                { type: 'min', value: 1, message: 'Минимум 1 участник' }
+              ],
+              defaultValue: ''
+            }
+          ]
+        }
+      },
+
+      // Общие настройки отображения
+      {
+        field: 'cardMinWidth',
+        label: 'Минимальная ширина карточки (px)',
+        type: 'number',
+        rules: [
+          { type: 'min', value: 200, message: 'Минимум: 200px' },
+          { type: 'max', value: 600, message: 'Максимум: 600px' }
+        ],
+        defaultValue: 300
+      },
+      {
+        field: 'gap',
+        label: 'Отступ между карточками (px)',
+        type: 'number',
+        rules: [
+          { type: 'min', value: 0, message: 'Минимум: 0px' },
+          { type: 'max', value: 100, message: 'Максимум: 100px' }
+        ],
+        defaultValue: 24
+      },
+      {
+        field: 'cardDefaultBg',
+        label: 'Цвет фона карточек по умолчанию',
+        type: 'color',
+        rules: [],
+        defaultValue: '#ffffff'
+      },
+      {
+        field: 'cardDefaultTextColor',
+        label: 'Цвет текста карточек по умолчанию',
+        type: 'color',
+        rules: [],
+        defaultValue: '#333333'
+      },
+      {
+        field: 'cardBorderRadius',
+        label: 'Скругление углов карточек (px)',
+        type: 'number',
+        rules: [
+          { type: 'min', value: 0, message: 'Минимум: 0px' },
+          { type: 'max', value: 50, message: 'Максимум: 50px' }
+        ],
+        defaultValue: 12
+      },
+      {
+        field: 'cardShadow',
+        label: 'Тень карточек',
+        type: 'select',
+        options: [
+          { value: 'none', label: 'Без тени' },
+          { value: '0 2px 8px rgba(0, 0, 0, 0.08)', label: 'Легкая' },
+          { value: '0 4px 12px rgba(0, 0, 0, 0.1)', label: 'Средняя' },
+          { value: '0 8px 24px rgba(0, 0, 0, 0.15)', label: 'Сильная' }
+        ],
+        rules: [],
+        defaultValue: '0 4px 12px rgba(0, 0, 0, 0.1)'
+      },
+      {
+        field: 'buttonColor',
+        label: 'Цвет кнопок',
+        type: 'color',
+        rules: [],
+        defaultValue: '#667eea'
+      },
+      {
+        field: 'buttonTextColor',
+        label: 'Цвет текста кнопок',
+        type: 'color',
+        rules: [],
+        defaultValue: '#ffffff'
+      },
+      {
+        field: 'buttonBorderRadius',
+        label: 'Скругление кнопок (px)',
+        type: 'number',
+        rules: [
+          { type: 'min', value: 0, message: 'Минимум: 0px' },
+          { type: 'max', value: 50, message: 'Максимум: 50px' }
+        ],
+        defaultValue: 6
+      }
+    ],
+    spacingOptions: {
+      spacingTypes: ['margin-top', 'margin-bottom', 'padding-top', 'padding-bottom'],
+      config: {
+        min: 0,
+        max: 120,
+        step: 8
+      }
+    }
   }
 }
 

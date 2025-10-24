@@ -222,7 +222,7 @@ export class RepeaterControlRenderer {
     switch (field.type) {
       case 'textarea':
         return `
-          <div class="repeater-control__field">
+          <div class="repeater-control__field ${hasError ? 'error' : ''}">
             <label for="${fieldId}" class="repeater-control__field-label">
               ${field.label}
               ${required ? '<span class="required">*</span>' : ''}
@@ -242,7 +242,7 @@ export class RepeaterControlRenderer {
 
       case 'select':
         return `
-          <div class="repeater-control__field">
+          <div class="repeater-control__field ${hasError ? 'error' : ''}">
             <label for="${fieldId}" class="repeater-control__field-label">
               ${field.label}
               ${required ? '<span class="required">*</span>' : ''}
@@ -265,7 +265,7 @@ export class RepeaterControlRenderer {
 
       case 'number':
         return `
-          <div class="repeater-control__field">
+          <div class="repeater-control__field ${hasError ? 'error' : ''}">
             <label for="${fieldId}" class="repeater-control__field-label">
               ${field.label}
               ${required ? '<span class="required">*</span>' : ''}
@@ -286,7 +286,7 @@ export class RepeaterControlRenderer {
 
       case 'color':
         return `
-          <div class="repeater-control__field">
+          <div class="repeater-control__field ${hasError ? 'error' : ''}">
             <label for="${fieldId}" class="repeater-control__field-label">
               ${field.label}
               ${required ? '<span class="required">*</span>' : ''}
@@ -306,7 +306,7 @@ export class RepeaterControlRenderer {
 
       case 'checkbox':
         return `
-          <div class="repeater-control__field">
+          <div class="repeater-control__field ${hasError ? 'error' : ''}">
             <label class="repeater-control__field-checkbox">
               <input
                 type="checkbox"
@@ -323,7 +323,7 @@ export class RepeaterControlRenderer {
       case 'url':
       case 'email':
         return `
-          <div class="repeater-control__field">
+          <div class="repeater-control__field ${hasError ? 'error' : ''}">
             <label for="${fieldId}" class="repeater-control__field-label">
               ${field.label}
               ${required ? '<span class="required">*</span>' : ''}
@@ -344,7 +344,7 @@ export class RepeaterControlRenderer {
 
       default: // text
         return `
-          <div class="repeater-control__field">
+          <div class="repeater-control__field ${hasError ? 'error' : ''}">
             <label for="${fieldId}" class="repeater-control__field-label">
               ${field.label}
               ${required ? '<span class="required">*</span>' : ''}
@@ -593,6 +593,25 @@ export class RepeaterControlRenderer {
       this.container.innerHTML = '';
       this.container = undefined;
     }
+  }
+
+  /**
+   * Открыть аккордеон для элемента с ошибкой
+   */
+  public expandItem(index: number): void {
+    if (this.collapsedItems.has(index)) {
+      this.collapsedItems.delete(index);
+      if (this.container) {
+        this.render(this.container);
+      }
+    }
+  }
+
+  /**
+   * Проверить, свернут ли элемент
+   */
+  public isItemCollapsed(index: number): boolean {
+    return this.collapsedItems.has(index);
   }
 }
 

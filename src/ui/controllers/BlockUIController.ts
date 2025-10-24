@@ -15,6 +15,7 @@ import { RepeaterControlRenderer } from '../services/RepeaterControlRenderer';
 import { copyToClipboard } from '../../utils/copyToClipboard';
 import { UniversalValidator } from '../../utils/universalValidation';
 import { addSpacingFieldToFields } from '../../utils/blockSpacingHelpers';
+import { scrollToFirstError, parseErrorKey } from '../../utils/formErrorHelpers';
 
 export interface IBlockUIControllerConfig {
   containerId: string;
@@ -594,6 +595,12 @@ export class BlockUIController {
         // Добавляем класс ошибки к полю
         input.classList.add('error');
 
+        // Добавляем класс ошибки к группе поля
+        const formGroup = input.closest('.block-builder-form-group') as HTMLElement;
+        if (formGroup) {
+          formGroup.classList.add('error');
+        }
+
         // Создаем контейнер для ошибок
         const errorContainer = document.createElement('div');
         errorContainer.className = 'block-builder-form-errors';
@@ -610,6 +617,9 @@ export class BlockUIController {
         input.parentElement?.appendChild(errorContainer);
       }
     });
+
+    // Скроллим к первой ошибке и открываем аккордеоны
+    this.handleScrollToFirstError(errors);
   }
 
   /**
@@ -621,10 +631,137 @@ export class BlockUIController {
       input.classList.remove('error');
     });
 
+    // Убираем класс error у всех групп полей
+    document.querySelectorAll('.block-builder-form-group.error').forEach(group => {
+      group.classList.remove('error');
+    });
+
     // Удаляем все контейнеры с ошибками
     document.querySelectorAll('.block-builder-form-errors').forEach(container => {
       container.remove();
     });
+  }
+
+  /**
+   * Обработка скролла к первой ошибке
+   */
+  private handleScrollToFirstError(errors: Record<string, string[]>): void {
+    // Небольшая задержка, чтобы ошибки успели отрисоваться в DOM
+    setTimeout(() => {
+      const modalBody = document.querySelector('.block-builder-modal-body') as HTMLElement;
+      
+      if (!modalBody) {
+        console.warn('[handleScrollToFirstError] Не найден контейнер модального окна');
+        return;
+      }
+      
+      // Находим первую ошибку
+      const firstErrorKey = Object.keys(errors)[0];
+      if (!firstErrorKey) return;
+      
+      const errorInfo = parseErrorKey(firstErrorKey);
+      
+      // Если ошибка в repeater - СНАЧАЛА открываем аккордеон, ПОТОМ скроллим
+      if (errorInfo.isRepeaterField && errorInfo.repeaterFieldName) {
+        this.openRepeaterAccordion(
+          errorInfo.repeaterFieldName,
+          errorInfo.repeaterIndex || 0
+        );
+        // Скролл произойдет автоматически внутри openRepeaterAccordion после раскрытия
+      } else {
+        // Для обычных полей скроллим сразу
+        scrollToFirstError(modalBody, errors, {
+          offset: 40,
+          behavior: 'smooth',
+          autoFocus: true
+        });
+      }
+    }, 100); // Увеличена задержка для стабильной отрисовки ошибок
+  }
+
+  /**
+   * Открытие аккордеона в repeater для конкретного элемента
+   */
+  private openRepeaterAccordion(repeaterFieldName: string, itemIndex: number): void {
+    // Получаем renderer для этого repeater
+    const renderer = this.repeaterRenderers.get(repeaterFieldName);
+    
+    if (!renderer) {
+      console.warn(`[openRepeaterAccordion] Не найден renderer для repeater: ${repeaterFieldName}`);
+      return;
+    }
+    
+    const modalBody = document.querySelector('.block-builder-modal-body') as HTMLElement;
+    if (!modalBody) return;
+    
+    // Проверяем, свернут ли элемент
+    if (renderer.isItemCollapsed(itemIndex)) {
+      console.log('[openRepeaterAccordion] Раскрываем аккордеон для элемента:', itemIndex);
+      
+      // Раскрываем элемент
+      renderer.expandItem(itemIndex);
+      
+      // После раскрытия скроллим к конкретному полю
+      // Увеличенная задержка для завершения анимации раскрытия
+      setTimeout(() => {
+        console.log('[openRepeaterAccordion] Скролл к полю после раскрытия аккордеона');
+        
+        // Используем исходные ошибки для скролла - они уже содержат все нужные данные
+        const allErrors: Record<string, string[]> = {};
+        Object.entries(this.repeaterRenderers.get(repeaterFieldName)?.['errors'] || {}).forEach(([key, value]) => {
+          allErrors[key] = value;
+        });
+        
+        // Скроллим к полю с ошибкой
+        scrollToFirstError(modalBody, allErrors, {
+          offset: 40,
+          behavior: 'smooth',
+          autoFocus: true
+        });
+      }, 350); // Увеличена задержка для завершения анимации раскрытия
+    } else {
+      console.log('[openRepeaterAccordion] Элемент уже развернут, скроллим к полю');
+      
+      // Элемент уже развернут - скроллим к полю сразу
+      scrollToFirstError(modalBody, this.getRepeaterErrors(), {
+        offset: 40,
+        behavior: 'smooth',
+        autoFocus: true
+      });
+    }
+  }
+  
+  /**
+   * Получить все ошибки из repeater для скролла
+   */
+  private getRepeaterErrors(): Record<string, string[]> {
+    const errors: Record<string, string[]> = {};
+    
+    // Ищем все сообщения об ошибках в DOM
+    document.querySelectorAll('.repeater-control__field-error').forEach(errorEl => {
+      const field = errorEl.closest('.repeater-control__field') as HTMLElement;
+      if (field) {
+        const input = field.querySelector('input, textarea, select') as HTMLElement;
+        if (input) {
+          const dataIndex = input.getAttribute('data-item-index');
+          const fieldName = input.getAttribute('data-field-name');
+          
+          if (dataIndex !== null && fieldName) {
+            // Находим имя repeater по структуре DOM
+            const repeaterControl = field.closest('.repeater-control') as HTMLElement;
+            if (repeaterControl) {
+              const repeaterFieldName = repeaterControl.getAttribute('data-field-name');
+              if (repeaterFieldName) {
+                const errorKey = `${repeaterFieldName}[${dataIndex}].${fieldName}`;
+                errors[errorKey] = [errorEl.textContent || ''];
+              }
+            }
+          }
+        }
+      }
+    });
+    
+    return errors;
   }
 
   /**

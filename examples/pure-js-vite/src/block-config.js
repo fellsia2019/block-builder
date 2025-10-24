@@ -730,6 +730,570 @@ export const blockConfigs = {
         defaultValue: 16
       }
     ]
+  },
+
+  richCardList: {
+    title: '🎯 Богатые карточки (тест)',
+    icon: '💎',
+    description: 'Тестовый блок с множеством полей в каждой карточке для pure JS',
+    render: {
+      kind: 'html',
+      template: (props) => {
+        const cards = props.cards || []
+        
+        const cardsHtml = cards.map(card => {
+          const cardBg = card.backgroundColor || props.cardDefaultBg || '#ffffff'
+          const cardTextColor = card.textColor || props.cardDefaultTextColor || '#333333'
+          
+          return `
+            <div class="rich-card" style="
+              background-color: ${cardBg};
+              color: ${cardTextColor};
+              border-radius: ${props.cardBorderRadius || 12}px;
+              box-shadow: ${props.cardShadow || '0 4px 12px rgba(0, 0, 0, 0.1)'};
+              overflow: hidden;
+              transition: transform 0.3s ease, box-shadow 0.3s ease;
+            ">
+              ${card.image || card.imageMobile ? `
+                <div style="
+                  width: 100%;
+                  height: 240px;
+                  overflow: hidden;
+                ">
+                  <picture>
+                    ${card.imageMobile ? `
+                      <source srcset="${card.imageMobile}" media="(max-width: 768px)" />
+                    ` : ''}
+                    <img 
+                      src="${card.image || card.imageMobile}"
+                      alt="${card.imageAlt || card.title || ''}"
+                      style="
+                        width: 100%;
+                        height: 100%;
+                        object-fit: cover;
+                        transition: transform 0.3s ease;
+                      "
+                    />
+                  </picture>
+                </div>
+              ` : ''}
+              
+              <div style="
+                padding: 24px;
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+              ">
+                ${card.title ? `
+                  <h3 style="
+                    margin: 0;
+                    font-size: 24px;
+                    font-weight: 700;
+                    line-height: 1.3;
+                  ">${card.title}</h3>
+                ` : ''}
+                
+                ${card.subtitle ? `
+                  <h4 style="
+                    margin: 0;
+                    font-size: 18px;
+                    font-weight: 600;
+                    line-height: 1.4;
+                    opacity: 0.9;
+                  ">${card.subtitle}</h4>
+                ` : ''}
+                
+                ${card.text ? `
+                  <p style="
+                    margin: 0;
+                    font-size: 16px;
+                    line-height: 1.6;
+                    opacity: 0.85;
+                  ">${card.text}</p>
+                ` : ''}
+                
+                ${card.detailedText ? `
+                  <div style="
+                    font-size: 14px;
+                    line-height: 1.6;
+                    opacity: 0.75;
+                    margin-top: 8px;
+                  ">${card.detailedText}</div>
+                ` : ''}
+                
+                ${card.meetingPlace || card.meetingTime || card.participantsCount ? `
+                  <div style="
+                    display: flex;
+                    flex-direction: column;
+                    gap: 8px;
+                    padding: 16px;
+                    background-color: rgba(0, 0, 0, 0.03);
+                    border-radius: 8px;
+                    margin-top: 12px;
+                  ">
+                    ${card.meetingPlace ? `
+                      <div style="
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+                        font-size: 14px;
+                      ">
+                        <span style="font-weight: 600; white-space: nowrap;">📍 Место:</span>
+                        <span style="opacity: 0.85;">${card.meetingPlace}</span>
+                      </div>
+                    ` : ''}
+                    ${card.meetingTime ? `
+                      <div style="
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+                        font-size: 14px;
+                      ">
+                        <span style="font-weight: 600; white-space: nowrap;">🕐 Время:</span>
+                        <span style="opacity: 0.85;">${card.meetingTime}</span>
+                      </div>
+                    ` : ''}
+                    ${card.participantsCount ? `
+                      <div style="
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+                        font-size: 14px;
+                      ">
+                        <span style="font-weight: 600; white-space: nowrap;">👥 Участников:</span>
+                        <span style="opacity: 0.85;">${card.participantsCount}</span>
+                      </div>
+                    ` : ''}
+                  </div>
+                ` : ''}
+                
+                ${card.link && card.buttonText ? `
+                  <a 
+                    href="${card.link}"
+                    target="${card.linkTarget || '_self'}"
+                    ${card.linkTarget === '_blank' ? 'rel="noopener noreferrer"' : ''}
+                    style="
+                      display: inline-flex;
+                      align-items: center;
+                      justify-content: center;
+                      padding: 12px 24px;
+                      text-decoration: none;
+                      font-weight: 600;
+                      font-size: 16px;
+                      margin-top: auto;
+                      background-color: ${props.buttonColor || '#667eea'};
+                      color: ${props.buttonTextColor || '#ffffff'};
+                      border-radius: ${props.buttonBorderRadius || 6}px;
+                      transition: opacity 0.3s ease, transform 0.2s ease;
+                      cursor: pointer;
+                      align-self: flex-start;
+                    "
+                    onmouseover="this.style.opacity='0.9'; this.style.transform='translateX(4px)'"
+                    onmouseout="this.style.opacity='1'; this.style.transform='translateX(0)'"
+                  >${card.buttonText}</a>
+                ` : ''}
+              </div>
+            </div>
+          `
+        }).join('')
+        
+        return `
+          <div class="rich-card-list" style="
+            width: 100%;
+            padding: 20px;
+          ">
+            ${props.sectionTitle ? `
+              <h2 style="
+                margin: 0 0 32px 0;
+                font-weight: 700;
+                line-height: 1.2;
+                color: ${props.titleColor || '#333333'};
+                font-size: ${props.titleSize || 32}px;
+                text-align: ${props.titleAlign || 'center'};
+              ">${props.sectionTitle}</h2>
+            ` : ''}
+            
+            <div style="
+              display: grid;
+              grid-template-columns: repeat(auto-fit, minmax(${props.cardMinWidth || 300}px, 1fr));
+              gap: ${props.gap || 24}px;
+              width: 100%;
+            ">
+              ${cardsHtml}
+            </div>
+          </div>
+          
+          <style>
+            .rich-card:hover {
+              transform: translateY(-4px);
+              box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15) !important;
+            }
+            
+            @media (max-width: 768px) {
+              .rich-card-list {
+                padding: 16px !important;
+              }
+              
+              .rich-card-list h2 {
+                margin-bottom: 24px !important;
+              }
+              
+              .rich-card > div:first-child {
+                height: 200px !important;
+              }
+              
+              .rich-card > div:last-child {
+                padding: 20px !important;
+                gap: 10px !important;
+              }
+              
+              .rich-card h3 {
+                font-size: 20px !important;
+              }
+              
+              .rich-card h4 {
+                font-size: 16px !important;
+              }
+              
+              .rich-card p {
+                font-size: 14px !important;
+              }
+              
+              .rich-card > div:last-child > div {
+                font-size: 13px !important;
+              }
+            }
+          </style>
+        `
+      }
+    },
+    fields: [
+      {
+        field: 'sectionTitle',
+        label: 'Заголовок секции',
+        type: 'text',
+        placeholder: 'Наши продукты',
+        rules: [],
+        defaultValue: 'Наши продукты'
+      },
+      {
+        field: 'titleColor',
+        label: 'Цвет заголовка секции',
+        type: 'color',
+        rules: [],
+        defaultValue: '#333333'
+      },
+      {
+        field: 'titleSize',
+        label: 'Размер заголовка секции (px)',
+        type: 'number',
+        rules: [
+          { type: 'min', value: 16, message: 'Минимум: 16px' },
+          { type: 'max', value: 72, message: 'Максимум: 72px' }
+        ],
+        defaultValue: 32
+      },
+      {
+        field: 'titleAlign',
+        label: 'Выравнивание заголовка',
+        type: 'select',
+        options: [
+          { value: 'left', label: 'По левому краю' },
+          { value: 'center', label: 'По центру' },
+          { value: 'right', label: 'По правому краю' }
+        ],
+        rules: [],
+        defaultValue: 'center'
+      },
+      
+      // Карточки через repeater
+      {
+        field: 'cards',
+        label: 'Карточки',
+        type: 'repeater',
+        defaultValue: [
+          {
+            title: 'Премиум продукт',
+            subtitle: 'Лучшее решение 2024',
+            text: 'Инновационный продукт с передовыми технологиями для вашего бизнеса',
+            detailedText: 'Полное описание включает все особенности и преимущества данного продукта. Идеально подходит для малого и среднего бизнеса.',
+            link: 'https://example.com/product-1',
+            linkTarget: '_blank',
+            buttonText: 'Узнать подробнее',
+            image: '/1.jpeg',
+            imageMobile: '/1.jpeg',
+            imageAlt: 'Премиум продукт',
+            backgroundColor: '#ffffff',
+            textColor: '#333333',
+            meetingPlace: 'Конференц-зал "Альфа", БЦ "Столица"',
+            meetingTime: '15:00, 25 октября 2024',
+            participantsCount: '50'
+          },
+          {
+            title: 'Стандарт версия',
+            subtitle: 'Оптимальный выбор',
+            text: 'Проверенное решение для ежедневных задач с отличным соотношением цены и качества',
+            detailedText: 'Включает базовый функционал, необходимый для эффективной работы. Легко масштабируется при росте вашего бизнеса.',
+            link: 'https://example.com/product-2',
+            linkTarget: '_self',
+            buttonText: 'Подробности',
+            image: '/2.jpg',
+            imageMobile: '/2.jpg',
+            imageAlt: 'Стандарт версия',
+            backgroundColor: '#f8f9fa',
+            textColor: '#212529',
+            meetingPlace: 'Офис компании, 3 этаж',
+            meetingTime: '10:30, 26 октября 2024',
+            participantsCount: '25'
+          },
+          {
+            title: 'Корпоративное решение',
+            subtitle: 'Для крупного бизнеса',
+            text: 'Масштабируемое решение с расширенными возможностями для корпоративного уровня',
+            detailedText: 'Полная кастомизация, интеграция с существующими системами, приоритетная техническая поддержка 24/7.',
+            link: 'https://example.com/product-3',
+            linkTarget: '_blank',
+            buttonText: 'Связаться с нами',
+            image: '/3.png',
+            imageMobile: '/3.png',
+            imageAlt: 'Корпоративное решение',
+            backgroundColor: '#e7f3ff',
+            textColor: '#004085',
+            meetingPlace: 'Гостиница "Метрополь", зал "Премьер"',
+            meetingTime: '14:00, 27 октября 2024',
+            participantsCount: '100'
+          }
+        ],
+        repeaterConfig: {
+          itemTitle: 'Карточка',
+          addButtonText: 'Добавить карточку',
+          removeButtonText: 'Удалить',
+          min: 1,
+          max: 20,
+          collapsible: true,
+          fields: [
+            {
+              field: 'title',
+              label: 'Заголовок',
+              type: 'text',
+              placeholder: 'Название продукта',
+              rules: [{ type: 'required', message: 'Заголовок обязателен' }],
+              defaultValue: ''
+            },
+            {
+              field: 'subtitle',
+              label: 'Подзаголовок',
+              type: 'text',
+              placeholder: 'Краткое описание',
+              rules: [],
+              defaultValue: ''
+            },
+            {
+              field: 'text',
+              label: 'Основной текст',
+              type: 'textarea',
+              placeholder: 'Основное описание продукта...',
+              rules: [{ type: 'required', message: 'Основной текст обязателен' }],
+              defaultValue: ''
+            },
+            {
+              field: 'detailedText',
+              label: 'Детальное описание',
+              type: 'textarea',
+              placeholder: 'Подробное описание со всеми деталями...',
+              rules: [],
+              defaultValue: ''
+            },
+            {
+              field: 'link',
+              label: 'Ссылка',
+              type: 'text',
+              placeholder: 'https://example.com',
+              rules: [
+                { type: 'required', message: 'Ссылка обязательна' },
+                { type: 'pattern', value: '^https?://', message: 'Ссылка должна начинаться с http:// или https://' }
+              ],
+              defaultValue: 'https://example.com'
+            },
+            {
+              field: 'linkTarget',
+              label: 'Открытие ссылки',
+              type: 'select',
+              options: [
+                { value: '_self', label: 'В текущей вкладке' },
+                { value: '_blank', label: 'В новой вкладке' }
+              ],
+              rules: [],
+              defaultValue: '_blank'
+            },
+            {
+              field: 'buttonText',
+              label: 'Текст кнопки',
+              type: 'text',
+              placeholder: 'Подробнее',
+              rules: [{ type: 'required', message: 'Текст кнопки обязателен' }],
+              defaultValue: 'Подробнее'
+            },
+            {
+              field: 'image',
+              label: 'Изображение (десктоп)',
+              type: 'text',
+              placeholder: '/путь/к/изображению.jpg',
+              rules: [],
+              defaultValue: '/2.jpg'
+            },
+            {
+              field: 'imageMobile',
+              label: 'Изображение (мобильное)',
+              type: 'text',
+              placeholder: '/путь/к/мобильному-изображению.jpg',
+              rules: [],
+              defaultValue: '/2.jpg'
+            },
+            {
+              field: 'imageAlt',
+              label: 'Альтернативный текст изображения',
+              type: 'text',
+              placeholder: 'Описание изображения для доступности',
+              rules: [],
+              defaultValue: ''
+            },
+            {
+              field: 'backgroundColor',
+              label: 'Цвет фона карточки',
+              type: 'color',
+              rules: [],
+              defaultValue: '#ffffff'
+            },
+            {
+              field: 'textColor',
+              label: 'Цвет текста карточки',
+              type: 'color',
+              rules: [],
+              defaultValue: '#333333'
+            },
+            {
+              field: 'meetingPlace',
+              label: 'Место встречи',
+              type: 'text',
+              placeholder: 'Конференц-зал, офис...',
+              rules: [{ type: 'required', message: 'Место встречи обязательно' }],
+              defaultValue: ''
+            },
+            {
+              field: 'meetingTime',
+              label: 'Время встречи',
+              type: 'text',
+              placeholder: '15:00, 25 октября 2024',
+              rules: [{ type: 'required', message: 'Время встречи обязательно' }],
+              defaultValue: ''
+            },
+            {
+              field: 'participantsCount',
+              label: 'Количество участников',
+              type: 'number',
+              placeholder: '50',
+              rules: [
+                { type: 'required', message: 'Количество участников обязательно' },
+                { type: 'min', value: 1, message: 'Минимум 1 участник' }
+              ],
+              defaultValue: ''
+            }
+          ]
+        }
+      },
+
+      // Общие настройки отображения
+      {
+        field: 'cardMinWidth',
+        label: 'Минимальная ширина карточки (px)',
+        type: 'number',
+        rules: [
+          { type: 'min', value: 200, message: 'Минимум: 200px' },
+          { type: 'max', value: 600, message: 'Максимум: 600px' }
+        ],
+        defaultValue: 300
+      },
+      {
+        field: 'gap',
+        label: 'Отступ между карточками (px)',
+        type: 'number',
+        rules: [
+          { type: 'min', value: 0, message: 'Минимум: 0px' },
+          { type: 'max', value: 100, message: 'Максимум: 100px' }
+        ],
+        defaultValue: 24
+      },
+      {
+        field: 'cardDefaultBg',
+        label: 'Цвет фона карточек по умолчанию',
+        type: 'color',
+        rules: [],
+        defaultValue: '#ffffff'
+      },
+      {
+        field: 'cardDefaultTextColor',
+        label: 'Цвет текста карточек по умолчанию',
+        type: 'color',
+        rules: [],
+        defaultValue: '#333333'
+      },
+      {
+        field: 'cardBorderRadius',
+        label: 'Скругление углов карточек (px)',
+        type: 'number',
+        rules: [
+          { type: 'min', value: 0, message: 'Минимум: 0px' },
+          { type: 'max', value: 50, message: 'Максимум: 50px' }
+        ],
+        defaultValue: 12
+      },
+      {
+        field: 'cardShadow',
+        label: 'Тень карточек',
+        type: 'select',
+        options: [
+          { value: 'none', label: 'Без тени' },
+          { value: '0 2px 8px rgba(0, 0, 0, 0.08)', label: 'Легкая' },
+          { value: '0 4px 12px rgba(0, 0, 0, 0.1)', label: 'Средняя' },
+          { value: '0 8px 24px rgba(0, 0, 0, 0.15)', label: 'Сильная' }
+        ],
+        rules: [],
+        defaultValue: '0 4px 12px rgba(0, 0, 0, 0.1)'
+      },
+      {
+        field: 'buttonColor',
+        label: 'Цвет кнопок',
+        type: 'color',
+        rules: [],
+        defaultValue: '#667eea'
+      },
+      {
+        field: 'buttonTextColor',
+        label: 'Цвет текста кнопок',
+        type: 'color',
+        rules: [],
+        defaultValue: '#ffffff'
+      },
+      {
+        field: 'buttonBorderRadius',
+        label: 'Скругление кнопок (px)',
+        type: 'number',
+        rules: [
+          { type: 'min', value: 0, message: 'Минимум: 0px' },
+          { type: 'max', value: 50, message: 'Максимум: 50px' }
+        ],
+        defaultValue: 6
+      }
+    ],
+    spacingOptions: {
+      spacingTypes: ['margin-top', 'margin-bottom', 'padding-top', 'padding-bottom'],
+      config: {
+        min: 0,
+        max: 120,
+        step: 8
+      }
+    }
   }
 }
 

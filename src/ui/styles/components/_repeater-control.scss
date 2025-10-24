@@ -313,18 +313,6 @@
       display: block;
     }
   }
-
-  // Адаптивность
-  @media (min-width: 768px) {
-    &__item-fields {
-      grid-template-columns: repeat(2, 1fr);
-    }
-
-    // Полноширинные поля
-    &__field--full {
-      grid-column: 1 / -1;
-    }
-  }
 }
 
 // Интеграция со стилями block-builder

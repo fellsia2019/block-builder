@@ -78,3 +78,6 @@ export { copyToClipboard } from './utils/copyToClipboard';
 export * from './utils/spacingHelpers';
 export * from './utils/blockSpacingHelpers';
 export * from './utils/breakpointHelpers';
+
+// Утилиты для работы с ошибками валидации форм
+export * from './utils/formErrorHelpers';

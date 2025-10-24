@@ -68,7 +68,7 @@ export class FormBuilder {
    */
   private generateTextareaHTML(fieldId: string, field: IFieldConfig, value: any, required: string): string {
     return `
-      <div class="block-builder-form-group">
+      <div class="block-builder-form-group" data-field-name="${field.field}">
         <label for="${fieldId}" class="block-builder-form-label">
           ${field.label} ${required ? '<span class="required">*</span>' : ''}
         </label>
@@ -89,7 +89,7 @@ export class FormBuilder {
    */
   private generateSelectHTML(fieldId: string, field: IFieldConfig, value: any, required: string): string {
     return `
-      <div class="block-builder-form-group">
+      <div class="block-builder-form-group" data-field-name="${field.field}">
         <label for="${fieldId}" class="block-builder-form-label">
           ${field.label} ${required ? '<span class="required">*</span>' : ''}
         </label>
@@ -108,7 +108,7 @@ export class FormBuilder {
    */
   private generateNumberHTML(fieldId: string, field: IFieldConfig, value: any, required: string): string {
     return `
-      <div class="block-builder-form-group">
+      <div class="block-builder-form-group" data-field-name="${field.field}">
         <label for="${fieldId}" class="block-builder-form-label">
           ${field.label} ${required ? '<span class="required">*</span>' : ''}
         </label>
@@ -130,7 +130,7 @@ export class FormBuilder {
    */
   private generateColorHTML(fieldId: string, field: IFieldConfig, value: any, required: string): string {
     return `
-      <div class="block-builder-form-group">
+      <div class="block-builder-form-group" data-field-name="${field.field}">
         <label for="${fieldId}" class="block-builder-form-label">
           ${field.label} ${required ? '<span class="required">*</span>' : ''}
         </label>
@@ -151,7 +151,7 @@ export class FormBuilder {
    */
   private generateUrlHTML(fieldId: string, field: IFieldConfig, value: any, required: string): string {
     return `
-      <div class="block-builder-form-group">
+      <div class="block-builder-form-group" data-field-name="${field.field}">
         <label for="${fieldId}" class="block-builder-form-label">
           ${field.label} ${required ? '<span class="required">*</span>' : ''}
         </label>
@@ -173,7 +173,7 @@ export class FormBuilder {
    */
   private generateCheckboxHTML(fieldId: string, field: IFieldConfig, value: any): string {
     return `
-      <div class="block-builder-form-group">
+      <div class="block-builder-form-group" data-field-name="${field.field}">
         <label class="block-builder-form-checkbox">
           <input
             type="checkbox"
@@ -193,7 +193,7 @@ export class FormBuilder {
    */
   private generateTextHTML(fieldId: string, field: IFieldConfig, value: any, required: string): string {
     return `
-      <div class="block-builder-form-group">
+      <div class="block-builder-form-group" data-field-name="${field.field}">
         <label for="${fieldId}" class="block-builder-form-label">
           ${field.label} ${required ? '<span class="required">*</span>' : ''}
         </label>

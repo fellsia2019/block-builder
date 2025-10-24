@@ -201,6 +201,8 @@
               v-for="field in currentBlockFields"
               :key="field.field"
               class="block-builder-form-group"
+              :class="{ 'error': formErrors[field.field] }"
+              :data-field-name="field.field"
             >
               <!-- Лейбл только для полей без собственного лейбла (spacing и repeater имеют свой) -->
               <label 
@@ -302,6 +304,7 @@
               <!-- Repeater Control -->
               <RepeaterControl
                 v-else-if="field.type === 'repeater'"
+                :ref="(el: any) => setRepeaterRef(field.field, el)"
                 :field-name="field.field"
                 :label="field.label"
                 v-model="formData[field.field]"
@@ -386,6 +389,7 @@ import { UniversalValidator } from '../../utils/universalValidation';
 import { addSpacingFieldToFields } from '../../utils/blockSpacingHelpers';
 import { getBlockInlineStyles, watchBreakpointChanges } from '../../utils/breakpointHelpers';
 import { ISpacingData } from '../../utils/spacingHelpers';
+import { scrollToFirstError, parseErrorKey } from '../../utils/formErrorHelpers';
 import SpacingControl from './SpacingControl.vue';
 import RepeaterControl from './RepeaterControl.vue';
 
@@ -435,6 +439,16 @@ const currentBlockId = ref<TBlockId | null>(null);
 const selectedPosition = ref<number | undefined>(undefined);
 const formData = reactive<Record<string, any>>({});
 const formErrors = reactive<Record<string, string[]>>({});
+const repeaterRefs = new Map<string, any>();
+
+// Функция для установки ref к RepeaterControl компонентам
+const setRepeaterRef = (fieldName: string, el: any): void => {
+  if (el) {
+    repeaterRefs.set(fieldName, el);
+  } else {
+    repeaterRefs.delete(fieldName);
+  }
+};
 
 // Вычисляемые свойства
 const availableBlockTypes = computed(() => props.config?.availableBlockTypes || []);
@@ -547,6 +561,8 @@ const closeModal = () => {
   currentBlockId.value = null;
   Object.keys(formData).forEach(key => delete formData[key]);
   Object.keys(formErrors).forEach(key => delete formErrors[key]);
+  // Очищаем refs к repeater компонентам
+  repeaterRefs.clear();
 };
 
 // Отправка формы
@@ -583,6 +599,10 @@ const createBlock = async (): Promise<boolean> => {
     // Копируем ошибки в reactive объект
     Object.assign(formErrors, validation.errors);
     console.log('❌ Ошибки валидации:', validation.errors);
+    
+    // Скроллим к первой ошибке и открываем аккордеон, если нужно
+    await handleValidationErrors();
+    
     return false;
   }
   
@@ -656,6 +676,10 @@ const updateBlock = async (): Promise<boolean> => {
     // Копируем ошибки в reactive объект
     Object.assign(formErrors, validation.errors);
     console.log('❌ Ошибки валидации:', validation.errors);
+    
+    // Скроллим к первой ошибке и открываем аккордеон, если нужно
+    await handleValidationErrors();
+    
     return false;
   }
   
@@ -934,6 +958,98 @@ const cleanupBreakpointWatchers = () => {
   breakpointUnsubscribers.clear();
 };
 
+/**
+ * Обработка ошибок валидации
+ * Скролл к первой ошибке и открытие аккордеонов
+ */
+const handleValidationErrors = async () => {
+  await nextTick(); // Ждем, пока ошибки отрисуются в DOM
+  
+  const modalContent = document.querySelector('.block-builder-modal-body') as HTMLElement;
+  
+  if (!modalContent) {
+    console.warn('[handleValidationErrors] Не найден контейнер модального окна');
+    return;
+  }
+  
+  // Добавляем небольшую задержку перед скроллом для стабильной позиции
+  setTimeout(async () => {
+    // Находим первую ошибку
+    const firstErrorKey = Object.keys(formErrors)[0];
+    if (!firstErrorKey) return;
+    
+    const errorInfo = parseErrorKey(firstErrorKey);
+    
+    // Если ошибка в repeater - СНАЧАЛА открываем аккордеон, ПОТОМ скроллим
+    if (errorInfo.isRepeaterField && errorInfo.repeaterFieldName) {
+      await openRepeaterAccordion(errorInfo.repeaterFieldName, errorInfo.repeaterIndex || 0);
+      // Скролл произойдет автоматически внутри openRepeaterAccordion после раскрытия
+    } else {
+      // Для обычных полей скроллим сразу
+      scrollToFirstError(modalContent, formErrors, {
+        offset: 40,
+        behavior: 'smooth',
+        autoFocus: true
+      });
+    }
+  }, 50); // Небольшая задержка для завершения отрисовки ошибок
+};
+
+/**
+ * Открытие аккордеона в repeater для конкретного элемента
+ */
+const openRepeaterAccordion = async (repeaterFieldName: string, itemIndex: number): Promise<void> => {
+  // Ждем следующий тик, чтобы убедиться, что компонент отрисован
+  await nextTick();
+  
+  // Получаем ссылку на RepeaterControl компонент
+  const repeaterComponent = repeaterRefs.get(repeaterFieldName);
+  
+  if (!repeaterComponent) {
+    console.warn(`[openRepeaterAccordion] Не найден ref для repeater: ${repeaterFieldName}`);
+    return;
+  }
+  
+  // Проверяем, свернут ли элемент
+  if (repeaterComponent.isItemCollapsed && repeaterComponent.isItemCollapsed(itemIndex)) {
+    console.log('[openRepeaterAccordion] Раскрываем аккордеон для элемента:', itemIndex);
+    
+    // Раскрываем элемент через exposed метод
+    if (repeaterComponent.expandItem) {
+      repeaterComponent.expandItem(itemIndex);
+      
+      // Ждем, пока аккордеон откроется и DOM полностью обновится
+      await nextTick();
+      
+      // Даем время на завершение анимации раскрытия
+      await new Promise(resolve => setTimeout(resolve, 350));
+      
+      // Теперь скроллим к конкретному полю с ошибкой
+      const modalContent = document.querySelector('.block-builder-modal-body') as HTMLElement;
+      if (modalContent) {
+        console.log('[openRepeaterAccordion] Скролл к полю после раскрытия аккордеона');
+        scrollToFirstError(modalContent, formErrors, {
+          offset: 40,
+          behavior: 'smooth',
+          autoFocus: true
+        });
+      }
+    }
+  } else {
+    console.log('[openRepeaterAccordion] Элемент уже развернут, скроллим к полю');
+    
+    // Элемент уже развернут - скроллим к полю сразу
+    const modalContent = document.querySelector('.block-builder-modal-body') as HTMLElement;
+    if (modalContent) {
+      scrollToFirstError(modalContent, formErrors, {
+        offset: 40,
+        behavior: 'smooth',
+        autoFocus: true
+      });
+    }
+  }
+};
+
 // Загрузка блоков
 onMounted(async () => {
   // Сначала загружаем начальные блоки (если есть)
@@ -972,6 +1088,20 @@ onBeforeUnmount(() => {
   &:focus {
     border-color: var(--bb-color-danger, #dc3545);
     box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+  }
+}
+
+/* Анимация подсветки поля с ошибкой */
+:global(.field-error-highlight) {
+  animation: errorPulse 0.6s ease-in-out;
+}
+
+@keyframes errorPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(220, 53, 69, 0);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(220, 53, 69, 0.3);
   }
 }
 </style>
