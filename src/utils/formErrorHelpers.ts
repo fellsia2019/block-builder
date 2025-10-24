@@ -101,7 +101,7 @@ export function findFieldElement(
       return formGroup;
     }
     
-    // Fallback - ищем поле и получаем его родителя
+    // Запасной вариант - ищем поле и получаем его родителя
     const fieldId = `field-${errorInfo.fieldKey}`;
     const element = containerElement.querySelector(`#${fieldId}`) as HTMLElement;
     
@@ -113,7 +113,7 @@ export function findFieldElement(
     return null;
   }
   
-  // Repeater поле - ищем поле внутри конкретного элемента repeater
+  // Поле repeater - ищем поле внутри конкретного элемента repeater
   // Формат ID: repeater-{itemId}-{fieldName} или repeater-{fieldName}-{index}-{nestedFieldName}
   const repeaterSelector = `[data-field-name="${errorInfo.repeaterFieldName}"]`;
   const repeaterContainer = containerElement.querySelector(repeaterSelector);
@@ -151,7 +151,7 @@ export function findFieldElement(
     return fieldContainer;
   }
   
-  // Fallback - ищем поле напрямую
+  // Запасной вариант - ищем поле напрямую
   const fieldSelector = `[data-field-name="${errorInfo.nestedFieldName}"], [id*="${errorInfo.nestedFieldName}"]`;
   const field = targetItem.querySelector(fieldSelector) as HTMLElement;
   
@@ -187,7 +187,7 @@ export function scrollToElement(
   const scrollContainer = container || getScrollContainer(element);
   
   if (!scrollContainer) {
-    // Fallback на window.scroll
+    // Запасной вариант - используем window.scroll
     const elementRect = element.getBoundingClientRect();
     const absoluteElementTop = elementRect.top + window.pageYOffset;
     const targetPosition = absoluteElementTop - offset;

@@ -97,6 +97,10 @@ export class MemoryBlockRepositoryImpl implements IBlockRepository {
     this.blocks.clear();
   }
 
+  /**
+   * Генерирует уникальный идентификатор для блока
+   * @returns Уникальный идентификатор в формате block_{timestamp}_{random}
+   */
   private generateId(): string {
     return `block_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }

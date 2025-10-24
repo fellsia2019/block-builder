@@ -24,22 +24,6 @@ export class StyleManager {
   }
 
   /**
-   * Инъекция основных стилей приложения
-   * @deprecated Используйте injectStyles() вместо этого
-   */
-  injectMainStyles(): void {
-    this.injectStyles();
-  }
-
-  /**
-   * Инъекция стилей для модальных окон
-   * @deprecated Используйте injectStyles() вместо этого
-   */
-  injectModalStyles(): void {
-    this.injectStyles();
-  }
-
-  /**
    * Удаление всех инъектированных стилей
    */
   removeAllStyles(): void {

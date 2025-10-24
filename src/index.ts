@@ -45,7 +45,7 @@ export { SpacingControlRenderer } from './ui/services/SpacingControlRenderer';
 export type { ISpacingControlOptions } from './ui/services/SpacingControlRenderer';
 
 // UI Types
-export type { IFieldConfig } from './ui/services/FormBuilder';
+export type { TFieldConfig } from './ui/services/FormBuilder';
 export type { IModalOptions } from './ui/services/ModalManager';
 export type { IUIRendererConfig } from './ui/services/UIRenderer';
 export type { IBlockUIControllerConfig } from './ui/controllers/BlockUIController';

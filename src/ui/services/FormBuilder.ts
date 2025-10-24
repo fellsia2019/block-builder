@@ -5,21 +5,23 @@
 
 import { IFormFieldConfig } from '../../core/types/form';
 
-// Алиас для обратной совместимости
-export type IFieldConfig = IFormFieldConfig;
+/**
+ * Алиас для конфигурации поля формы
+ */
+export type TFieldConfig = IFormFieldConfig;
 
 export class FormBuilder {
   /**
    * Генерация HTML для формы создания
    */
-  generateCreateFormHTML(fields: IFieldConfig[]): string {
+  generateCreateFormHTML(fields: TFieldConfig[]): string {
     return fields.map(field => this.generateFieldHTML(field, field.defaultValue)).join('');
   }
 
   /**
    * Генерация HTML для формы редактирования
    */
-  generateEditFormHTML(fields: IFieldConfig[], currentProps: Record<string, any>): string {
+  generateEditFormHTML(fields: TFieldConfig[], currentProps: Record<string, any>): string {
     return fields.map(field => {
       const currentValue = currentProps[field.field] || field.defaultValue || '';
       return this.generateFieldHTML(field, currentValue);
@@ -29,7 +31,7 @@ export class FormBuilder {
   /**
    * Генерация HTML для отдельного поля
    */
-  private generateFieldHTML(field: IFieldConfig, value: any): string {
+  private generateFieldHTML(field: TFieldConfig, value: any): string {
     const fieldId = `field-${field.field}`;
     const required = field.rules?.some(rule => rule.type === 'required') ? 'required' : '';
 
@@ -66,7 +68,7 @@ export class FormBuilder {
   /**
    * Генерация textarea поля
    */
-  private generateTextareaHTML(fieldId: string, field: IFieldConfig, value: any, required: string): string {
+  private generateTextareaHTML(fieldId: string, field: TFieldConfig, value: any, required: string): string {
     return `
       <div class="block-builder-form-group" data-field-name="${field.field}">
         <label for="${fieldId}" class="block-builder-form-label">
@@ -87,7 +89,7 @@ export class FormBuilder {
   /**
    * Генерация select поля
    */
-  private generateSelectHTML(fieldId: string, field: IFieldConfig, value: any, required: string): string {
+  private generateSelectHTML(fieldId: string, field: TFieldConfig, value: any, required: string): string {
     return `
       <div class="block-builder-form-group" data-field-name="${field.field}">
         <label for="${fieldId}" class="block-builder-form-label">
@@ -106,7 +108,7 @@ export class FormBuilder {
   /**
    * Генерация number поля
    */
-  private generateNumberHTML(fieldId: string, field: IFieldConfig, value: any, required: string): string {
+  private generateNumberHTML(fieldId: string, field: TFieldConfig, value: any, required: string): string {
     return `
       <div class="block-builder-form-group" data-field-name="${field.field}">
         <label for="${fieldId}" class="block-builder-form-label">
@@ -128,7 +130,7 @@ export class FormBuilder {
   /**
    * Генерация color поля
    */
-  private generateColorHTML(fieldId: string, field: IFieldConfig, value: any, required: string): string {
+  private generateColorHTML(fieldId: string, field: TFieldConfig, value: any, required: string): string {
     return `
       <div class="block-builder-form-group" data-field-name="${field.field}">
         <label for="${fieldId}" class="block-builder-form-label">
@@ -149,7 +151,7 @@ export class FormBuilder {
   /**
    * Генерация URL поля
    */
-  private generateUrlHTML(fieldId: string, field: IFieldConfig, value: any, required: string): string {
+  private generateUrlHTML(fieldId: string, field: TFieldConfig, value: any, required: string): string {
     return `
       <div class="block-builder-form-group" data-field-name="${field.field}">
         <label for="${fieldId}" class="block-builder-form-label">
@@ -171,7 +173,7 @@ export class FormBuilder {
   /**
    * Генерация checkbox поля
    */
-  private generateCheckboxHTML(fieldId: string, field: IFieldConfig, value: any): string {
+  private generateCheckboxHTML(fieldId: string, field: TFieldConfig, value: any): string {
     return `
       <div class="block-builder-form-group" data-field-name="${field.field}">
         <label class="block-builder-form-checkbox">
@@ -191,7 +193,7 @@ export class FormBuilder {
   /**
    * Генерация text поля
    */
-  private generateTextHTML(fieldId: string, field: IFieldConfig, value: any, required: string): string {
+  private generateTextHTML(fieldId: string, field: TFieldConfig, value: any, required: string): string {
     return `
       <div class="block-builder-form-group" data-field-name="${field.field}">
         <label for="${fieldId}" class="block-builder-form-label">
@@ -214,7 +216,7 @@ export class FormBuilder {
    * Генерация контейнера для spacing поля
    * Будет инициализирован через SpacingControlRenderer в BlockUIController
    */
-  private generateSpacingPlaceholderHTML(fieldId: string, field: IFieldConfig, value: any, required: string): string {
+  private generateSpacingPlaceholderHTML(fieldId: string, field: TFieldConfig, value: any, required: string): string {
     const spacingConfig = field.spacingConfig || {};
     const configJson = JSON.stringify({
       field: field.field,
@@ -240,7 +242,7 @@ export class FormBuilder {
    * Генерация контейнера для repeater поля
    * Будет инициализирован через RepeaterControlRenderer в BlockUIController
    */
-  private generateRepeaterPlaceholderHTML(fieldId: string, field: IFieldConfig, value: any, required: string): string {
+  private generateRepeaterPlaceholderHTML(fieldId: string, field: TFieldConfig, value: any, required: string): string {
     const repeaterConfig = field.repeaterConfig || { fields: [] };
     const configJson = JSON.stringify({
       field: field.field,
@@ -265,13 +267,13 @@ export class FormBuilder {
   /**
    * Валидация формы
    */
-  validateForm(props: Record<string, any>, fields: IFieldConfig[]): { valid: boolean; message?: string } {
+  validateForm(props: Record<string, any>, fields: TFieldConfig[]): { valid: boolean; message?: string } {
     for (const field of fields) {
       const value = props[field.field];
       const rules = field.rules || [];
 
       for (const rule of rules) {
-        // Required валидация
+        // Валидация обязательности поля
         if (rule.type === 'required' && (!value || value.toString().trim() === '')) {
           return {
             valid: false,
@@ -279,7 +281,7 @@ export class FormBuilder {
           };
         }
 
-        // Email валидация
+        // Валидация email адреса
         if (rule.type === 'email' && value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
           return {
             valid: false,
@@ -287,7 +289,7 @@ export class FormBuilder {
           };
         }
 
-        // URL валидация
+        // Валидация URL адреса
         if (rule.type === 'url' && value && !/^https?:\/\/.+/.test(value)) {
           return {
             valid: false,
@@ -295,7 +297,7 @@ export class FormBuilder {
           };
         }
 
-        // Min валидация
+        // Валидация минимального значения
         if (rule.type === 'min' && value && Number(value) < rule.value!) {
           return {
             valid: false,
@@ -303,7 +305,7 @@ export class FormBuilder {
           };
         }
 
-        // Max валидация
+        // Валидация максимального значения
         if (rule.type === 'max' && value && Number(value) > rule.value!) {
           return {
             valid: false,
@@ -311,7 +313,7 @@ export class FormBuilder {
           };
         }
 
-        // MinLength валидация
+        // Валидация минимальной длины
         if (rule.type === 'minLength' && value && value.length < rule.value!) {
           return {
             valid: false,
@@ -319,7 +321,7 @@ export class FormBuilder {
           };
         }
 
-        // MaxLength валидация
+        // Валидация максимальной длины
         if (rule.type === 'maxLength' && value && value.length > rule.value!) {
           return {
             valid: false,

@@ -444,7 +444,7 @@ export default {
       initializeItems();
     });
 
-    // Expose метод для программного раскрытия элемента (для скролла к ошибкам)
+    // Экспортируемый метод для программного раскрытия элемента (для скролла к ошибкам)
     const expandItem = (index) => {
       const item = items.value[index];
       if (item && collapsedItems.value[item._id]) {
@@ -452,7 +452,7 @@ export default {
       }
     };
 
-    // Expose метод для проверки, свернут ли элемент
+    // Экспортируемый метод для проверки, свернут ли элемент
     const isItemCollapsed = (index) => {
       const item = items.value[index];
       return item ? !!collapsedItems.value[item._id] : false;

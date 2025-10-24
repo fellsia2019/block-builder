@@ -7,7 +7,7 @@
 import { IBlockDto, ICreateBlockDto, IUpdateBlockDto } from '../../core/types';
 import { BlockManagementUseCase } from '../../core/use-cases/BlockManagementUseCase';
 import { UIRenderer } from '../services/UIRenderer';
-import { FormBuilder, IFieldConfig } from '../services/FormBuilder';
+import { FormBuilder, TFieldConfig } from '../services/FormBuilder';
 import { ModalManager } from '../services/ModalManager';
 import { StyleManager } from '../services/StyleManager';
 import { SpacingControlRenderer } from '../services/SpacingControlRenderer';
@@ -55,7 +55,7 @@ export class BlockUIController {
    */
   async init(): Promise<void> {
     // Инъекция стилей
-    this.styleManager.injectMainStyles();
+    this.styleManager.injectStyles();
     
     // Рендеринг UI
     this.uiRenderer.renderContainer();
@@ -98,7 +98,7 @@ export class BlockUIController {
       </div>
     `;
 
-    this.styleManager.injectModalStyles();
+    this.styleManager.injectStyles();
     this.modalManager.showModal({
       title: 'Выберите тип блока',
       bodyHTML,
@@ -123,7 +123,7 @@ export class BlockUIController {
     }
 
     // Автоматически добавляем spacing поле, если его нет
-    const fields: IFieldConfig[] = addSpacingFieldToFields(
+    const fields: TFieldConfig[] = addSpacingFieldToFields(
       config.fields || [],
       config.spacingOptions
     );
@@ -134,7 +134,7 @@ export class BlockUIController {
       </form>
     `;
 
-    this.styleManager.injectModalStyles();
+    this.styleManager.injectStyles();
     this.modalManager.showModal({
       title: `Добавить ${config.title}`,
       bodyHTML: formHTML,
@@ -281,7 +281,7 @@ export class BlockUIController {
   /**
    * Обработка создания блока
    */
-  private async handleCreateBlock(type: string, fields: IFieldConfig[], position?: number): Promise<void> {
+  private async handleCreateBlock(type: string, fields: TFieldConfig[], position?: number): Promise<void> {
     const props = this.getFormDataWithSpacing('block-builder-form');
 
     // Валидация с помощью UniversalValidator
@@ -359,7 +359,7 @@ export class BlockUIController {
     }
 
     // Автоматически добавляем spacing поле, если его нет
-    const fields: IFieldConfig[] = addSpacingFieldToFields(
+    const fields: TFieldConfig[] = addSpacingFieldToFields(
       config.fields || [],
       config.spacingOptions
     );
@@ -369,7 +369,7 @@ export class BlockUIController {
       </form>
     `;
 
-    this.styleManager.injectModalStyles();
+    this.styleManager.injectStyles();
     this.modalManager.showModal({
       title: `Редактировать ${config.title}`,
       bodyHTML: formHTML,
@@ -386,7 +386,7 @@ export class BlockUIController {
   /**
    * Обработка обновления блока
    */
-  private async handleUpdateBlock(blockId: string, type: string, fields: IFieldConfig[]): Promise<void> {
+  private async handleUpdateBlock(blockId: string, type: string, fields: TFieldConfig[]): Promise<void> {
     const props = this.getFormDataWithSpacing('block-builder-form');
 
     // Валидация с помощью UniversalValidator

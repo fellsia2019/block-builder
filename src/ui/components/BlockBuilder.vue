@@ -61,7 +61,7 @@
             <!-- Заголовок блока -->
             <div class="block-builder-block-header">
               <div class="block-builder-block-info">
-                <span>📦 {{ getBlockConfig(block.type)?.title || block.type }}</span>
+                <span>📦 {{ getBlockTitle(block) }}</span>
                 <small class="block-builder-block-id">
                   ID: {{ block.id }}
                   <button 
@@ -109,16 +109,16 @@
                 <button 
                   @click="handleToggleLock(block.id)" 
                   class="block-builder-control-btn" 
-                  :title="block.locked ? 'Разблокировать' : 'Заблокировать'"
+                  :title="getBlockLockTooltip(block)"
                 >
-                  {{ block.locked ? '🔓' : '🔒' }}
+                  {{ getBlockLockIcon(block) }}
                 </button>
                 <button 
                   @click="handleToggleVisibility(block.id)" 
                   class="block-builder-control-btn" 
-                  :title="block.visible ? 'Скрыть' : 'Показать'"
+                  :title="getBlockVisibilityTooltip(block)"
                 >
-                  {{ block.visible ? '👁️' : '👁️‍🗨️' }}
+                  {{ getBlockVisibilityIcon(block) }}
                 </button>
                 <button 
                   @click="handleDeleteBlock(block.id)" 
@@ -138,7 +138,7 @@
                 v-bind="getUserComponentProps(block)"
               />
               <div v-else class="block-content-fallback">
-                <strong>{{ getBlockConfig(block.type)?.title || block.type }}</strong>
+                <strong>{{ getBlockTitle(block) }}</strong>
                 <pre>{{ JSON.stringify(getUserComponentProps(block), null, 2) }}</pre>
               </div>
             </div>
@@ -206,12 +206,12 @@
             >
               <!-- Лейбл только для полей без собственного лейбла (spacing и repeater имеют свой) -->
               <label 
-                v-if="field.type !== 'spacing' && field.type !== 'repeater' && field.type !== 'checkbox'"
+                v-if="isRegularInputField(field)"
                 :for="'field-' + field.field" 
                 class="block-builder-form-label"
               >
                 {{ field.label }}
-                <span v-if="hasRequiredRule(field)" class="required">*</span>
+                <span v-if="isFieldRequired(field)" class="required">*</span>
               </label>
               
               <!-- Text input -->
@@ -297,14 +297,14 @@
                 :max="field.spacingConfig?.max"
                 :step="field.spacingConfig?.step"
                 :breakpoints="field.spacingConfig?.breakpoints"
-                :required="hasRequiredRule(field)"
+                :required="isFieldRequired(field)"
                 :show-preview="true"
               />
 
               <!-- Repeater Control -->
               <RepeaterControl
                 v-else-if="field.type === 'repeater'"
-                :ref="(el: any) => setRepeaterRef(field.field, el)"
+                :ref="createRepeaterRefCallback(field.field)"
                 :field-name="field.field"
                 :label="field.label"
                 v-model="formData[field.field]"
@@ -320,42 +320,6 @@
                 :collapsible="field.repeaterConfig?.collapsible"
               />
 
-              <!-- Array (для cards) -->
-              <div v-else-if="field.type === 'array' && field.itemFields">
-                <div
-                  v-for="(item, idx) in formData[field.field]"
-                  :key="idx"
-                  class="array-item"
-                >
-                  <h4>{{ field.itemLabel || 'Элемент' }} {{ idx + 1 }}</h4>
-                  <div
-                    v-for="itemField in field.itemFields"
-                    :key="itemField.field"
-                    class="form-field"
-                  >
-                    <label>{{ itemField.label }}</label>
-                    <input
-                      v-if="itemField.type === 'text'"
-                      v-model="item[itemField.field]"
-                      type="text"
-                      :placeholder="itemField.placeholder"
-                    />
-                    <textarea
-                      v-else-if="itemField.type === 'textarea'"
-                      v-model="item[itemField.field]"
-                      :placeholder="itemField.placeholder"
-                      rows="2"
-                    ></textarea>
-                  </div>
-                  <button type="button" @click="removeArrayItem(field.field, idx)" class="btn-remove">
-                    Удалить
-                  </button>
-                </div>
-                <button type="button" @click="addArrayItem(field)" class="btn-add">
-                  + Добавить {{ field.itemLabel || 'элемент' }}
-                </button>
-              </div>
-              
               <!-- Ошибки валидации (общие для всех типов полей) -->
               <div v-if="formErrors[field.field]" class="block-builder-form-errors">
                 <span v-for="error in formErrors[field.field]" :key="error" class="error">{{ error }}</span>
@@ -450,6 +414,11 @@ const setRepeaterRef = (fieldName: string, el: any): void => {
   }
 };
 
+// Хелпер-функция для создания ref коллбека с типом (обходит ограничение Vue на inline типы)
+const createRepeaterRefCallback = (fieldName: string) => {
+  return (el: any) => setRepeaterRef(fieldName, el);
+};
+
 // Вычисляемые свойства
 const availableBlockTypes = computed(() => props.config?.availableBlockTypes || []);
 
@@ -469,6 +438,94 @@ const currentBlockFields = computed(() => {
     (blockType as any).spacingOptions
   );
 });
+
+// ===== Computed свойства для темплейтов (убираем логику из разметки) =====
+
+/**
+ * Получить заголовок блока
+ */
+const getBlockTitle = (block: IBlock): string => {
+  return getBlockConfig(block.type)?.title || block.type;
+};
+
+/**
+ * Получить тултип для кнопки блокировки
+ */
+const getBlockLockTooltip = (block: IBlock): string => {
+  return block.locked ? 'Разблокировать' : 'Заблокировать';
+};
+
+/**
+ * Получить иконку для кнопки блокировки
+ */
+const getBlockLockIcon = (block: IBlock): string => {
+  return block.locked ? '🔓' : '🔒';
+};
+
+/**
+ * Получить тултип для кнопки видимости
+ */
+const getBlockVisibilityTooltip = (block: IBlock): string => {
+  return block.visible ? 'Скрыть' : 'Показать';
+};
+
+/**
+ * Получить иконку для кнопки видимости
+ */
+const getBlockVisibilityIcon = (block: IBlock): string => {
+  return block.visible ? '👁️' : '👁️‍🗨️';
+};
+
+/**
+ * Проверить, является ли поле обычным инпутом
+ */
+const isRegularInputField = (field: any): boolean => {
+  return field.type !== 'spacing' && 
+         field.type !== 'repeater' && 
+         field.type !== 'checkbox';
+};
+
+/**
+ * Проверить, является ли поле textarea
+ */
+const isTextareaField = (field: any): boolean => {
+  return field.type === 'textarea';
+};
+
+/**
+ * Проверить, является ли поле select
+ */
+const isSelectField = (field: any): boolean => {
+  return field.type === 'select';
+};
+
+/**
+ * Проверить, является ли поле checkbox
+ */
+const isCheckboxField = (field: any): boolean => {
+  return field.type === 'checkbox';
+};
+
+/**
+ * Проверить, является ли поле spacing
+ */
+const isSpacingField = (field: any): boolean => {
+  return field.type === 'spacing';
+};
+
+/**
+ * Проверить, является ли поле repeater
+ */
+const isRepeaterField = (field: any): boolean => {
+  return field.type === 'repeater';
+};
+
+/**
+ * Проверить, требуется ли поле (для отображения звездочки)
+ */
+const isFieldRequired = (field: any): boolean => {
+  return field.rules?.some((rule: any) => rule.type === 'required') ?? false;
+};
 
 // Методы для работы с блоками
 const loadBlocks = async () => {
@@ -785,29 +842,6 @@ const handleToggleVisibility = async (blockId: TBlockId) => {
 // Получить конфигурацию блока по типу
 const getBlockConfig = (type: string) => {
   return availableBlockTypes.value.find((bt: IBlockType) => bt.type === type);
-};
-
-// Проверка наличия правила required у поля
-const hasRequiredRule = (field: any): boolean => {
-  return field.rules?.some((r: any) => r.type === 'required') || false;
-};
-
-// Работа с массивами в формах
-const addArrayItem = (field: any) => {
-  if (!formData[field.field]) {
-    formData[field.field] = [];
-  }
-  
-  const newItem: Record<string, any> = {};
-  field.itemFields?.forEach((itemField: any) => {
-    newItem[itemField.field] = itemField.defaultValue || '';
-  });
-  
-  formData[field.field].push(newItem);
-};
-
-const removeArrayItem = (fieldName: string, index: number) => {
-  formData[fieldName].splice(index, 1);
 };
 
 // Копирование ID блока
