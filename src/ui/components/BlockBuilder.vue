@@ -202,7 +202,12 @@
               :key="field.field"
               class="block-builder-form-group"
             >
-              <label :for="'field-' + field.field" class="block-builder-form-label">
+              <!-- Лейбл только для полей без собственного лейбла (spacing и repeater имеют свой) -->
+              <label 
+                v-if="field.type !== 'spacing' && field.type !== 'repeater' && field.type !== 'checkbox'"
+                :for="'field-' + field.field" 
+                class="block-builder-form-label"
+              >
                 {{ field.label }}
                 <span v-if="hasRequiredRule(field)" class="required">*</span>
               </label>
@@ -294,6 +299,24 @@
                 :show-preview="true"
               />
 
+              <!-- Repeater Control -->
+              <RepeaterControl
+                v-else-if="field.type === 'repeater'"
+                :field-name="field.field"
+                :label="field.label"
+                v-model="formData[field.field]"
+                :fields="field.repeaterConfig?.fields || []"
+                :rules="field.rules || []"
+                :errors="formErrors"
+                :add-button-text="field.repeaterConfig?.addButtonText"
+                :remove-button-text="field.repeaterConfig?.removeButtonText"
+                :item-title="field.repeaterConfig?.itemTitle"
+                :min="field.repeaterConfig?.min"
+                :max="field.repeaterConfig?.max"
+                :default-item-value="field.repeaterConfig?.defaultItemValue"
+                :collapsible="field.repeaterConfig?.collapsible"
+              />
+
               <!-- Array (для cards) -->
               <div v-else-if="field.type === 'array' && field.itemFields">
                 <div
@@ -364,6 +387,7 @@ import { addSpacingFieldToFields } from '../../utils/blockSpacingHelpers';
 import { getBlockInlineStyles, watchBreakpointChanges } from '../../utils/breakpointHelpers';
 import { ISpacingData } from '../../utils/spacingHelpers';
 import SpacingControl from './SpacingControl.vue';
+import RepeaterControl from './RepeaterControl.vue';
 
 interface IBlockType {
   type: string;

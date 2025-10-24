@@ -7,6 +7,8 @@
 export { default as BlockBuilderComponent } from './ui/components/BlockBuilder.vue'
 export { default as BlockComponent } from './ui/components/BlockComponent.vue'
 export { default as BlockProperties } from './ui/components/BlockProperties.vue'
+export { default as SpacingControl } from './ui/components/SpacingControl.vue'
+export { default as RepeaterControl } from './ui/components/RepeaterControl.vue'
 
 // Core для использования в Vue компонентах
 export * from './core/use-cases/BlockManagementUseCase'

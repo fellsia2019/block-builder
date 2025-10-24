@@ -107,11 +107,33 @@ export class UniversalValidator {
     let isValid = true;
 
     for (const fieldConfig of formFields) {
+      // Валидация самого поля (например, required для repeater массива)
       if (fieldConfig.rules && fieldConfig.rules.length > 0) {
         const errors = this.validateField(formData[fieldConfig.field], fieldConfig.rules);
         if (errors.length > 0) {
           formErrors[fieldConfig.field] = errors;
           isValid = false;
+        }
+      }
+
+      // Дополнительная валидация для repeater - проверяем поля внутри каждого элемента
+      if (fieldConfig.type === 'repeater' && fieldConfig.repeaterConfig) {
+        const arrayValue = formData[fieldConfig.field];
+        if (Array.isArray(arrayValue)) {
+          const repeaterFields = fieldConfig.repeaterConfig.fields || [];
+          
+          arrayValue.forEach((item, index) => {
+            for (const repeaterField of repeaterFields) {
+              if (repeaterField.rules && repeaterField.rules.length > 0) {
+                const fieldErrors = this.validateField(item[repeaterField.field], repeaterField.rules);
+                if (fieldErrors.length > 0) {
+                  const errorKey = `${fieldConfig.field}[${index}].${repeaterField.field}`;
+                  formErrors[errorKey] = fieldErrors;
+                  isValid = false;
+                }
+              }
+            }
+          });
         }
       }
     }

@@ -55,6 +55,9 @@ export class FormBuilder {
       case 'spacing':
         return this.generateSpacingPlaceholderHTML(fieldId, field, value, required);
 
+      case 'repeater':
+        return this.generateRepeaterPlaceholderHTML(fieldId, field, value, required);
+
       default: // text
         return this.generateTextHTML(fieldId, field, value, required);
     }
@@ -229,6 +232,32 @@ export class FormBuilder {
         data-spacing-config="${configJson}"
       >
         <!-- SpacingControl будет здесь отрендерен через SpacingControlRenderer -->
+      </div>
+    `;
+  }
+
+  /**
+   * Генерация контейнера для repeater поля
+   * Будет инициализирован через RepeaterControlRenderer в BlockUIController
+   */
+  private generateRepeaterPlaceholderHTML(fieldId: string, field: IFieldConfig, value: any, required: string): string {
+    const repeaterConfig = field.repeaterConfig || { fields: [] };
+    const configJson = JSON.stringify({
+      field: field.field,
+      label: field.label,
+      rules: field.rules || [],
+      value: value || [],
+      ...repeaterConfig
+    }).replace(/"/g, '&quot;');
+
+    return `
+      <div 
+        class="block-builder-form-group repeater-control-container" 
+        data-field-type="repeater"
+        data-field-name="${field.field}"
+        data-repeater-config="${configJson}"
+      >
+        <!-- RepeaterControl будет здесь отрендерен через RepeaterControlRenderer -->
       </div>
     `;
   }

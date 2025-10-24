@@ -309,13 +309,8 @@ export const blockConfigs = {
         // Генерируем уникальный ID для слайдера
         const sliderId = `swiper-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
         
-        // Фильтруем слайды
-        const slides = [
-          { url: props.image1_url, title: props.image1_title, description: props.image1_description },
-          { url: props.image2_url, title: props.image2_title, description: props.image2_description },
-          { url: props.image3_url, title: props.image3_title, description: props.image3_description },
-          { url: props.image4_url, title: props.image4_title, description: props.image4_description }
-        ].filter(slide => slide.url && slide.title)
+        // ✅ НОВЫЙ подход: используем массив slides из props
+        const slides = (props.slides || []).filter(slide => slide.url && slide.title)
 
         // Преобразуем значения
         const autoplayValue = typeof props.autoplay === 'string' 
@@ -394,83 +389,70 @@ export const blockConfigs = {
         placeholder: 'Галерея изображений',
         defaultValue: 'Галерея изображений'
       },
-      // Изображение 1
+      // ✅ НОВЫЙ подход: массив слайдов через repeater
       {
-        field: 'image1_url',
-        label: 'Изображение 1 - URL',
-        type: 'text',
-        rules: [{ type: 'required', message: 'URL обязателен' }],
-        defaultValue: '/qw.jpg'
-      },
-      {
-        field: 'image1_title',
-        label: 'Изображение 1 - Заголовок',
-        type: 'text',
-        rules: [{ type: 'required', message: 'Заголовок обязателен' }],
-        defaultValue: 'Природа'
-      },
-      {
-        field: 'image1_description',
-        label: 'Изображение 1 - Описание',
-        type: 'textarea',
-        defaultValue: 'Красивый пейзаж природы'
-      },
-      // Изображение 2
-      {
-        field: 'image2_url',
-        label: 'Изображение 2 - URL',
-        type: 'text',
-        defaultValue: '/Edvard_Grieg.jpg'
-      },
-      {
-        field: 'image2_title',
-        label: 'Изображение 2 - Заголовок',
-        type: 'text',
-        defaultValue: 'Эдвард Григ'
-      },
-      {
-        field: 'image2_description',
-        label: 'Изображение 2 - Описание',
-        type: 'textarea',
-        defaultValue: 'Знаменитый норвежский композитор'
-      },
-      // Изображение 3
-      {
-        field: 'image3_url',
-        label: 'Изображение 3 - URL',
-        type: 'text',
-        defaultValue: '/bear.jpg'
-      },
-      {
-        field: 'image3_title',
-        label: 'Изображение 3 - Заголовок',
-        type: 'text',
-        defaultValue: 'Медведь'
-      },
-      {
-        field: 'image3_description',
-        label: 'Изображение 3 - Описание',
-        type: 'textarea',
-        defaultValue: 'Дикая природа'
-      },
-      // Изображение 4
-      {
-        field: 'image4_url',
-        label: 'Изображение 4 - URL',
-        type: 'text',
-        defaultValue: '/spanch.jpg'
-      },
-      {
-        field: 'image4_title',
-        label: 'Изображение 4 - Заголовок',
-        type: 'text',
-        defaultValue: 'Губка Боб'
-      },
-      {
-        field: 'image4_description',
-        label: 'Изображение 4 - Описание',
-        type: 'textarea',
-        defaultValue: 'Популярный мультипликационный персонаж'
+        field: 'slides',
+        label: 'Слайды',
+        type: 'repeater',
+        rules: [
+          { type: 'required', message: 'Необходим хотя бы один слайд' }
+        ],
+        defaultValue: [
+          {
+            url: '/qw.jpg',
+            title: 'Природа',
+            description: 'Красивый пейзаж природы'
+          },
+          {
+            url: '/Edvard_Grieg.jpg',
+            title: 'Эдвард Григ',
+            description: 'Знаменитый норвежский композитор'
+          },
+          {
+            url: '/bear.jpg',
+            title: 'Медведь',
+            description: 'Дикая природа'
+          },
+          {
+            url: '/spanch.jpg',
+            title: 'Губка Боб',
+            description: 'Популярный мультипликационный персонаж'
+          }
+        ],
+        repeaterConfig: {
+          itemTitle: 'Слайд',
+          addButtonText: 'Добавить слайд',
+          removeButtonText: 'Удалить',
+          min: 3, // ✅ РАБОТАЕТ! т.к. есть required в rules (минимум 3 слайда)
+          max: 20,
+          collapsible: true,
+          fields: [
+            {
+              field: 'url',
+              label: 'URL изображения',
+              type: 'text',
+              placeholder: '/путь/к/изображению.jpg',
+              rules: [{ type: 'required', message: 'URL обязателен' }],
+              defaultValue: ''
+            },
+            {
+              field: 'title',
+              label: 'Заголовок',
+              type: 'text',
+              placeholder: 'Заголовок слайда',
+              rules: [{ type: 'required', message: 'Заголовок обязателен' }],
+              defaultValue: ''
+            },
+            {
+              field: 'description',
+              label: 'Описание',
+              type: 'textarea',
+              placeholder: 'Описание слайда',
+              rules: [],
+              defaultValue: ''
+            }
+          ]
+        }
       },
       // Настройки слайдера
       {
@@ -504,6 +486,248 @@ export const blockConfigs = {
           { type: 'max', value: 100, message: 'Максимум: 100' }
         ],
         defaultValue: 30
+      }
+    ]
+  },
+
+  cardList: {
+    title: 'Список карточек',
+    icon: '🃏',
+    description: 'Сетка из карточек с изображениями и описаниями',
+    render: {
+      kind: 'custom',
+      mount: (container, props) => {
+        const cards = (props.cards || []).filter(card => card.title && card.text);
+        
+        container.innerHTML = `
+          <div class="card-list-block" style="padding: 40px 20px; background: #f8f9fa;">
+            ${props.title ? `<h2 style="text-align: center; margin-bottom: 40px; font-size: 32px; font-weight: 700; color: #333;">${props.title}</h2>` : ''}
+            
+            <div class="cards-grid" style="
+              display: grid;
+              grid-template-columns: repeat(${props.columns || 3}, 1fr);
+              gap: ${props.gap || 16}px;
+              max-width: 1200px;
+              margin: 0 auto;
+            ">
+              ${cards.map(card => `
+                <div class="card" style="
+                  background: ${props.cardBackground || '#ffffff'};
+                  border-radius: ${props.cardBorderRadius || 8}px;
+                  overflow: hidden;
+                  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+                  transition: all 0.3s ease;
+                  cursor: pointer;
+                  display: flex;
+                  flex-direction: column;
+                ">
+                  ${card.image ? `
+                    <div style="
+                      width: 100%;
+                      height: 200px;
+                      overflow: hidden;
+                      background: #e9ecef;
+                    ">
+                      <img 
+                        src="${card.image}" 
+                        alt="${card.title}"
+                        style="width: 100%; height: 100%; object-fit: cover; display: block;"
+                      />
+                    </div>
+                  ` : ''}
+                  
+                  <div style="padding: 24px; flex: 1; display: flex; flex-direction: column;">
+                    <h3 style="
+                      margin: 0 0 12px 0;
+                      font-size: 20px;
+                      font-weight: 600;
+                      color: ${props.cardTextColor || '#333333'};
+                    ">${card.title}</h3>
+                    
+                    <p style="
+                      margin: 0 0 20px 0;
+                      font-size: 14px;
+                      line-height: 1.6;
+                      color: ${props.cardTextColor || '#333333'};
+                      opacity: 0.8;
+                      flex: 1;
+                    ">${card.text}</p>
+                    
+                    ${card.button && card.link ? `
+                      <a 
+                        href="${card.link}" 
+                        style="
+                          display: inline-block;
+                          padding: 10px 20px;
+                          background: #007bff;
+                          color: white;
+                          text-decoration: none;
+                          border-radius: 4px;
+                          font-size: 14px;
+                          font-weight: 500;
+                          transition: background 0.2s ease;
+                          text-align: center;
+                        "
+                        onmouseover="this.style.background='#0056b3'"
+                        onmouseout="this.style.background='#007bff'"
+                      >${card.button}</a>
+                    ` : ''}
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+
+        // Добавляем hover эффект для карточек
+        const cardElements = container.querySelectorAll('.card');
+        cardElements.forEach(card => {
+          card.addEventListener('mouseenter', () => {
+            card.style.transform = 'translateY(-5px)';
+            card.style.boxShadow = '0 8px 20px rgba(0,0,0,0.15)';
+          });
+          card.addEventListener('mouseleave', () => {
+            card.style.transform = 'translateY(0)';
+            card.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
+          });
+        });
+      }
+    },
+    fields: [
+      {
+        field: 'title',
+        label: 'Заголовок секции',
+        type: 'text',
+        placeholder: 'Наши услуги',
+        rules: [],
+        defaultValue: 'Наши услуги'
+      },
+      // ✅ Массив карточек через repeater
+      {
+        field: 'cards',
+        label: 'Карточки',
+        type: 'repeater',
+        defaultValue: [
+          {
+            title: 'Веб-разработка',
+            text: 'Создание современных веб-приложений',
+            button: 'Подробнее',
+            link: 'https://example.com',
+            image: '/2.jpg'
+          },
+          {
+            title: 'Мобильные приложения',
+            text: 'Разработка мобильных приложений для iOS и Android',
+            button: 'Узнать больше',
+            link: 'https://example.com',
+            image: '/spanch.jpg'
+          },
+          {
+            title: 'Дизайн',
+            text: 'Создание уникального дизайна для вашего бренда',
+            button: 'Посмотреть работы',
+            link: 'https://example.com',
+            image: '/bear.jpg'
+          }
+        ],
+        repeaterConfig: {
+          itemTitle: 'Карточка',
+          addButtonText: 'Добавить карточку',
+          removeButtonText: 'Удалить',
+          min: 1, // ⚠️ ИГНОРИРУЕТСЯ! т.к. нет required в rules (можно удалить все)
+          max: 12,
+          collapsible: true,
+          fields: [
+            {
+              field: 'title',
+              label: 'Заголовок',
+              type: 'text',
+              placeholder: 'Заголовок карточки',
+              rules: [{ type: 'required', message: 'Заголовок обязателен' }],
+              defaultValue: ''
+            },
+            {
+              field: 'text',
+              label: 'Описание',
+              type: 'textarea',
+              placeholder: 'Описание карточки',
+              rules: [{ type: 'required', message: 'Описание обязательно' }],
+              defaultValue: ''
+            },
+            {
+              field: 'image',
+              label: 'Изображение (URL)',
+              type: 'text',
+              placeholder: '/путь/к/изображению.jpg',
+              rules: [],
+              defaultValue: '/2.jpg'
+            },
+            {
+              field: 'button',
+              label: 'Текст кнопки',
+              type: 'text',
+              placeholder: 'Подробнее',
+              rules: [],
+              defaultValue: 'Подробнее'
+            },
+            {
+              field: 'link',
+              label: 'Ссылка',
+              type: 'text',
+              placeholder: 'https://example.com',
+              rules: [],
+              defaultValue: 'https://example.com'
+            }
+          ]
+        }
+      },
+      // Настройки отображения
+      {
+        field: 'cardBackground',
+        label: 'Цвет фона карточек',
+        type: 'color',
+        rules: [],
+        defaultValue: '#ffffff'
+      },
+      {
+        field: 'cardTextColor',
+        label: 'Цвет текста карточек',
+        type: 'color',
+        rules: [],
+        defaultValue: '#333333'
+      },
+      {
+        field: 'cardBorderRadius',
+        label: 'Скругление карточек',
+        type: 'number',
+        rules: [
+          { type: 'min', value: 0, message: 'Минимум: 0' },
+          { type: 'max', value: 50, message: 'Максимум: 50' }
+        ],
+        defaultValue: 8
+      },
+      {
+        field: 'columns',
+        label: 'Количество колонок',
+        type: 'select',
+        options: [
+          { value: 1, label: '1 колонка' },
+          { value: 2, label: '2 колонки' },
+          { value: 3, label: '3 колонки' },
+          { value: 4, label: '4 колонки' }
+        ],
+        rules: [],
+        defaultValue: 3
+      },
+      {
+        field: 'gap',
+        label: 'Отступ между карточками',
+        type: 'number',
+        rules: [
+          { type: 'min', value: 0, message: 'Минимум: 0' },
+          { type: 'max', value: 50, message: 'Максимум: 50' }
+        ],
+        defaultValue: 16
       }
     ]
   }

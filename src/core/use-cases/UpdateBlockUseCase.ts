@@ -56,6 +56,11 @@ export class UpdateBlockUseCase {
         return; // spacing может быть объектом
       }
       
+      // Разрешаем массивы (для repeater полей: cards, slides и т.д.)
+      if (Array.isArray(value)) {
+        return; // массивы разрешены
+      }
+      
       if (value !== null && typeof value !== 'string' && typeof value !== 'number' && typeof value !== 'boolean') {
         throw new Error(`Invalid prop value for key '${key}': must be primitive type`);
       }

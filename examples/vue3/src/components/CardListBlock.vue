@@ -73,21 +73,32 @@ import { ref, computed } from 'vue'
 
 const props = defineProps({
   title: { type: String, default: 'Наши услуги' },
-  card1_title: { type: String, default: 'Веб-разработка' },
-  card1_text: { type: String, default: 'Создание современных веб-приложений' },
-  card1_button: { type: String, default: 'Подробнее' },
-  card1_link: { type: String, default: 'https://example.com' },
-  card1_image: { type: String, default: '../static-files/img/fwfw.jpg' },
-  card2_title: { type: String, default: 'Мобильные приложения' },
-  card2_text: { type: String, default: 'Разработка мобильных приложений для iOS и Android' },
-  card2_button: { type: String, default: 'Узнать больше' },
-  card2_link: { type: String, default: 'https://example.com' },
-  card2_image: { type: String, default: '../static-files/img/fwfw.jpg' },
-  card3_title: { type: String, default: 'Дизайн' },
-  card3_text: { type: String, default: 'Создание уникального дизайна для вашего бренда' },
-  card3_button: { type: String, default: 'Посмотреть работы' },
-  card3_link: { type: String, default: 'https://example.com' },
-  card3_image: { type: String, default: '../static-files/img/fwfw.jpg' },
+  cards: {
+    type: Array,
+    default: () => [
+      {
+        title: 'Веб-разработка',
+        text: 'Создание современных веб-приложений',
+        button: 'Подробнее',
+        link: 'https://example.com',
+        image: '/2.jpg'
+      },
+      {
+        title: 'Мобильные приложения',
+        text: 'Разработка мобильных приложений для iOS и Android',
+        button: 'Узнать больше',
+        link: 'https://example.com',
+        image: '/spanch.jpg'
+      },
+      {
+        title: 'Дизайн',
+        text: 'Создание уникального дизайна для вашего бренда',
+        button: 'Посмотреть работы',
+        link: 'https://example.com',
+        image: '/bear.jpg'
+      }
+    ]
+  },
   cardBackground: { type: String, default: '#ffffff' },
   cardTextColor: { type: String, default: '#333333' },
   cardBorderRadius: { type: Number, default: 8 },
@@ -97,14 +108,6 @@ const props = defineProps({
 
 const selectedCard = ref(null)
 const showModal = ref(false)
-
-const cards = computed(() => {
-  return [
-    { title: props.card1_title, text: props.card1_text, button: props.card1_button, link: props.card1_link, image: props.card1_image },
-    { title: props.card2_title, text: props.card2_text, button: props.card2_button, link: props.card2_link, image: props.card2_image },
-    { title: props.card3_title, text: props.card3_text, button: props.card3_button, link: props.card3_link, image: props.card3_image }
-  ].filter(card => card.title && card.text)
-})
 
 const containerStyle = computed(() => ({
   display: 'grid',

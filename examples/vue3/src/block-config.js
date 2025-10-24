@@ -325,113 +325,87 @@ export const blockConfigs = {
         rules: [],
         defaultValue: 'Наши услуги'
       },
-      // Карточка 1
+      // ✅ НОВЫЙ подход: массив карточек через repeater
       {
-        field: 'card1_title',
-        label: 'Карточка 1 - Заголовок',
-        type: 'text',
-        rules: [{ type: 'required', message: 'Заголовок обязателен' }],
-        defaultValue: 'Веб-разработка'
-      },
-      {
-        field: 'card1_text',
-        label: 'Карточка 1 - Текст',
-        type: 'textarea',
-        rules: [{ type: 'required', message: 'Текст обязателен' }],
-        defaultValue: 'Создание современных веб-приложений'
-      },
-      {
-        field: 'card1_button',
-        label: 'Карточка 1 - Кнопка',
-        type: 'text',
-        rules: [],
-        defaultValue: 'Подробнее'
-      },
-      {
-        field: 'card1_link',
-        label: 'Карточка 1 - Ссылка',
-        type: 'text',
-        rules: [],
-        defaultValue: 'https://example.com'
-      },
-      {
-        field: 'card1_image',
-        label: 'Карточка 1 - Изображение',
-        type: 'text',
-        rules: [],
-        defaultValue: '/2.jpg'
-      },
-      // Карточка 2
-      {
-        field: 'card2_title',
-        label: 'Карточка 2 - Заголовок',
-        type: 'text',
-        rules: [],
-        defaultValue: 'Мобильные приложения'
-      },
-      {
-        field: 'card2_text',
-        label: 'Карточка 2 - Текст',
-        type: 'textarea',
-        rules: [],
-        defaultValue: 'Разработка мобильных приложений для iOS и Android'
-      },
-      {
-        field: 'card2_button',
-        label: 'Карточка 2 - Кнопка',
-        type: 'text',
-        rules: [],
-        defaultValue: 'Узнать больше'
-      },
-      {
-        field: 'card2_link',
-        label: 'Карточка 2 - Ссылка',
-        type: 'text',
-        rules: [],
-        defaultValue: 'https://example.com'
-      },
-      {
-        field: 'card2_image',
-        label: 'Карточка 2 - Изображение',
-        type: 'text',
-        rules: [],
-        defaultValue: '/spanch.jpg'
-      },
-      // Карточка 3
-      {
-        field: 'card3_title',
-        label: 'Карточка 3 - Заголовок',
-        type: 'text',
-        rules: [],
-        defaultValue: 'Дизайн'
-      },
-      {
-        field: 'card3_text',
-        label: 'Карточка 3 - Текст',
-        type: 'textarea',
-        rules: [],
-        defaultValue: 'Создание уникального дизайна для вашего бренда'
-      },
-      {
-        field: 'card3_button',
-        label: 'Карточка 3 - Кнопка',
-        type: 'text',
-        rules: [],
-        defaultValue: 'Посмотреть работы'
-      },
-      {
-        field: 'card3_link',
-        label: 'Карточка 3 - Ссылка',
-        type: 'text',
-        rules: [],
-        defaultValue: 'https://example.com'
-      },
-      {
-        field: 'card3_image',
-        label: 'Карточка 3 - Изображение',
-        type: 'text',
-        rules: [],
-        defaultValue: '/bear.jpg'
+        field: 'cards',
+        label: 'Карточки',
+        type: 'repeater',
+        // rules: [
+        //   { type: 'required', message: 'Необходима хотя бы одна карточка' }
+        // ],
+        defaultValue: [
+          {
+            title: 'Веб-разработка',
+            text: 'Создание современных веб-приложений',
+            button: 'Подробнее',
+            link: 'https://example.com',
+            image: '/2.jpg'
+          },
+          {
+            title: 'Мобильные приложения',
+            text: 'Разработка мобильных приложений для iOS и Android',
+            button: 'Узнать больше',
+            link: 'https://example.com',
+            image: '/spanch.jpg'
+          },
+          {
+            title: 'Дизайн',
+            text: 'Создание уникального дизайна для вашего бренда',
+            button: 'Посмотреть работы',
+            link: 'https://example.com',
+            image: '/bear.jpg'
+          }
+        ],
+        repeaterConfig: {
+          itemTitle: 'Карточка',
+          addButtonText: 'Добавить карточку',
+          removeButtonText: 'Удалить',
+          min: 1, // ⚠️ ИГНОРИРУЕТСЯ! т.к. нет required в rules (можно удалить все)
+          max: 12,
+          collapsible: true,
+          fields: [
+            {
+              field: 'title',
+              label: 'Заголовок',
+              type: 'text',
+              placeholder: 'Заголовок карточки',
+              rules: [{ type: 'required', message: 'Заголовок обязателен' }],
+              defaultValue: ''
+            },
+            {
+              field: 'text',
+              label: 'Описание',
+              type: 'textarea',
+              placeholder: 'Описание карточки',
+              rules: [{ type: 'required', message: 'Описание обязательно' }],
+              defaultValue: ''
+            },
+            {
+              field: 'image',
+              label: 'Изображение (URL)',
+              type: 'text',
+              placeholder: '/путь/к/изображению.jpg',
+              rules: [],
+              defaultValue: '/2.jpg'
+            },
+            {
+              field: 'button',
+              label: 'Текст кнопки',
+              type: 'text',
+              placeholder: 'Подробнее',
+              rules: [],
+              defaultValue: 'Подробнее'
+            },
+            {
+              field: 'link',
+              label: 'Ссылка',
+              type: 'text',
+              placeholder: 'https://example.com',
+              rules: [],
+              defaultValue: 'https://example.com'
+            }
+          ]
+        }
       },
       // Настройки отображения
       {
@@ -548,93 +522,70 @@ export const blockConfigs = {
         rules: [],
         defaultValue: 'Галерея изображений'
       },
-      // Изображение 1
+      // ✅ НОВЫЙ подход: массив слайдов через repeater
       {
-        field: 'image1_url',
-        label: 'Изображение 1 - URL',
-        type: 'text',
-        rules: [{ type: 'required', message: 'URL обязателен' }],
-        defaultValue: '/2.jpg'
-      },
-      {
-        field: 'image1_title',
-        label: 'Изображение 1 - Заголовок',
-        type: 'text',
-        rules: [{ type: 'required', message: 'Заголовок обязателен' }],
-        defaultValue: 'Изображение 1'
-      },
-      {
-        field: 'image1_description',
-        label: 'Изображение 1 - Описание',
-        type: 'textarea',
-        rules: [],
-        defaultValue: 'Описание первого изображения'
-      },
-      // Изображение 2
-      {
-        field: 'image2_url',
-        label: 'Изображение 2 - URL',
-        type: 'text',
-        rules: [],
-        defaultValue: '/spanch.jpg'
-      },
-      {
-        field: 'image2_title',
-        label: 'Изображение 2 - Заголовок',
-        type: 'text',
-        rules: [],
-        defaultValue: 'Изображение 2'
-      },
-      {
-        field: 'image2_description',
-        label: 'Изображение 2 - Описание',
-        type: 'textarea',
-        rules: [],
-        defaultValue: 'Описание второго изображения'
-      },
-      // Изображение 3
-      {
-        field: 'image3_url',
-        label: 'Изображение 3 - URL',
-        type: 'text',
-        rules: [],
-        defaultValue: '/bear.jpg'
-      },
-      {
-        field: 'image3_title',
-        label: 'Изображение 3 - Заголовок',
-        type: 'text',
-        rules: [],
-        defaultValue: 'Изображение 3'
-      },
-      {
-        field: 'image3_description',
-        label: 'Изображение 3 - Описание',
-        type: 'textarea',
-        rules: [],
-        defaultValue: 'Описание третьего изображения'
-      },
-      // Изображение 4
-      {
-        field: 'image4_url',
-        label: 'Изображение 4 - URL',
-        type: 'text',
-        rules: [],
-        defaultValue: '/3.png'
-      },
-      {
-        field: 'image4_title',
-        label: 'Изображение 4 - Заголовок',
-        type: 'text',
-        rules: [],
-        defaultValue: 'Изображение 4'
-      },
-      {
-        field: 'image4_description',
-        label: 'Изображение 4 - Описание',
-        type: 'textarea',
-        rules: [],
-        defaultValue: 'Описание четвёртого изображения'
+        field: 'slides',
+        label: 'Слайды',
+        type: 'repeater',
+        rules: [
+          { type: 'required', message: 'Необходим хотя бы один слайд' }
+        ],
+        defaultValue: [
+          {
+            url: '/2.jpg',
+            title: 'Изображение 1',
+            description: 'Описание первого изображения'
+          },
+          {
+            url: '/spanch.jpg',
+            title: 'Изображение 2',
+            description: 'Описание второго изображения'
+          },
+          {
+            url: '/bear.jpg',
+            title: 'Изображение 3',
+            description: 'Описание третьего изображения'
+          },
+          {
+            url: '/3.png',
+            title: 'Изображение 4',
+            description: 'Описание четвёртого изображения'
+          }
+        ],
+        repeaterConfig: {
+          itemTitle: 'Слайд',
+          addButtonText: 'Добавить слайд',
+          removeButtonText: 'Удалить',
+          min: 2, // ✅ РАБОТАЕТ! т.к. есть required в rules (минимум 2 слайда)
+          max: 20,
+          collapsible: true,
+          fields: [
+            {
+              field: 'url',
+              label: 'URL изображения',
+              type: 'text',
+              placeholder: '/путь/к/изображению.jpg',
+              rules: [{ type: 'required', message: 'URL обязателен' }],
+              defaultValue: ''
+            },
+            {
+              field: 'title',
+              label: 'Заголовок',
+              type: 'text',
+              placeholder: 'Заголовок слайда',
+              rules: [{ type: 'required', message: 'Заголовок обязателен' }],
+              defaultValue: ''
+            },
+            {
+              field: 'description',
+              label: 'Описание',
+              type: 'textarea',
+              placeholder: 'Описание слайда',
+              rules: [],
+              defaultValue: ''
+            }
+          ]
+        }
       },
       // Настройки слайдера
       {

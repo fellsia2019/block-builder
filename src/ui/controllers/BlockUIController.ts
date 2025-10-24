@@ -11,6 +11,7 @@ import { FormBuilder, IFieldConfig } from '../services/FormBuilder';
 import { ModalManager } from '../services/ModalManager';
 import { StyleManager } from '../services/StyleManager';
 import { SpacingControlRenderer } from '../services/SpacingControlRenderer';
+import { RepeaterControlRenderer } from '../services/RepeaterControlRenderer';
 import { copyToClipboard } from '../../utils/copyToClipboard';
 import { UniversalValidator } from '../../utils/universalValidation';
 import { addSpacingFieldToFields } from '../../utils/blockSpacingHelpers';
@@ -31,6 +32,7 @@ export class BlockUIController {
   private blocks: IBlockDto[] = [];
   private onSave?: (blocks: IBlockDto[]) => Promise<boolean> | boolean;
   private spacingRenderers: Map<string, SpacingControlRenderer> = new Map();
+  private repeaterRenderers: Map<string, RepeaterControlRenderer> = new Map();
 
   constructor(config: IBlockUIControllerConfig) {
     this.config = config;
@@ -140,8 +142,9 @@ export class BlockUIController {
       submitButtonText: 'Добавить'
     });
 
-    // Инициализируем spacing контролы после рендеринга модалки
+    // Инициализируем spacing и repeater контролы после рендеринга модалки
     this.initializeSpacingControls();
+    this.initializeRepeaterControls();
   }
 
   /**
@@ -204,13 +207,70 @@ export class BlockUIController {
   }
 
   /**
-   * Получение данных формы с учетом spacing контролов
+   * Инициализация repeater контролов
+   */
+  private initializeRepeaterControls(): void {
+    // Очищаем старые рендереры
+    this.cleanupRepeaterControls();
+
+    // Находим все контейнеры для repeater
+    const containers = document.querySelectorAll('.repeater-control-container');
+    
+    containers.forEach(container => {
+      const config = container.getAttribute('data-repeater-config');
+      if (!config) return;
+
+      try {
+        const repeaterConfig = JSON.parse(config.replace(/&quot;/g, '"'));
+        
+        // Создаем рендерер
+        const renderer = new RepeaterControlRenderer({
+          fieldName: repeaterConfig.field,
+          label: repeaterConfig.label,
+          rules: repeaterConfig.rules || [],
+          config: repeaterConfig,
+          value: repeaterConfig.value || [],
+          onChange: (value) => {
+            // Обновление значения при изменении
+            // Сохраняем в data-атрибуте для последующего получения
+            container.setAttribute('data-repeater-value', JSON.stringify(value));
+          }
+        });
+
+        // Рендерим контрол
+        renderer.render(container as HTMLElement);
+
+        // Сохраняем рендерер
+        this.repeaterRenderers.set(repeaterConfig.field, renderer);
+      } catch (error) {
+        console.error('Ошибка инициализации repeater контрола:', error);
+      }
+    });
+  }
+
+  /**
+   * Очистка repeater контролов
+   */
+  private cleanupRepeaterControls(): void {
+    this.repeaterRenderers.forEach(renderer => {
+      renderer.destroy();
+    });
+    this.repeaterRenderers.clear();
+  }
+
+  /**
+   * Получение данных формы с учетом spacing и repeater контролов
    */
   private getFormDataWithSpacing(formId: string): Record<string, any> {
     const props = this.modalManager.getFormData(formId);
 
     // Добавляем данные из spacing контролов
     this.spacingRenderers.forEach((renderer, fieldName) => {
+      props[fieldName] = renderer.getValue();
+    });
+
+    // Добавляем данные из repeater контролов
+    this.repeaterRenderers.forEach((renderer, fieldName) => {
       props[fieldName] = renderer.getValue();
     });
 
@@ -317,8 +377,9 @@ export class BlockUIController {
       submitButtonText: 'Сохранить'
     });
 
-    // Инициализируем spacing контролы после рендеринга модалки
+    // Инициализируем spacing и repeater контролы после рендеринга модалки
     this.initializeSpacingControls();
+    this.initializeRepeaterControls();
   }
 
   /**
@@ -516,8 +577,18 @@ export class BlockUIController {
     // Сначала очищаем все старые ошибки
     this.clearValidationErrors();
 
-    // Добавляем новые ошибки
+    // Обновляем ошибки в repeater контролах
+    this.repeaterRenderers.forEach((renderer) => {
+      renderer.updateErrors(errors);
+    });
+
+    // Добавляем новые ошибки для обычных полей
     Object.entries(errors).forEach(([fieldName, fieldErrors]) => {
+      // Пропускаем ошибки repeater полей (формат: "cards[0].title")
+      if (fieldName.includes('[') && fieldName.includes(']')) {
+        return; // Эти ошибки обрабатываются в repeater контроле
+      }
+
       const input = document.querySelector(`[name="${fieldName}"]`) as HTMLElement;
       if (input) {
         // Добавляем класс ошибки к полю
@@ -569,6 +640,7 @@ export class BlockUIController {
   private closeModalWithCleanup(): void {
     this.clearValidationErrors();
     this.cleanupSpacingControls();
+    this.cleanupRepeaterControls();
     this.modalManager.closeModal();
   }
 

@@ -45,18 +45,31 @@ import 'swiper/css/pagination'
 
 const props = defineProps({
   title: { type: String, default: 'Галерея изображений' },
-  image1_url: { type: String, default: '../static-files/img/fwfw.jpg' },
-  image1_title: { type: String, default: 'Изображение 1' },
-  image1_description: { type: String, default: 'Описание первого изображения' },
-  image2_url: { type: String, default: '../static-files/img/spanch.jpg' },
-  image2_title: { type: String, default: 'Изображение 2' },
-  image2_description: { type: String, default: 'Описание второго изображения' },
-  image3_url: { type: String, default: '../static-files/img/мэдвэд.jpg' },
-  image3_title: { type: String, default: 'Изображение 3' },
-  image3_description: { type: String, default: 'Описание третьего изображения' },
-  image4_url: { type: String, default: '../static-files/img/Квантовое_4D-кодирование_картинка.jpg' },
-  image4_title: { type: String, default: 'Изображение 4' },
-  image4_description: { type: String, default: 'Описание четвёртого изображения' },
+  slides: {
+    type: Array,
+    default: () => [
+      {
+        url: '/2.jpg',
+        title: 'Изображение 1',
+        description: 'Описание первого изображения'
+      },
+      {
+        url: '/spanch.jpg',
+        title: 'Изображение 2',
+        description: 'Описание второго изображения'
+      },
+      {
+        url: '/bear.jpg',
+        title: 'Изображение 3',
+        description: 'Описание третьего изображения'
+      },
+      {
+        url: '/3.png',
+        title: 'Изображение 4',
+        description: 'Описание четвёртого изображения'
+      }
+    ]
+  },
   autoplay: { type: [Boolean, String], default: true },
   autoplayDelay: { type: [Number, String], default: 3000 },
   loop: { type: [Boolean, String], default: true },
@@ -65,16 +78,6 @@ const props = defineProps({
 
 // Модули Swiper
 const modules = [Navigation, Pagination, Autoplay]
-
-// Вычисляемые свойства для преобразования значений
-const slides = computed(() => {
-  return [
-    { url: props.image1_url, title: props.image1_title, description: props.image1_description },
-    { url: props.image2_url, title: props.image2_title, description: props.image2_description },
-    { url: props.image3_url, title: props.image3_title, description: props.image3_description },
-    { url: props.image4_url, title: props.image4_title, description: props.image4_description }
-  ].filter(slide => slide.url && slide.title)
-})
 
 const autoplayValue = computed(() => {
   if (typeof props.autoplay === 'string') {

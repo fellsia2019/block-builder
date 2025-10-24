@@ -5,7 +5,7 @@
 import { IValidationRule } from './validation';
 
 // Типы полей форм
-export type TFieldType = 'text' | 'number' | 'email' | 'url' | 'textarea' | 'select' | 'checkbox' | 'color' | 'file' | 'spacing';
+export type TFieldType = 'text' | 'number' | 'email' | 'url' | 'textarea' | 'select' | 'checkbox' | 'color' | 'file' | 'spacing' | 'repeater';
 
 // Типы отступов
 export type TSpacingType = 'padding-top' | 'padding-bottom' | 'margin-top' | 'margin-bottom';
@@ -38,6 +38,29 @@ export interface IBlockSpacingOptions {
   config?: Omit<ISpacingFieldConfig, 'spacingTypes'>; // Дополнительная конфигурация
 }
 
+// Конфигурация поля внутри repeater
+export interface IRepeaterItemFieldConfig {
+  field: string; // Имя поля внутри элемента массива
+  label: string; // Метка поля
+  type: Exclude<TFieldType, 'repeater' | 'spacing'>; // Тип поля (repeater не может быть вложенным)
+  placeholder?: string;
+  defaultValue?: any;
+  options?: { value: string; label: string }[]; // Для типа 'select'
+  rules?: IValidationRule[];
+}
+
+// Конфигурация для repeater поля
+export interface IRepeaterFieldConfig {
+  fields: IRepeaterItemFieldConfig[]; // Поля внутри каждого элемента массива
+  addButtonText?: string; // Текст кнопки добавления (по умолчанию "Добавить")
+  removeButtonText?: string; // Текст кнопки удаления (по умолчанию "Удалить")
+  itemTitle?: string; // Заголовок элемента (например, "Карточка", "Слайд")
+  min?: number; // Минимальное количество элементов (если не указано, определяется по required: true = 1, false = 0)
+  max?: number; // Максимальное количество элементов
+  defaultItemValue?: Record<string, any>; // Значения по умолчанию для нового элемента
+  collapsible?: boolean; // Можно ли сворачивать элементы (по умолчанию false)
+}
+
 // Конфигурация поля формы
 export interface IFormFieldConfig {
   field: string;
@@ -48,6 +71,7 @@ export interface IFormFieldConfig {
   options?: { value: string; label: string }[]; // Для типа 'select'
   rules?: IValidationRule[];
   spacingConfig?: ISpacingFieldConfig; // Для типа 'spacing'
+  repeaterConfig?: IRepeaterFieldConfig; // Для типа 'repeater'
 }
 
 // Конфигурация блока с опциями spacing
