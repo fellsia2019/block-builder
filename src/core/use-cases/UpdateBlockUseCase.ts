@@ -51,6 +51,11 @@ export class UpdateBlockUseCase {
 
   private validateProps(props: Partial<Record<string, any>>): void {
     Object.entries(props).forEach(([key, value]) => {
+      // Исключаем 'spacing' - это объект с брекпоинтами
+      if (key === 'spacing') {
+        return; // spacing может быть объектом
+      }
+      
       if (value !== null && typeof value !== 'string' && typeof value !== 'number' && typeof value !== 'boolean') {
         throw new Error(`Invalid prop value for key '${key}': must be primitive type`);
       }

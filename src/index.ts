@@ -41,6 +41,8 @@ export { FormBuilder } from './ui/services/FormBuilder';
 export { ModalManager } from './ui/services/ModalManager';
 export { UIRenderer } from './ui/services/UIRenderer';
 export { BlockUIController } from './ui/controllers/BlockUIController';
+export { SpacingControlRenderer } from './ui/services/SpacingControlRenderer';
+export type { ISpacingControlOptions } from './ui/services/SpacingControlRenderer';
 
 // UI Types
 export type { IFieldConfig } from './ui/services/FormBuilder';
@@ -71,3 +73,8 @@ export { JavaScriptValidator as UtilsJavaScriptValidator, JavaScriptFormGenerato
 
 // Утилита для копирования в буфер обмена
 export { copyToClipboard } from './utils/copyToClipboard';
+
+// Утилиты для работы со spacing
+export * from './utils/spacingHelpers';
+export * from './utils/blockSpacingHelpers';
+export * from './utils/breakpointHelpers';

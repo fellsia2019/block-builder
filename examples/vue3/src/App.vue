@@ -42,6 +42,7 @@ const availableBlockTypes = ref(
     icon: cfg.icon, // Добавляем иконку
     render: cfg.render,
     fields: cfg.fields, // Передаем поля для форм
+    spacingOptions: cfg.spacingOptions, // ✅ Передаем spacingOptions для кастомных брекпоинтов
     defaultSettings: {},
     defaultProps: cfg.fields?.reduce((acc, field) => {
       acc[field.field] = field.defaultValue

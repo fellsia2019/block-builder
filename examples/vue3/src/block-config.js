@@ -16,7 +16,9 @@ import ImageBlock from './components/ImageBlock.vue'
 import ButtonBlock from './components/ButtonBlock.vue'
 import CardListBlock from './components/CardListBlock.vue'
 import HeroBlock from './components/HeroBlock.vue'
+import FeatureCard from './components/FeatureCard.vue'
 import GallerySliderBlock from './components/GallerySliderBlock.vue'
+import SpacedContentBlock from './components/SpacedContentBlock.vue'
 
 // ✅ АСИНХРОННЫЙ импорт компонента (загружается по требованию)
 const Counter = defineAsyncComponent(() => import('./components/Counter.vue'))
@@ -74,7 +76,24 @@ export const blockConfigs = {
         rules: [{ type: 'required', message: 'Выравнивание обязательно' }],
         defaultValue: 'left'
       }
-    ]
+    ],
+    // 🧪 Кастомные брекпоинты для тестирования
+    spacingOptions: {
+      config: {
+        min: 0,
+        max: 120,
+        step: 8,
+        // Отключаем дефолтные брекпоинты (Desktop, Tablet, Mobile)
+        defaultBreakpoints: false,
+        // Используем ТОЛЬКО кастомные брекпоинты: XL, Large, Medium, Small
+        breakpoints: [
+          { name: 'xlarge', label: 'XL (Desktop)', maxWidth: undefined }, // Desktop без ограничения
+          { name: 'large', label: 'L (Laptop)', maxWidth: 1440 },
+          { name: 'medium', label: 'M (Tablet)', maxWidth: 1024 },
+          { name: 'small', label: 'S (Mobile)', maxWidth: 640 }
+        ]
+      }
+    }
   },
 
   image: {
@@ -278,7 +297,16 @@ export const blockConfigs = {
         rules: [],
         defaultValue: true
       }
-    ]
+    ],
+    // Пример использования padding для блока с фоном
+    spacingOptions: {
+      spacingTypes: ['padding-top', 'padding-bottom', 'margin-bottom'],
+      config: {
+        min: 0,
+        max: 200,
+        step: 10
+      }
+    }
   },
 
   cardList: {
@@ -456,6 +484,52 @@ export const blockConfigs = {
         defaultValue: 16
       }
     ]
+  },
+
+  feature: {
+    title: 'Карточка возможности',
+    icon: '⭐',
+    description: 'Карточка для описания фичи или преимущества',
+    render: {
+      kind: 'component',
+      framework: 'vue',
+      component: FeatureCard
+    },
+    fields: [
+      {
+        field: 'icon',
+        label: 'Иконка (emoji)',
+        type: 'text',
+        placeholder: '🚀',
+        rules: [],
+        defaultValue: '🚀'
+      },
+      {
+        field: 'title',
+        label: 'Заголовок',
+        type: 'text',
+        placeholder: 'Быстрая работа',
+        rules: [{ type: 'required', message: 'Заголовок обязателен' }],
+        defaultValue: 'Быстрая работа'
+      },
+      {
+        field: 'description',
+        label: 'Описание',
+        type: 'textarea',
+        placeholder: 'Молниеносная скорость загрузки...',
+        rules: [{ type: 'required', message: 'Описание обязательно' }],
+        defaultValue: 'Молниеносная скорость загрузки и отличная производительность'
+      }
+    ],
+    // Демонстрация использования padding для карточки с фоном
+    spacingOptions: {
+      spacingTypes: ['padding-top', 'padding-bottom', 'margin-bottom'],
+      config: {
+        min: 0,
+        max: 100,
+        step: 5
+      }
+    }
   },
 
   gallerySlider: {
@@ -758,6 +832,86 @@ export const blockConfigs = {
           { type: 'max', value: 50, message: 'Максимум: 50' }
         ],
         defaultValue: 12
+      }
+    ]
+  },
+
+  // 🆕 ПРИМЕР: Блок с ЯВНЫМ spacing полем (не автоматическим)
+  spacedContent: {
+    title: 'Контент с отступами (ручной)',
+    icon: '📐',
+    description: 'Блок с явно определённым spacing полем',
+    render: {
+      kind: 'component',
+      framework: 'vue',
+      component: SpacedContentBlock
+    },
+    fields: [
+      {
+        field: 'title',
+        label: 'Заголовок',
+        type: 'text',
+        placeholder: 'Введите заголовок...',
+        rules: [
+          { type: 'required', message: 'Заголовок обязателен' }
+        ],
+        defaultValue: 'Заголовок секции'
+      },
+      {
+        field: 'content',
+        label: 'Контент',
+        type: 'textarea',
+        placeholder: 'Введите контент...',
+        rules: [
+          { type: 'required', message: 'Контент обязателен' }
+        ],
+        defaultValue: '<p>Это пример контента с настраиваемыми отступами.</p><p>Отступы можно настроить отдельно для каждого брекпоинта.</p>'
+      },
+      {
+        field: 'backgroundColor',
+        label: 'Цвет фона',
+        type: 'color',
+        rules: [],
+        defaultValue: '#f8f9fa'
+      },
+      {
+        field: 'spacing',
+        label: 'Отступы блока',
+        type: 'spacing',
+        spacingConfig: {
+          // Какие типы отступов доступны (по умолчанию все 4)
+          spacingTypes: ['padding-top', 'padding-bottom', 'margin-top', 'margin-bottom'],
+          // Диапазон значений
+          min: 0,
+          max: 200,
+          step: 4,
+          // Использовать базовые брекпоинты (desktop, tablet, mobile)
+          defaultBreakpoints: true,
+          // Дополнительные кастомные брекпоинты (необязательно)
+          // breakpoints: [
+          //   { name: 'wide', label: 'Широкий экран', maxWidth: 1920 }
+          // ]
+        },
+        defaultValue: {
+          desktop: {
+            'padding-top': 60,
+            'padding-bottom': 60,
+            'margin-top': 0,
+            'margin-bottom': 20
+          },
+          tablet: {
+            'padding-top': 40,
+            'padding-bottom': 40,
+            'margin-top': 0,
+            'margin-bottom': 16
+          },
+          mobile: {
+            'padding-top': 24,
+            'padding-bottom': 24,
+            'margin-top': 0,
+            'margin-bottom': 12
+          }
+        }
       }
     ]
   }

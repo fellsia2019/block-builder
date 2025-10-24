@@ -4,6 +4,8 @@
  */
 
 import { IBlockDto } from '../../core/types';
+import { getBlockInlineStyles, watchBreakpointChanges } from '../../utils/breakpointHelpers';
+import { ISpacingData } from '../../utils/spacingHelpers';
 
 export interface IUIRendererConfig {
   containerId: string;
@@ -13,9 +15,22 @@ export interface IUIRendererConfig {
 
 export class UIRenderer {
   private config: IUIRendererConfig;
+  private breakpointUnsubscribers: Map<string, () => void> = new Map();
 
   constructor(config: IUIRendererConfig) {
     this.config = config;
+  }
+
+  /**
+   * Получение props для пользовательского компонента (без служебного spacing)
+   */
+  private getUserComponentProps(props: Record<string, any>): Record<string, any> {
+    if (!props) return {};
+    
+    // Исключаем spacing - это служебное поле для BlockBuilder
+    const { spacing, ...userProps } = props;
+    
+    return userProps;
   }
 
   /**
@@ -82,6 +97,9 @@ export class UIRenderer {
 
     if (!blocksContainer || !countElement) return;
 
+    // Очищаем старые watchers перед перерендером
+    this.cleanupBreakpointWatchers();
+
     // Обновляем счетчик
     countElement.textContent = blocks.length.toString();
 
@@ -112,6 +130,8 @@ export class UIRenderer {
     // Инициализируем custom блоки после рендеринга
     setTimeout(() => {
       this.initializeCustomBlocks(blocks);
+      // Настраиваем watchers для spacing после рендеринга DOM
+      this.setupBreakpointWatchers(blocks);
     }, 0);
   }
 
@@ -123,9 +143,16 @@ export class UIRenderer {
     if (!config) return '';
 
     const blockContent = this.renderBlockContent(block, config);
+    
+    // Генерируем spacing стили из props.spacing
+    // margin - напрямую, padding - через CSS переменные
+    const spacingStylesObj = getBlockInlineStyles(block.props.spacing || {}, 'spacing');
+    const styleAttr = Object.keys(spacingStylesObj).length > 0 
+      ? ` style="${this.objectToStyleString(spacingStylesObj)}"` 
+      : '';
 
     return `
-      <div class="block-builder-block ${block.locked ? 'locked' : ''} ${!block.visible ? 'hidden' : ''}" data-block-id="${block.id}">
+      <div class="block-builder-block ${block.locked ? 'locked' : ''} ${!block.visible ? 'hidden' : ''}" data-block-id="${block.id}"${styleAttr}>
         <div class="block-builder-block-header">
           <div class="block-builder-block-info">
             <span>📦 ${config.title}</span>
@@ -152,6 +179,19 @@ export class UIRenderer {
   }
 
   /**
+   * Преобразование объекта стилей в строку
+   */
+  private objectToStyleString(styles: Record<string, string>): string {
+    return Object.entries(styles)
+      .map(([key, value]) => {
+        // Конвертируем camelCase в kebab-case для CSS свойств
+        const cssKey = key.replace(/([A-Z])/g, '-$1').toLowerCase();
+        return `${cssKey}: ${value}`;
+      })
+      .join('; ');
+  }
+
+  /**
    * Рендеринг элементов управления блока
    */
   private renderBlockControls(block: IBlockDto): string {
@@ -170,6 +210,9 @@ export class UIRenderer {
    * Рендеринг содержимого блока
    */
   private renderBlockContent(block: IBlockDto, config: any): string {
+    // Получаем props без служебного spacing
+    const userProps = this.getUserComponentProps(block.props);
+
     // Если есть custom render с функцией mount
     if (config.render?.kind === 'custom' && config.render?.mount) {
       return this.renderCustomBlock(block);
@@ -183,19 +226,19 @@ export class UIRenderer {
     // Если есть HTML шаблон в render
     if (config.render?.kind === 'html' && config.render?.template) {
       const template = config.render.template;
-      return typeof template === 'function' ? template(block.props) : template;
+      return typeof template === 'function' ? template(userProps) : template;
     }
 
     // Fallback на старый формат template
     if (config.template) {
-      return typeof config.template === 'function' ? config.template(block.props) : config.template;
+      return typeof config.template === 'function' ? config.template(userProps) : config.template;
     }
 
     // Fallback - простое отображение
     return `
       <div class="block-content-fallback">
         <strong>${config.title}</strong>
-        <pre>${JSON.stringify(block.props, null, 2)}</pre>
+        <pre>${JSON.stringify(userProps, null, 2)}</pre>
       </div>
     `;
   }
@@ -206,6 +249,7 @@ export class UIRenderer {
   private renderVueComponent(block: IBlockDto, config: any): string {
     const componentId = `vue-component-${block.id}`;
     const componentName = config.render.component.name;
+    const userProps = this.getUserComponentProps(block.props);
 
     // Создаем контейнер для Vue компонента
     const containerHTML = `
@@ -216,7 +260,7 @@ export class UIRenderer {
 
     // Монтируем Vue компонент асинхронно
     setTimeout(() => {
-      this.mountVueComponent(componentId, componentName, block.props);
+      this.mountVueComponent(componentId, componentName, userProps);
     }, 0);
 
     return containerHTML;
@@ -285,8 +329,11 @@ export class UIRenderer {
         
         if (container && !container.hasAttribute('data-custom-mounted')) {
           try {
+            // Получаем props без служебного spacing
+            const userProps = this.getUserComponentProps(block.props);
+            
             // Вызываем функцию mount с контейнером и пропсами
-            config.render.mount(container, block.props);
+            config.render.mount(container, userProps);
             container.setAttribute('data-custom-mounted', 'true');
           } catch (error) {
             console.error(`Ошибка монтирования custom блока ${block.id}:`, error);
@@ -298,6 +345,59 @@ export class UIRenderer {
         }
       }
     });
+  }
+
+  /**
+   * Настройка watchers для отслеживания брекпоинтов и обновления spacing
+   */
+  private setupBreakpointWatchers(blocks: IBlockDto[]): void {
+    blocks.forEach(block => {
+      const spacing = block.props?.spacing as ISpacingData | undefined;
+      
+      if (!spacing || Object.keys(spacing).length === 0) {
+        return;
+      }
+
+      // Находим DOM элемент блока
+      const element = document.querySelector(`[data-block-id="${block.id}"]`) as HTMLElement;
+      
+      if (!element) {
+        return;
+      }
+
+      // Отписываемся от старого watcher, если есть
+      const oldUnsubscribe = this.breakpointUnsubscribers.get(block.id);
+      if (oldUnsubscribe) {
+        oldUnsubscribe();
+      }
+
+      // Получаем конфиг блока для определения breakpoints
+      const blockConfig = this.config.blockConfigs[block.type];
+      const breakpoints = blockConfig?.spacingOptions?.config?.breakpoints;
+
+      // Настраиваем новый watcher
+      const unsubscribe = watchBreakpointChanges(element, spacing, 'spacing', breakpoints);
+      this.breakpointUnsubscribers.set(block.id, unsubscribe);
+    });
+  }
+
+  /**
+   * Очистка всех watchers
+   */
+  private cleanupBreakpointWatchers(): void {
+    this.breakpointUnsubscribers.forEach(unsubscribe => unsubscribe());
+    this.breakpointUnsubscribers.clear();
+  }
+
+  /**
+   * Очистка watcher для конкретного блока
+   */
+  cleanupBlockWatcher(blockId: string): void {
+    const unsubscribe = this.breakpointUnsubscribers.get(blockId);
+    if (unsubscribe) {
+      unsubscribe();
+      this.breakpointUnsubscribers.delete(blockId);
+    }
   }
 }
 

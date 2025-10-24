@@ -55,6 +55,8 @@
           <div
             class="block-builder-block"
             :class="{ locked: block.locked, hidden: !block.visible }"
+            :data-block-id="block.id"
+            :style="getBlockSpacingStyles(block)"
           >
             <!-- Заголовок блока -->
             <div class="block-builder-block-header">
@@ -133,11 +135,11 @@
               <component
                 v-if="isVueComponent(block)"
                 :is="getVueComponent(block)"
-                v-bind="block.props"
+                v-bind="getUserComponentProps(block)"
               />
               <div v-else class="block-content-fallback">
                 <strong>{{ getBlockConfig(block.type)?.title || block.type }}</strong>
-                <pre>{{ JSON.stringify(block.props, null, 2) }}</pre>
+                <pre>{{ JSON.stringify(getUserComponentProps(block), null, 2) }}</pre>
               </div>
             </div>
           </div>
@@ -277,6 +279,22 @@
                 <span class="block-builder-form-checkbox-label">{{ field.label }}</span>
               </label>
 
+              <!-- Spacing Control -->
+              <SpacingControl
+                v-else-if="field.type === 'spacing'"
+                :label="field.label"
+                :field-name="field.field"
+                v-model="formData[field.field]"
+                :spacing-types="field.spacingConfig?.spacingTypes"
+                :min="field.spacingConfig?.min"
+                :max="field.spacingConfig?.max"
+                :step="field.spacingConfig?.step"
+                :breakpoints="field.spacingConfig?.breakpoints"
+                :use-default-breakpoints="field.spacingConfig?.defaultBreakpoints !== false"
+                :required="hasRequiredRule(field)"
+                :show-preview="true"
+              />
+
               <!-- Array (для cards) -->
               <div v-else-if="field.type === 'array' && field.itemFields">
                 <div
@@ -335,7 +353,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted } from 'vue';
+import { ref, reactive, computed, onMounted, onBeforeUnmount, nextTick } from 'vue';
 import { IBlock, TBlockId } from '../../core/types';
 import { BlockManagementUseCase } from '../../core/use-cases/BlockManagementUseCase';
 import { IBlockRepository } from '../../core/ports/BlockRepository';
@@ -343,6 +361,10 @@ import { IComponentRegistry } from '../../core/ports/ComponentRegistry';
 import { MemoryBlockRepositoryImpl } from '../../infrastructure/repositories/MemoryBlockRepositoryImpl';
 import { copyToClipboard } from '../../utils/copyToClipboard';
 import { UniversalValidator } from '../../utils/universalValidation';
+import { addSpacingFieldToFields } from '../../utils/blockSpacingHelpers';
+import { getBlockInlineStyles, watchBreakpointChanges } from '../../utils/breakpointHelpers';
+import { ISpacingData } from '../../utils/spacingHelpers';
+import SpacingControl from './SpacingControl.vue';
 
 interface IBlockType {
   type: string;
@@ -399,8 +421,16 @@ const currentBlockType = computed(() => {
   return availableBlockTypes.value.find(bt => bt.type === currentType.value) || null;
 });
 
+// Текущие поля формы (с автоматическим добавлением spacing)
 const currentBlockFields = computed(() => {
-  return currentBlockType.value?.fields || [];
+  if (!currentBlockType.value) return [];
+  const blockType = currentBlockType.value;
+  
+  // Автоматически добавляем spacing поле, если его нет
+  return addSpacingFieldToFields(
+    blockType.fields || [],
+    (blockType as any).spacingOptions
+  );
 });
 
 // Методы для работы с блоками
@@ -575,6 +605,9 @@ const createBlock = async (): Promise<boolean> => {
     // Перезагружаем блоки
     await loadBlocks();
     
+    // Перенастраиваем watchers для новых блоков
+    await setupBreakpointWatchers();
+    
     emit('block-added', newBlock as any);
     console.log('✅ Блок создан:', newBlock);
     return true;
@@ -613,6 +646,9 @@ const updateBlock = async (): Promise<boolean> => {
       blocks.value[index] = updated as any;
     }
     
+    // Перенастраиваем watchers после обновления блока
+    await setupBreakpointWatchers();
+    
     emit('block-updated', updated as any);
     console.log('✅ Блок обновлен:', updated);
     return true;
@@ -628,6 +664,10 @@ const handleDuplicateBlock = async (id: TBlockId) => {
   try {
     const duplicated = await blockService.duplicateBlock(id);
     blocks.value.push(duplicated as any);
+    
+    // Перенастраиваем watchers после дублирования
+    await setupBreakpointWatchers();
+    
     emit('block-added', duplicated as any);
     console.log('✅ Блок продублирован:', duplicated);
   } catch (error) {
@@ -639,6 +679,13 @@ const handleDuplicateBlock = async (id: TBlockId) => {
 const handleDeleteBlock = async (id: TBlockId) => {
   if (confirm('Удалить блок?')) {
     try {
+      // Очищаем watcher для удаляемого блока
+      const unsubscribe = breakpointUnsubscribers.get(id);
+      if (unsubscribe) {
+        unsubscribe();
+        breakpointUnsubscribers.delete(id);
+      }
+      
       await blockService.deleteBlock(id);
       blocks.value = blocks.value.filter(b => b.id !== id);
       emit('block-deleted', id);
@@ -675,6 +722,7 @@ const handleToggleLock = async (blockId: TBlockId) => {
   
   await blockService.setBlockLocked(blockId, !block.locked);
   await loadBlocks();
+  await setupBreakpointWatchers();
 };
 
 // Переключить видимость блока
@@ -684,6 +732,7 @@ const handleToggleVisibility = async (blockId: TBlockId) => {
   
   await blockService.setBlockVisible(blockId, !block.visible);
   await loadBlocks();
+  await setupBreakpointWatchers();
 };
 
 // Получить конфигурацию блока по типу
@@ -791,12 +840,90 @@ const handleClearAll = async () => {
   }
 };
 
+// ===== Spacing Utilities =====
+
+// Получение inline стилей для блока (margin + CSS переменные для padding)
+const getBlockSpacingStyles = (block: IBlock): Record<string, string> => {
+  // Проверяем, есть ли spacing в props блока
+  const spacing = block.props?.spacing as ISpacingData | undefined;
+  
+  if (!spacing || Object.keys(spacing).length === 0) {
+    return {};
+  }
+
+  // Получаем конфиг блока для определения breakpoints
+  const blockConfig = getBlockConfig(block.type) as any;
+  const breakpoints = blockConfig?.spacingOptions?.config?.breakpoints;
+
+  return getBlockInlineStyles(spacing, 'spacing', breakpoints);
+};
+
+// Получение props для пользовательского компонента (без служебного spacing)
+const getUserComponentProps = (block: IBlock): Record<string, any> => {
+  if (!block.props) return {};
+  
+  // Исключаем spacing - это служебное поле для BlockBuilder
+  const { spacing, ...userProps } = block.props;
+  
+  return userProps;
+};
+
+// Отслеживание изменения брекпоинтов
+const breakpointUnsubscribers = new Map<TBlockId, () => void>();
+
+// Функция для настройки отслеживания брекпоинтов для всех блоков
+const setupBreakpointWatchers = async () => {
+  await nextTick(); // Ждем, пока DOM обновится
+
+  blocks.value.forEach(block => {
+    const spacing = block.props?.spacing as ISpacingData | undefined;
+    
+    if (!spacing || Object.keys(spacing).length === 0) {
+      return;
+    }
+
+    // Находим DOM элемент блока
+    const element = document.querySelector(`[data-block-id="${block.id}"]`) as HTMLElement;
+    
+    if (!element) {
+      return;
+    }
+
+    // Отписываемся от старого watcher, если есть
+    const oldUnsubscribe = breakpointUnsubscribers.get(block.id);
+    if (oldUnsubscribe) {
+      oldUnsubscribe();
+    }
+
+    // Получаем конфиг блока для определения breakpoints
+    const blockConfig = getBlockConfig(block.type) as any;
+    const breakpoints = blockConfig?.spacingOptions?.config?.breakpoints;
+
+    // Настраиваем новый watcher
+    const unsubscribe = watchBreakpointChanges(element, spacing, 'spacing', breakpoints);
+    breakpointUnsubscribers.set(block.id, unsubscribe);
+  });
+};
+
+// Очистка всех watchers
+const cleanupBreakpointWatchers = () => {
+  breakpointUnsubscribers.forEach(unsubscribe => unsubscribe());
+  breakpointUnsubscribers.clear();
+};
+
 // Загрузка блоков
 onMounted(async () => {
   // Сначала загружаем начальные блоки (если есть)
   await loadInitialBlocks();
   // Затем загружаем все блоки для отображения
   await loadBlocks();
+  // Настраиваем отслеживание брекпоинтов
+  await setupBreakpointWatchers();
+});
+
+// Очистка при размонтировании
+onBeforeUnmount(() => {
+  cleanupBreakpointWatchers();
 });
 </script>
 

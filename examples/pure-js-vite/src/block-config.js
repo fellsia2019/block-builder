@@ -12,6 +12,95 @@ import 'swiper/css/navigation'
 import 'swiper/css/pagination'
 
 export const blockConfigs = {
+  spacedText: {
+    title: 'Текст с отступами',
+    icon: '📐',
+    description: 'Текстовый блок с управлением отступами',
+    render: {
+      kind: 'html',
+      template: (props) => {
+        // Используем CSS переменные для padding (они автоматически устанавливаются на .block-builder-block)
+        // margin применяется автоматически к .block-builder-block
+        return `
+          <div class="spaced-text-block" style="
+            padding-top: var(--spacing-padding-top, 0px);
+            padding-bottom: var(--spacing-padding-bottom, 0px);
+            text-align: ${props.textAlign}; 
+            font-size: ${props.fontSize}px; 
+            color: ${props.color};
+            background: ${props.backgroundColor};
+            border-radius: 8px;
+            transition: all 0.3s ease;
+          " onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.15)'" onmouseout="this.style.boxShadow='none'">
+            ${props.content}
+          </div>
+        `
+      }
+    },
+    fields: [
+      {
+        field: 'content',
+        label: 'Текст',
+        type: 'textarea',
+        placeholder: 'Введите текст...',
+        rules: [
+          { type: 'required', message: 'Текст обязателен' }
+        ],
+        defaultValue: 'Текст с управляемыми отступами'
+      },
+      {
+        field: 'fontSize',
+        label: 'Размер шрифта',
+        type: 'number',
+        rules: [
+          { type: 'min', value: 12, message: 'Минимум: 12px' },
+          { type: 'max', value: 48, message: 'Максимум: 48px' }
+        ],
+        defaultValue: 18
+      },
+      {
+        field: 'color',
+        label: 'Цвет текста',
+        type: 'color',
+        defaultValue: '#333333'
+      },
+      {
+        field: 'backgroundColor',
+        label: 'Цвет фона',
+        type: 'color',
+        defaultValue: '#f8f9fa'
+      },
+      {
+        field: 'textAlign',
+        label: 'Выравнивание',
+        type: 'select',
+        options: [
+          { value: 'left', label: 'По левому краю' },
+          { value: 'center', label: 'По центру' },
+          { value: 'right', label: 'По правому краю' }
+        ],
+        defaultValue: 'center'
+      }
+    ],
+    // 🧪 Кастомные брекпоинты для тестирования (так же как во Vue примере)
+    spacingOptions: {
+      config: {
+        min: 0,
+        max: 120,
+        step: 8,
+        // Отключаем дефолтные брекпоинты (Desktop, Tablet, Mobile)
+        defaultBreakpoints: false,
+        // Используем ТОЛЬКО кастомные брекпоинты: XL, Large, Medium, Small
+        breakpoints: [
+          { name: 'xlarge', label: 'XL (Desktop)', maxWidth: undefined }, // Desktop без ограничения
+          { name: 'large', label: 'L (Laptop)', maxWidth: 1440 },
+          { name: 'medium', label: 'M (Tablet)', maxWidth: 1024 },
+          { name: 'small', label: 'S (Mobile)', maxWidth: 640 }
+        ]
+      }
+    }
+  },
+
   text: {
     title: 'Текстовый блок',
     icon: '📝',

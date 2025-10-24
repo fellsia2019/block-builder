@@ -52,6 +52,9 @@ export class FormBuilder {
       case 'checkbox':
         return this.generateCheckboxHTML(fieldId, field, value);
 
+      case 'spacing':
+        return this.generateSpacingPlaceholderHTML(fieldId, field, value, required);
+
       default: // text
         return this.generateTextHTML(fieldId, field, value, required);
     }
@@ -200,6 +203,32 @@ export class FormBuilder {
           value="${value || ''}"
           ${required}
         />
+      </div>
+    `;
+  }
+
+  /**
+   * Генерация контейнера для spacing поля
+   * Будет инициализирован через SpacingControlRenderer в BlockUIController
+   */
+  private generateSpacingPlaceholderHTML(fieldId: string, field: IFieldConfig, value: any, required: string): string {
+    const spacingConfig = field.spacingConfig || {};
+    const configJson = JSON.stringify({
+      field: field.field,
+      label: field.label,
+      required: !!required,
+      value: value || {},
+      ...spacingConfig
+    }).replace(/"/g, '&quot;');
+
+    return `
+      <div 
+        class="block-builder-form-group spacing-control-container" 
+        data-field-type="spacing"
+        data-field-name="${field.field}"
+        data-spacing-config="${configJson}"
+      >
+        <!-- SpacingControl будет здесь отрендерен через SpacingControlRenderer -->
       </div>
     `;
   }

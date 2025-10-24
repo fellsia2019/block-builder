@@ -10,8 +10,10 @@ import { UIRenderer } from '../services/UIRenderer';
 import { FormBuilder, IFieldConfig } from '../services/FormBuilder';
 import { ModalManager } from '../services/ModalManager';
 import { StyleManager } from '../services/StyleManager';
+import { SpacingControlRenderer } from '../services/SpacingControlRenderer';
 import { copyToClipboard } from '../../utils/copyToClipboard';
 import { UniversalValidator } from '../../utils/universalValidation';
+import { addSpacingFieldToFields } from '../../utils/blockSpacingHelpers';
 
 export interface IBlockUIControllerConfig {
   containerId: string;
@@ -28,6 +30,7 @@ export class BlockUIController {
   private styleManager: StyleManager;
   private blocks: IBlockDto[] = [];
   private onSave?: (blocks: IBlockDto[]) => Promise<boolean> | boolean;
+  private spacingRenderers: Map<string, SpacingControlRenderer> = new Map();
 
   constructor(config: IBlockUIControllerConfig) {
     this.config = config;
@@ -116,7 +119,12 @@ export class BlockUIController {
       return;
     }
 
-    const fields: IFieldConfig[] = config.fields || [];
+    // Автоматически добавляем spacing поле, если его нет
+    const fields: IFieldConfig[] = addSpacingFieldToFields(
+      config.fields || [],
+      config.spacingOptions
+    );
+
     const formHTML = `
       <form id="block-builder-form" class="block-builder-form">
         ${this.formBuilder.generateCreateFormHTML(fields)}
@@ -131,6 +139,9 @@ export class BlockUIController {
       onCancel: () => this.closeModalWithCleanup(),
       submitButtonText: 'Добавить'
     });
+
+    // Инициализируем spacing контролы после рендеринга модалки
+    this.initializeSpacingControls();
   }
 
   /**
@@ -141,10 +152,76 @@ export class BlockUIController {
   }
 
   /**
+   * Инициализация spacing контролов
+   */
+  private initializeSpacingControls(): void {
+    // Очищаем старые рендереры
+    this.cleanupSpacingControls();
+
+    // Находим все контейнеры для spacing
+    const containers = document.querySelectorAll('.spacing-control-container');
+    
+    containers.forEach(container => {
+      const config = container.getAttribute('data-spacing-config');
+      if (!config) return;
+
+      try {
+        const spacingConfig = JSON.parse(config.replace(/&quot;/g, '"'));
+        
+        // Создаем рендерер
+        const renderer = new SpacingControlRenderer({
+          fieldName: spacingConfig.field,
+          label: spacingConfig.label,
+          required: spacingConfig.required,
+          config: spacingConfig,
+          value: spacingConfig.value || {},
+          onChange: (value) => {
+            // Обновление значения при изменении
+            // Сохраняем в data-атрибуте для последующего получения
+            container.setAttribute('data-spacing-value', JSON.stringify(value));
+          }
+        });
+
+        // Рендерим контрол
+        renderer.render(container as HTMLElement);
+
+        // Сохраняем рендерер
+        this.spacingRenderers.set(spacingConfig.field, renderer);
+      } catch (error) {
+        console.error('Ошибка инициализации spacing контрола:', error);
+      }
+    });
+  }
+
+  /**
+   * Очистка spacing контролов
+   */
+  private cleanupSpacingControls(): void {
+    this.spacingRenderers.forEach(renderer => {
+      renderer.destroy();
+    });
+    this.spacingRenderers.clear();
+  }
+
+  /**
+   * Получение данных формы с учетом spacing контролов
+   */
+  private getFormDataWithSpacing(formId: string): Record<string, any> {
+    const props = this.modalManager.getFormData(formId);
+
+    // Добавляем данные из spacing контролов
+    this.spacingRenderers.forEach((renderer, fieldName) => {
+      props[fieldName] = renderer.getValue();
+    });
+
+    return props;
+  }
+
+  /**
    * Обработка создания блока
    */
   private async handleCreateBlock(type: string, fields: IFieldConfig[], position?: number): Promise<void> {
-    const props = this.modalManager.getFormData('block-builder-form');
+    const props = this.getFormDataWithSpacing('block-builder-form');
 
     // Валидация с помощью UniversalValidator
     const validation = UniversalValidator.validateForm(props, fields);
@@ -220,7 +297,11 @@ export class BlockUIController {
       return;
     }
 
-    const fields: IFieldConfig[] = config.fields || [];
+    // Автоматически добавляем spacing поле, если его нет
+    const fields: IFieldConfig[] = addSpacingFieldToFields(
+      config.fields || [],
+      config.spacingOptions
+    );
     const formHTML = `
       <form id="block-builder-form" class="block-builder-form">
         ${this.formBuilder.generateEditFormHTML(fields, block.props)}
@@ -235,13 +316,16 @@ export class BlockUIController {
       onCancel: () => this.closeModalWithCleanup(),
       submitButtonText: 'Сохранить'
     });
+
+    // Инициализируем spacing контролы после рендеринга модалки
+    this.initializeSpacingControls();
   }
 
   /**
    * Обработка обновления блока
    */
   private async handleUpdateBlock(blockId: string, type: string, fields: IFieldConfig[]): Promise<void> {
-    const props = this.modalManager.getFormData('block-builder-form');
+    const props = this.getFormDataWithSpacing('block-builder-form');
 
     // Валидация с помощью UniversalValidator
     const validation = UniversalValidator.validateForm(props, fields);
@@ -290,6 +374,9 @@ export class BlockUIController {
   async deleteBlockUI(blockId: string): Promise<void> {
     if (!confirm('Удалить блок?')) return;
 
+    // Очищаем watcher для spacing перед удалением
+    this.uiRenderer.cleanupBlockWatcher(blockId);
+    
     await this.config.useCase.deleteBlock(blockId);
     await this.refreshBlocks();
   }
@@ -481,6 +568,7 @@ export class BlockUIController {
    */
   private closeModalWithCleanup(): void {
     this.clearValidationErrors();
+    this.cleanupSpacingControls();
     this.modalManager.closeModal();
   }
 
@@ -502,6 +590,7 @@ export class BlockUIController {
    * Очистка ресурсов
    */
   destroy(): void {
+    this.cleanupSpacingControls();
     this.styleManager.removeAllStyles();
     this.modalManager.closeModal();
   }
