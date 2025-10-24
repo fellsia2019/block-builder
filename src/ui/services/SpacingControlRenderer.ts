@@ -120,16 +120,6 @@ export class SpacingControlRenderer {
     return labels[spacingType];
   }
 
-  /**
-   * Получить процент для заполнения трека
-   */
-  private getTrackFillWidth(spacingType: TSpacingType): string {
-    const value = this.getSpacingValue(spacingType);
-    const min = this.config.min || 0;
-    const max = this.config.max || 200;
-    const percentage = ((value - min) / (max - min)) * 100;
-    return `${Math.max(0, Math.min(100, percentage))}%`;
-  }
 
   /**
    * Генерация HTML для превью CSS переменных
@@ -189,18 +179,6 @@ export class SpacingControlRenderer {
       if (valueInput) {
         valueInput.value = value.toString();
       }
-
-      // Обновляем визуальный трек
-      const trackFill = sliderWrapper.querySelector('.spacing-control__track-fill') as HTMLElement;
-      if (trackFill) {
-        trackFill.style.width = this.getTrackFillWidth(spacingType);
-      }
-
-      // Обновляем thumb
-      const thumb = sliderWrapper.querySelector('.spacing-control__thumb') as HTMLElement;
-      if (thumb) {
-        thumb.style.left = this.getTrackFillWidth(spacingType);
-      }
     }
 
     // Обновляем превью
@@ -226,7 +204,6 @@ export class SpacingControlRenderer {
     const min = this.config.min || 0;
     const max = this.config.max || 200;
     const step = this.config.step || 1;
-    const trackWidth = this.getTrackFillWidth(spacingType);
 
     return `
       <div class="spacing-control__group">
@@ -244,10 +221,6 @@ export class SpacingControlRenderer {
             value="${value}"
             data-spacing-type="${spacingType}"
           />
-          <div class="spacing-control__track">
-            <div class="spacing-control__track-fill" style="width: ${trackWidth}"></div>
-            <div class="spacing-control__thumb" style="left: ${trackWidth}"></div>
-          </div>
           <input
             type="number"
             class="spacing-control__value-input"

@@ -47,16 +47,6 @@
             :value="getSpacingValue(spacingType)"
             @input="handleSpacingChange(spacingType, $event)"
           />
-          <div class="spacing-control__track">
-            <div
-              class="spacing-control__track-fill"
-              :style="{ width: getTrackFillWidth(spacingType) }"
-            ></div>
-            <div
-              class="spacing-control__thumb"
-              :style="{ left: getTrackFillWidth(spacingType) }"
-            ></div>
-          </div>
           <input
             type="number"
             class="spacing-control__value-input"
@@ -232,13 +222,6 @@ export default {
       emit('update:modelValue', spacingData.value);
     };
 
-    // Получить ширину заполнения трека (в процентах)
-    const getTrackFillWidth = (spacingType) => {
-      const value = getSpacingValue(spacingType);
-      const percentage = ((value - minValue.value) / (maxValue.value - minValue.value)) * 100;
-      return `${percentage}%`;
-    };
-
     // Получить превью CSS переменных
     const getCSSVariablesPreview = () => {
       const lines = [];
@@ -310,7 +293,6 @@ export default {
       getSpacingValue,
       handleSpacingChange,
       handleValueInputChange,
-      getTrackFillWidth,
       getCSSVariablesPreview
     };
   }

@@ -112,99 +112,98 @@
   grid-template-columns: 1fr auto auto;
   align-items: center;
   gap: var(--bb-spacing-md);
-  position: relative;
 }
 
-/* Элемент: slider (скрытый нативный input[type=range]) */
+/* Элемент: slider (стандартный input[type=range]) */
 .spacing-control__slider {
-  position: absolute;
   width: 100%;
-  height: 100%;
-  opacity: 0;
+  height: 8px;
   cursor: pointer;
-  z-index: 2;
   margin: 0;
-
-  /* Убираем стандартные стили браузера */
   -webkit-appearance: none;
   appearance: none;
+  background: transparent;
 
+  /* Трек для WebKit (Chrome, Safari, Edge) */
+  &::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 8px;
+    background: var(--bb-bg-tertiary);
+    border-radius: 100px;
+  }
+
+  /* Трек для Firefox */
+  &::-moz-range-track {
+    width: 100%;
+    height: 8px;
+    background: var(--bb-bg-tertiary);
+    border-radius: 100px;
+    border: none;
+  }
+
+  /* Ползунок для WebKit */
   &::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
     width: 20px;
     height: 20px;
+    background-color: #ffffff;
+    border: 3px solid var(--bb-color-primary);
+    border-radius: 50%;
+    box-shadow: var(--bb-shadow-sm);
     cursor: pointer;
+    margin-top: -6px;
+    position: relative;
+    transition: all 0.15s ease;
+
+    &:hover {
+      transform: scale(1.15);
+      border-width: 4px;
+      box-shadow: var(--bb-shadow-md);
+    }
   }
 
+  /* Ползунок для Firefox */
   &::-moz-range-thumb {
     width: 20px;
     height: 20px;
-    cursor: pointer;
-    border: none;
-    background: transparent;
-  }
-}
-
-/* Элемент: track */
-.spacing-control__track {
-  position: relative;
-  width: 100%;
-  height: 8px;
-  background-color: var(--bb-bg-tertiary);
-  border-radius: 100px;
-  overflow: visible;
-}
-
-/* Элемент: track-fill */
-.spacing-control__track-fill {
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    var(--bb-color-primary) 0%,
-    var(--bb-color-primary-dark) 100%
-  );
-  border-radius: 100px;
-  transition: width 0.1s ease;
-  pointer-events: none;
-}
-
-/* Элемент: thumb */
-.spacing-control__thumb {
-  position: absolute;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: 20px;
-  height: 20px;
-  background-color: #ffffff;
-  border: 3px solid var(--bb-color-primary);
-  border-radius: 50%;
-  box-shadow: var(--bb-shadow-sm);
-  transition: left 0.1s ease;
-  pointer-events: none;
-  z-index: 1;
-
-  &::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 8px;
-    height: 8px;
-    background-color: var(--bb-color-primary);
+    background-color: #ffffff;
+    border: 3px solid var(--bb-color-primary);
     border-radius: 50%;
-  }
-}
+    box-shadow: var(--bb-shadow-sm);
+    cursor: pointer;
+    transition: all 0.15s ease;
 
-/* Анимация при наведении на слайдер */
-.spacing-control__slider-wrapper:hover .spacing-control__thumb {
-  transform: translate(-50%, -50%) scale(1.15);
-  border-width: 4px;
-  box-shadow: var(--bb-shadow-md);
+    &:hover {
+      transform: scale(1.15);
+      border-width: 4px;
+      box-shadow: var(--bb-shadow-md);
+    }
+  }
+
+  /* Заполненная часть трека (для Firefox) */
+  &::-moz-range-progress {
+    height: 8px;
+    background: linear-gradient(
+      90deg,
+      var(--bb-color-primary) 0%,
+      var(--bb-color-primary-dark) 100%
+    );
+    border-radius: 100px;
+  }
+
+  /* Фокус */
+  &:focus {
+    outline: none;
+
+    &::-webkit-slider-thumb {
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+    }
+
+    &::-moz-range-thumb {
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+    }
+  }
 }
 
 /* Элемент: value-input */
@@ -233,6 +232,7 @@
 
   /* Убираем стрелки в Firefox */
   &[type='number'] {
+    appearance: textfield;
     -moz-appearance: textfield;
   }
 }
