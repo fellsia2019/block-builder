@@ -2,12 +2,22 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { setupMockApi } from './mock-api-server.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
 export default defineConfig({
-  plugins: [vue()],
+  plugins: [
+    vue(),
+    // Плагин для Mock API
+    {
+      name: 'mock-api',
+      configureServer(server) {
+        setupMockApi(server.middlewares)
+      }
+    }
+  ],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),

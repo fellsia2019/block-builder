@@ -60,6 +60,9 @@ export class FormBuilder {
       case 'repeater':
         return this.generateRepeaterPlaceholderHTML(fieldId, field, value, required);
 
+      case 'api-select':
+        return this.generateApiSelectPlaceholderHTML(fieldId, field, value, required);
+
       default: // text
         return this.generateTextHTML(fieldId, field, value, required);
     }
@@ -227,8 +230,8 @@ export class FormBuilder {
     }).replace(/"/g, '&quot;');
 
     return `
-      <div 
-        class="block-builder-form-group spacing-control-container" 
+      <div
+        class="block-builder-form-group spacing-control-container"
         data-field-type="spacing"
         data-field-name="${field.field}"
         data-spacing-config="${configJson}"
@@ -253,13 +256,44 @@ export class FormBuilder {
     }).replace(/"/g, '&quot;');
 
     return `
-      <div 
-        class="block-builder-form-group repeater-control-container" 
+      <div
+        class="block-builder-form-group repeater-control-container"
         data-field-type="repeater"
         data-field-name="${field.field}"
         data-repeater-config="${configJson}"
       >
         <!-- RepeaterControl будет здесь отрендерен через RepeaterControlRenderer -->
+      </div>
+    `;
+  }
+
+  /**
+   * Генерация контейнера для api-select поля
+   * Будет инициализирован через ApiSelectControlRenderer в BlockUIController
+   */
+  private generateApiSelectPlaceholderHTML(fieldId: string, field: TFieldConfig, value: any, required: string): string {
+    const apiSelectConfig = field.apiSelectConfig || { url: '', multiple: false };
+    const configJson = JSON.stringify({
+      field: field.field,
+      label: field.label,
+      rules: field.rules || [],
+      value: value || (apiSelectConfig.multiple ? [] : null),
+      ...apiSelectConfig
+    }).replace(/"/g, '&quot;');
+
+    return `
+      <div
+        class="block-builder-form-group api-select-control-container"
+        data-field-type="api-select"
+        data-field-name="${field.field}"
+        data-api-select-config="${configJson}"
+      >
+        <label class="block-builder-form-label">
+          ${field.label} ${required ? '<span class="required">*</span>' : ''}
+        </label>
+        <div style="padding: 10px; border: 1px dashed #ccc; border-radius: 4px; color: #999;">
+          ⏳ Инициализация API Select...
+        </div>
       </div>
     `;
   }

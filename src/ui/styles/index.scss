@@ -1,6 +1,6 @@
 /**
  * Block Builder - Главный файл стилей SCSS
- * 
+ *
  * Этот файл импортирует все необходимые стили для работы Block Builder
  * как в чистом JS, так и во фреймворках (Vue3, React и т.д.)
  */
@@ -18,3 +18,4 @@
 @use './components/modals';
 @use './components/spacing-control';
 @use './components/repeater-control';
+@use './components/api-select-control';

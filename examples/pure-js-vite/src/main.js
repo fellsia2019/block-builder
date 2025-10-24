@@ -1,4 +1,5 @@
 import './style.css'
+import '../../../src/ui/styles/index.scss' // Импорт стилей BlockBuilder
 import { BlockBuilder } from 'block-builder'
 import { blockConfigs } from './block-config.js'
 
@@ -28,18 +29,18 @@ const blockBuilder = new BlockBuilder({
   // Пример функции сохранения
   onSave: async (blocks) => {
     console.log('💾 Сохранение блоков:', blocks)
-    
+
     try {
       // Здесь вы можете сохранять блоки любым способом:
       // 1. Отправить на сервер через API
       // await fetch('/api/blocks', { method: 'POST', body: JSON.stringify(blocks) })
-      
+
       // 2. Сохранить в localStorage
       localStorage.setItem('saved-blocks', JSON.stringify(blocks))
-      
+
       // 3. Сохранить в IndexedDB
       // await saveToIndexedDB(blocks)
-      
+
       // Возвращаем true при успешном сохранении
       return true
     } catch (error) {

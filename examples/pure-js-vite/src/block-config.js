@@ -25,8 +25,8 @@ export const blockConfigs = {
           <div class="spaced-text-block" style="
             padding-top: var(--spacing-padding-top, 0px);
             padding-bottom: var(--spacing-padding-bottom, 0px);
-            text-align: ${props.textAlign}; 
-            font-size: ${props.fontSize}px; 
+            text-align: ${props.textAlign};
+            font-size: ${props.fontSize}px;
             color: ${props.color};
             background: ${props.backgroundColor};
             border-radius: 8px;
@@ -107,8 +107,8 @@ export const blockConfigs = {
       kind: 'html',
       template: (props) => `
         <div class="text-block" style="
-          text-align: ${props.textAlign}; 
-          font-size: ${props.fontSize}px; 
+          text-align: ${props.textAlign};
+          font-size: ${props.fontSize}px;
           color: ${props.color};
           padding: 10px;
           border: 1px solid #e9ecef;
@@ -173,9 +173,9 @@ export const blockConfigs = {
       kind: 'html',
       template: (props) => `
         <div class="image-block" style="text-align: center; margin: 20px 0;">
-          <img 
-            src="${props.src}" 
-            alt="${props.alt}" 
+          <img
+            src="${props.src}"
+            alt="${props.alt}"
             style="
               border-radius: ${props.borderRadius}px;
               max-width: 100%;
@@ -229,7 +229,7 @@ export const blockConfigs = {
       kind: 'html',
       template: (props) => `
         <div class="button-block" style="text-align: center; margin: 20px 0;">
-          <button 
+          <button
             class="custom-button"
             style="
               background-color: ${props.backgroundColor};
@@ -308,29 +308,29 @@ export const blockConfigs = {
       mount: (container, props) => {
         // Генерируем уникальный ID для слайдера
         const sliderId = `swiper-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
-        
+
         // ✅ НОВЫЙ подход: используем массив slides из props
         const slides = (props.slides || []).filter(slide => slide.url && slide.title)
 
         // Преобразуем значения
-        const autoplayValue = typeof props.autoplay === 'string' 
-          ? (props.autoplay === 'on' || props.autoplay === 'true') 
+        const autoplayValue = typeof props.autoplay === 'string'
+          ? (props.autoplay === 'on' || props.autoplay === 'true')
           : props.autoplay
-        const autoplayDelay = typeof props.autoplayDelay === 'string' 
-          ? parseInt(props.autoplayDelay, 10) 
+        const autoplayDelay = typeof props.autoplayDelay === 'string'
+          ? parseInt(props.autoplayDelay, 10)
           : props.autoplayDelay
-        const loopValue = typeof props.loop === 'string' 
-          ? (props.loop === 'on' || props.loop === 'true') 
+        const loopValue = typeof props.loop === 'string'
+          ? (props.loop === 'on' || props.loop === 'true')
           : props.loop
-        const spaceBetween = typeof props.spaceBetween === 'string' 
-          ? parseInt(props.spaceBetween, 10) 
+        const spaceBetween = typeof props.spaceBetween === 'string'
+          ? parseInt(props.spaceBetween, 10)
           : props.spaceBetween
 
         // Создаем HTML
         container.innerHTML = `
           <div class="gallery-slider-block" style="padding: 20px; background: #f8f9fa; border-radius: 8px;">
             ${props.title ? `<h2 style="text-align: center; margin-bottom: 30px; font-size: 28px; font-weight: 700; color: #333;">${props.title}</h2>` : ''}
-            
+
             <div class="swiper" id="${sliderId}" style="width: 100%; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
               <div class="swiper-wrapper">
                 ${slides.map(slide => `
@@ -345,7 +345,7 @@ export const blockConfigs = {
                   </div>
                 `).join('')}
               </div>
-              
+
               <div class="swiper-button-next"></div>
               <div class="swiper-button-prev"></div>
               <div class="swiper-pagination"></div>
@@ -498,11 +498,11 @@ export const blockConfigs = {
       kind: 'custom',
       mount: (container, props) => {
         const cards = (props.cards || []).filter(card => card.title && card.text);
-        
+
         container.innerHTML = `
           <div class="card-list-block" style="padding: 40px 20px; background: #f8f9fa;">
             ${props.title ? `<h2 style="text-align: center; margin-bottom: 40px; font-size: 32px; font-weight: 700; color: #333;">${props.title}</h2>` : ''}
-            
+
             <div class="cards-grid" style="
               display: grid;
               grid-template-columns: repeat(${props.columns || 3}, 1fr);
@@ -528,14 +528,14 @@ export const blockConfigs = {
                       overflow: hidden;
                       background: #e9ecef;
                     ">
-                      <img 
-                        src="${card.image}" 
+                      <img
+                        src="${card.image}"
                         alt="${card.title}"
                         style="width: 100%; height: 100%; object-fit: cover; display: block;"
                       />
                     </div>
                   ` : ''}
-                  
+
                   <div style="padding: 24px; flex: 1; display: flex; flex-direction: column;">
                     <h3 style="
                       margin: 0 0 12px 0;
@@ -543,7 +543,7 @@ export const blockConfigs = {
                       font-weight: 600;
                       color: ${props.cardTextColor || '#333333'};
                     ">${card.title}</h3>
-                    
+
                     <p style="
                       margin: 0 0 20px 0;
                       font-size: 14px;
@@ -552,10 +552,10 @@ export const blockConfigs = {
                       opacity: 0.8;
                       flex: 1;
                     ">${card.text}</p>
-                    
+
                     ${card.button && card.link ? `
-                      <a 
-                        href="${card.link}" 
+                      <a
+                        href="${card.link}"
                         style="
                           display: inline-block;
                           padding: 10px 20px;
@@ -740,11 +740,11 @@ export const blockConfigs = {
       kind: 'html',
       template: (props) => {
         const cards = props.cards || []
-        
+
         const cardsHtml = cards.map(card => {
           const cardBg = card.backgroundColor || props.cardDefaultBg || '#ffffff'
           const cardTextColor = card.textColor || props.cardDefaultTextColor || '#333333'
-          
+
           return `
             <div class="rich-card" style="
               background-color: ${cardBg};
@@ -764,7 +764,7 @@ export const blockConfigs = {
                     ${card.imageMobile ? `
                       <source srcset="${card.imageMobile}" media="(max-width: 768px)" />
                     ` : ''}
-                    <img 
+                    <img
                       src="${card.image || card.imageMobile}"
                       alt="${card.imageAlt || card.title || ''}"
                       style="
@@ -777,7 +777,7 @@ export const blockConfigs = {
                   </picture>
                 </div>
               ` : ''}
-              
+
               <div style="
                 padding: 24px;
                 display: flex;
@@ -792,7 +792,7 @@ export const blockConfigs = {
                     line-height: 1.3;
                   ">${card.title}</h3>
                 ` : ''}
-                
+
                 ${card.subtitle ? `
                   <h4 style="
                     margin: 0;
@@ -802,7 +802,7 @@ export const blockConfigs = {
                     opacity: 0.9;
                   ">${card.subtitle}</h4>
                 ` : ''}
-                
+
                 ${card.text ? `
                   <p style="
                     margin: 0;
@@ -811,7 +811,7 @@ export const blockConfigs = {
                     opacity: 0.85;
                   ">${card.text}</p>
                 ` : ''}
-                
+
                 ${card.detailedText ? `
                   <div style="
                     font-size: 14px;
@@ -820,7 +820,7 @@ export const blockConfigs = {
                     margin-top: 8px;
                   ">${card.detailedText}</div>
                 ` : ''}
-                
+
                 ${card.meetingPlace || card.meetingTime || card.participantsCount ? `
                   <div style="
                     display: flex;
@@ -866,9 +866,9 @@ export const blockConfigs = {
                     ` : ''}
                   </div>
                 ` : ''}
-                
+
                 ${card.link && card.buttonText ? `
-                  <a 
+                  <a
                     href="${card.link}"
                     target="${card.linkTarget || '_self'}"
                     ${card.linkTarget === '_blank' ? 'rel="noopener noreferrer"' : ''}
@@ -896,7 +896,7 @@ export const blockConfigs = {
             </div>
           `
         }).join('')
-        
+
         return `
           <div class="rich-card-list" style="
             width: 100%;
@@ -912,7 +912,7 @@ export const blockConfigs = {
                 text-align: ${props.titleAlign || 'center'};
               ">${props.sectionTitle}</h2>
             ` : ''}
-            
+
             <div style="
               display: grid;
               grid-template-columns: repeat(auto-fit, minmax(${props.cardMinWidth || 300}px, 1fr));
@@ -922,43 +922,43 @@ export const blockConfigs = {
               ${cardsHtml}
             </div>
           </div>
-          
+
           <style>
             .rich-card:hover {
               transform: translateY(-4px);
               box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15) !important;
             }
-            
+
             @media (max-width: 768px) {
               .rich-card-list {
                 padding: 16px !important;
               }
-              
+
               .rich-card-list h2 {
                 margin-bottom: 24px !important;
               }
-              
+
               .rich-card > div:first-child {
                 height: 200px !important;
               }
-              
+
               .rich-card > div:last-child {
                 padding: 20px !important;
                 gap: 10px !important;
               }
-              
+
               .rich-card h3 {
                 font-size: 20px !important;
               }
-              
+
               .rich-card h4 {
                 font-size: 16px !important;
               }
-              
+
               .rich-card p {
                 font-size: 14px !important;
               }
-              
+
               .rich-card > div:last-child > div {
                 font-size: 13px !important;
               }
@@ -1005,7 +1005,7 @@ export const blockConfigs = {
         rules: [],
         defaultValue: 'center'
       },
-      
+
       // Карточки через repeater
       {
         field: 'cards',
@@ -1292,6 +1292,193 @@ export const blockConfigs = {
         min: 0,
         max: 120,
         step: 8
+      }
+    }
+  },
+
+  // ✅ ПРИМЕР: Блок с API Select
+  newsList: {
+    title: '📰 Список новостей из API',
+    icon: '📰',
+    description: 'Блок отображения новостей, выбранных через API',
+    render: {
+      kind: 'html',
+      template: (props) => {
+        const featuredNewsId = props.featuredNewsId || null;
+        const newsIds = Array.isArray(props.newsIds) ? props.newsIds : [];
+
+        return `
+          <div class="news-list-block" style="
+            background-color: ${props.backgroundColor || '#f8f9fa'};
+            color: ${props.textColor || '#333333'};
+            padding: 20px;
+            border-radius: 8px;
+          ">
+            <!-- Заголовок -->
+            <h2 style="margin: 0 0 20px 0; font-size: 24px; font-weight: bold;">
+              ${props.title || 'Последние новости'}
+            </h2>
+
+            ${featuredNewsId ? `
+              <!-- Главная новость -->
+              <div style="
+                background: rgba(102, 126, 234, 0.1);
+                border: 2px solid #667eea;
+                border-radius: 8px;
+                padding: 20px;
+                margin-bottom: 20px;
+              ">
+                <h3 style="margin: 0 0 10px 0; color: #667eea;">
+                  🌟 Главная новость (ID: ${featuredNewsId})
+                </h3>
+                <p style="margin: 0; opacity: 0.7; font-size: 14px;">
+                  В реальном приложении здесь будут данные, загруженные по API
+                </p>
+              </div>
+            ` : ''}
+
+            ${newsIds.length > 0 ? `
+              <!-- Список новостей -->
+              <div style="
+                display: grid;
+                grid-template-columns: repeat(${props.columns || '2'}, 1fr);
+                gap: 16px;
+                margin-top: 20px;
+              ">
+                ${newsIds.map(id => `
+                  <div style="
+                    background: white;
+                    border: 1px solid #e0e0e0;
+                    border-radius: 8px;
+                    padding: 16px;
+                    transition: all 0.2s;
+                  " class="news-card">
+                    <h4 style="margin: 0 0 8px 0; font-size: 16px;">
+                      Новость ID: ${id}
+                    </h4>
+                    ${props.showDate ? `
+                      <p style="margin: 0; font-size: 12px; opacity: 0.6;">
+                        ${new Date().toLocaleDateString('ru-RU')}
+                      </p>
+                    ` : ''}
+                    <p style="margin: 8px 0 0 0; font-size: 14px; opacity: 0.8;">
+                      Данные будут загружены из вашего API в реальном приложении
+                    </p>
+                  </div>
+                `).join('')}
+              </div>
+            ` : `
+              <div style="
+                text-align: center;
+                padding: 40px 20px;
+                opacity: 0.5;
+              ">
+                📋 Новости не выбраны. Настройте блок в редакторе.
+              </div>
+            `}
+          </div>
+
+          <style>
+            .news-card:hover {
+              box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+              transform: translateY(-2px);
+            }
+          </style>
+        `;
+      }
+    },
+    fields: [
+      {
+        field: 'title',
+        label: 'Заголовок секции',
+        type: 'text',
+        placeholder: 'Последние новости',
+        rules: [{ type: 'required', message: 'Заголовок обязателен' }],
+        defaultValue: 'Последние новости'
+      },
+      // ✅ ПРИМЕР: API-SELECT с одиночным выбором
+      {
+        field: 'featuredNewsId',
+        label: 'Главная новость',
+        type: 'api-select',
+        rules: [{ type: 'required', message: 'Выберите главную новость' }],
+        defaultValue: null,
+        apiSelectConfig: {
+          url: 'http://localhost:3002/api/news',
+          method: 'GET',
+          multiple: false, // Одиночный выбор
+          placeholder: 'Начните вводить для поиска новости...',
+          limit: 10,
+          debounceMs: 300,
+          minSearchLength: 0,
+          loadingText: 'Загрузка новостей...',
+          noResultsText: 'Новости не найдены',
+          errorText: 'Ошибка загрузки новостей'
+        }
+      },
+      // ✅ ПРИМЕР: API-SELECT с множественным выбором
+      {
+        field: 'newsIds',
+        label: 'Список новостей для отображения',
+        type: 'api-select',
+        rules: [
+          { type: 'required', message: 'Выберите хотя бы одну новость' },
+          { type: 'minLength', value: 2, message: 'Выберите минимум 2 новости' }
+        ],
+        defaultValue: [],
+        apiSelectConfig: {
+          url: 'http://localhost:3002/api/news',
+          method: 'GET',
+          multiple: true, // Множественный выбор
+          placeholder: 'Выберите новости...',
+          limit: 10,
+          debounceMs: 300,
+          loadingText: 'Загрузка...',
+          noResultsText: 'Ничего не найдено',
+          errorText: 'Ошибка загрузки'
+        }
+      },
+      // Настройки отображения
+      {
+        field: 'showDate',
+        label: 'Показывать дату',
+        type: 'checkbox',
+        rules: [],
+        defaultValue: true
+      },
+      {
+        field: 'columns',
+        label: 'Количество колонок',
+        type: 'select',
+        options: [
+          { value: '1', label: '1 колонка' },
+          { value: '2', label: '2 колонки' },
+          { value: '3', label: '3 колонки' }
+        ],
+        rules: [],
+        defaultValue: '2'
+      },
+      {
+        field: 'backgroundColor',
+        label: 'Цвет фона',
+        type: 'color',
+        rules: [],
+        defaultValue: '#f8f9fa'
+      },
+      {
+        field: 'textColor',
+        label: 'Цвет текста',
+        type: 'color',
+        rules: [],
+        defaultValue: '#333333'
+      }
+    ],
+    spacingOptions: {
+      spacingTypes: ['margin-top', 'margin-bottom', 'padding-top', 'padding-bottom'],
+      config: {
+        min: 0,
+        max: 100,
+        step: 4
       }
     }
   }

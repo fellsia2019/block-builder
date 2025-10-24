@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { setupMockApi } from './mock-api-server.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -20,6 +21,14 @@ export default defineConfig({
   },
   optimizeDeps: {
     exclude: ['block-builder']
-  }
+  },
+  plugins: [
+    {
+      name: 'mock-api-server',
+      configureServer(server) {
+        setupMockApi(server.middlewares, 3002)
+      }
+    }
+  ]
 })
 

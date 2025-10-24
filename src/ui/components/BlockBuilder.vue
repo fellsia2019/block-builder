@@ -26,8 +26,8 @@
       <!-- Пустое состояние -->
       <div v-if="blocks.length === 0" class="block-builder-empty-state">
         <div class="block-builder-add-block-separator">
-          <button 
-            @click="openBlockTypeSelectionModal(0)" 
+          <button
+            @click="openBlockTypeSelectionModal(0)"
             class="block-builder-add-block-btn"
             title="Добавить блок"
           >
@@ -41,8 +41,8 @@
       <template v-else>
         <!-- Кнопка перед первым блоком -->
         <div class="block-builder-add-block-separator">
-          <button 
-            @click="openBlockTypeSelectionModal(0)" 
+          <button
+            @click="openBlockTypeSelectionModal(0)"
             class="block-builder-add-block-btn"
             title="Добавить блок"
           >
@@ -64,9 +64,9 @@
                 <span>📦 {{ getBlockTitle(block) }}</span>
                 <small class="block-builder-block-id">
                   ID: {{ block.id }}
-                  <button 
-                    @click="handleCopyId(block.id)" 
-                    class="block-builder-copy-id-btn" 
+                  <button
+                    @click="handleCopyId(block.id)"
+                    class="block-builder-copy-id-btn"
                     title="Копировать ID"
                   >
                     📋
@@ -76,53 +76,53 @@
                 <span v-if="!block.visible" class="hidden-indicator">👁️‍🗨️</span>
               </div>
               <div class="block-builder-block-controls">
-                <button 
-                  @click="handleMoveUp(block.id)" 
-                  class="block-builder-control-btn" 
+                <button
+                  @click="handleMoveUp(block.id)"
+                  class="block-builder-control-btn"
                   title="Переместить вверх"
                   :disabled="index === 0"
                 >
                   ⬆️
                 </button>
-                <button 
-                  @click="handleMoveDown(block.id)" 
-                  class="block-builder-control-btn" 
+                <button
+                  @click="handleMoveDown(block.id)"
+                  class="block-builder-control-btn"
                   title="Переместить вниз"
                   :disabled="index === blocks.length - 1"
                 >
                   ⬇️
                 </button>
-                <button 
-                  @click="openEditModal(block)" 
-                  class="block-builder-control-btn" 
+                <button
+                  @click="openEditModal(block)"
+                  class="block-builder-control-btn"
                   title="Редактировать"
                 >
                   ✏️
                 </button>
-                <button 
-                  @click="handleDuplicateBlock(block.id)" 
-                  class="block-builder-control-btn" 
+                <button
+                  @click="handleDuplicateBlock(block.id)"
+                  class="block-builder-control-btn"
                   title="Дублировать"
                 >
                   📋
                 </button>
-                <button 
-                  @click="handleToggleLock(block.id)" 
-                  class="block-builder-control-btn" 
+                <button
+                  @click="handleToggleLock(block.id)"
+                  class="block-builder-control-btn"
                   :title="getBlockLockTooltip(block)"
                 >
                   {{ getBlockLockIcon(block) }}
                 </button>
-                <button 
-                  @click="handleToggleVisibility(block.id)" 
-                  class="block-builder-control-btn" 
+                <button
+                  @click="handleToggleVisibility(block.id)"
+                  class="block-builder-control-btn"
                   :title="getBlockVisibilityTooltip(block)"
                 >
                   {{ getBlockVisibilityIcon(block) }}
                 </button>
-                <button 
-                  @click="handleDeleteBlock(block.id)" 
-                  class="block-builder-control-btn" 
+                <button
+                  @click="handleDeleteBlock(block.id)"
+                  class="block-builder-control-btn"
                   title="Удалить"
                 >
                   🗑️
@@ -146,8 +146,8 @@
 
           <!-- Кнопка после каждого блока -->
           <div class="block-builder-add-block-separator">
-            <button 
-              @click="openBlockTypeSelectionModal(index + 1)" 
+            <button
+              @click="openBlockTypeSelectionModal(index + 1)"
               class="block-builder-add-block-btn"
               title="Добавить блок"
             >
@@ -166,7 +166,7 @@
           <h3>Выберите тип блока</h3>
           <button @click="closeTypeSelectionModal" class="block-builder-modal-close">×</button>
         </div>
-        
+
         <div class="block-builder-modal-body">
           <div class="block-builder-block-type-selection">
             <button
@@ -194,7 +194,7 @@
           <h3>{{ modalMode === 'create' ? 'Создать' : 'Редактировать' }} {{ currentBlockType?.label }}</h3>
           <button @click="closeModal" class="block-builder-modal-close">×</button>
         </div>
-        
+
         <div class="block-builder-modal-body">
           <form @submit.prevent="handleSubmit" class="block-builder-form">
             <div
@@ -205,15 +205,15 @@
               :data-field-name="field.field"
             >
               <!-- Лейбл только для полей без собственного лейбла (spacing и repeater имеют свой) -->
-              <label 
+              <label
                 v-if="isRegularInputField(field)"
-                :for="'field-' + field.field" 
+                :for="'field-' + field.field"
                 class="block-builder-form-label"
               >
                 {{ field.label }}
                 <span v-if="isFieldRequired(field)" class="required">*</span>
               </label>
-              
+
               <!-- Text input -->
               <input
                 v-if="field.type === 'text'"
@@ -224,7 +224,7 @@
                 class="block-builder-form-control"
                 :class="{ 'error': formErrors[field.field] }"
               />
-              
+
               <!-- Textarea -->
               <textarea
                 v-else-if="field.type === 'textarea'"
@@ -235,7 +235,7 @@
                 class="block-builder-form-control"
                 :class="{ 'error': formErrors[field.field] }"
               ></textarea>
-              
+
               <!-- Number -->
               <input
                 v-else-if="field.type === 'number'"
@@ -246,7 +246,7 @@
                 class="block-builder-form-control"
                 :class="{ 'error': formErrors[field.field] }"
               />
-              
+
               <!-- Color -->
               <input
                 v-else-if="field.type === 'color'"
@@ -256,7 +256,7 @@
                 class="block-builder-form-control"
                 :class="{ 'error': formErrors[field.field] }"
               />
-              
+
               <!-- Select -->
               <select
                 v-else-if="field.type === 'select'"
@@ -274,7 +274,7 @@
                   {{ option.label }}
                 </option>
               </select>
-              
+
               <!-- Checkbox -->
               <label v-else-if="field.type === 'checkbox'" class="block-builder-form-checkbox">
                 <input
@@ -320,6 +320,14 @@
                 :collapsible="field.repeaterConfig?.collapsible"
               />
 
+              <!-- API Select Field -->
+              <ApiSelectField
+                v-else-if="field.type === 'api-select'"
+                :config="field"
+                v-model="formData[field.field]"
+                :validation-error="formErrors[field.field]?.[0]"
+              />
+
               <!-- Ошибки валидации (общие для всех типов полей) -->
               <div v-if="formErrors[field.field]" class="block-builder-form-errors">
                 <span v-for="error in formErrors[field.field]" :key="error" class="error">{{ error }}</span>
@@ -356,6 +364,7 @@ import { ISpacingData } from '../../utils/spacingHelpers';
 import { scrollToFirstError, parseErrorKey } from '../../utils/formErrorHelpers';
 import SpacingControl from './SpacingControl.vue';
 import RepeaterControl from './RepeaterControl.vue';
+import ApiSelectField from './ApiSelectField.vue';
 
 interface IBlockType {
   type: string;
@@ -431,7 +440,7 @@ const currentBlockType = computed(() => {
 const currentBlockFields = computed(() => {
   if (!currentBlockType.value) return [];
   const blockType = currentBlockType.value;
-  
+
   // Автоматически добавляем spacing поле, если его нет
   return addSpacingFieldToFields(
     blockType.fields || [],
@@ -480,9 +489,10 @@ const getBlockVisibilityIcon = (block: IBlock): string => {
  * Проверить, является ли поле обычным инпутом
  */
 const isRegularInputField = (field: any): boolean => {
-  return field.type !== 'spacing' && 
-         field.type !== 'repeater' && 
-         field.type !== 'checkbox';
+  return field.type !== 'spacing' &&
+         field.type !== 'repeater' &&
+         field.type !== 'checkbox' &&
+         field.type !== 'api-select';
 };
 
 /**
@@ -587,14 +597,14 @@ const openCreateModal = (type: string, position?: number) => {
   currentType.value = type;
   currentBlockId.value = null;
   selectedPosition.value = position;
-  
+
   // Заполняем форму дефолтными значениями
   Object.keys(formData).forEach(key => delete formData[key]);
   const blockType = currentBlockType.value;
   blockType?.fields?.forEach((field: any) => {
     formData[field.field] = field.defaultValue;
   });
-  
+
   showModal.value = true;
 };
 
@@ -603,11 +613,11 @@ const openEditModal = (block: IBlock) => {
   modalMode.value = 'edit';
   currentType.value = block.type;
   currentBlockId.value = block.id;
-  
+
   // Заполняем форму текущими значениями
   Object.keys(formData).forEach(key => delete formData[key]);
   Object.assign(formData, { ...block.props });
-  
+
   showModal.value = true;
 };
 
@@ -625,13 +635,13 @@ const closeModal = () => {
 // Отправка формы
 const handleSubmit = async () => {
   let success = false;
-  
+
   if (modalMode.value === 'create') {
     success = await createBlock();
   } else {
     success = await updateBlock();
   }
-  
+
   // Закрываем модалку только если успешно
   if (success) {
     closeModal();
@@ -641,28 +651,28 @@ const handleSubmit = async () => {
 // Создание блока
 const createBlock = async (): Promise<boolean> => {
   if (!currentType.value) return false;
-  
+
   const blockType = currentBlockType.value;
   if (!blockType) return false;
-  
+
   // Валидация формы с помощью UniversalValidator
   const fields = currentBlockFields.value;
   const validation = UniversalValidator.validateForm(formData, fields);
-  
+
   // Очищаем старые ошибки
   Object.keys(formErrors).forEach(key => delete formErrors[key]);
-  
+
   if (!validation.isValid) {
     // Копируем ошибки в reactive объект
     Object.assign(formErrors, validation.errors);
     console.log('❌ Ошибки валидации:', validation.errors);
-    
+
     // Скроллим к первой ошибке и открываем аккордеон, если нужно
     await handleValidationErrors();
-    
+
     return false;
   }
-  
+
   try {
     const newBlock = await blockService.createBlock({
       type: currentType.value,
@@ -670,44 +680,44 @@ const createBlock = async (): Promise<boolean> => {
       settings: blockType.defaultSettings || {},
       render: blockType.render
     } as any);
-    
+
     console.log('🔵 Блок создан:', newBlock.id, 'Позиция для вставки:', selectedPosition.value);
-    
+
     // Если указана позиция, вставляем блок в нужное место
     if (selectedPosition.value !== undefined) {
       // Получаем все блоки и перемещаем новый блок на нужную позицию
       const allBlocks = await blockService.getAllBlocks() as any[];
       console.log('🔵 Все блоки до reorder:', allBlocks.map((b: any) => ({ id: b.id, order: b.order })));
-      
+
       const blockIds = allBlocks.map((b: any) => b.id);
       console.log('🔵 IDs блоков:', blockIds);
-      
+
       // Удаляем новый блок из конца
       const newBlockIndex = blockIds.indexOf(newBlock.id);
       if (newBlockIndex !== -1) {
         blockIds.splice(newBlockIndex, 1);
       }
       console.log('🔵 IDs после удаления нового блока:', blockIds);
-      
+
       // Вставляем на нужную позицию
       blockIds.splice(selectedPosition.value, 0, newBlock.id);
       console.log('🔵 IDs после вставки на позицию', selectedPosition.value, ':', blockIds);
-      
+
       // Обновляем порядок
       const reorderResult = await blockService.reorderBlocks(blockIds);
       console.log('🔵 Результат reorderBlocks:', reorderResult);
-      
+
       // Проверяем, что порядок обновился
       const allBlocksAfter = await blockService.getAllBlocks() as any[];
       console.log('🔵 Все блоки после reorder:', allBlocksAfter.map((b: any) => ({ id: b.id, order: b.order })));
     }
-    
+
     // Перезагружаем блоки
     await loadBlocks();
-    
+
     // Перенастраиваем watchers для новых блоков
     await setupBreakpointWatchers();
-    
+
     emit('block-added', newBlock as any);
     console.log('✅ Блок создан:', newBlock);
     return true;
@@ -721,38 +731,38 @@ const createBlock = async (): Promise<boolean> => {
 // Обновление блока
 const updateBlock = async (): Promise<boolean> => {
   if (!currentBlockId.value) return false;
-  
+
   // Валидация формы с помощью UniversalValidator
   const fields = currentBlockFields.value;
   const validation = UniversalValidator.validateForm(formData, fields);
-  
+
   // Очищаем старые ошибки
   Object.keys(formErrors).forEach(key => delete formErrors[key]);
-  
+
   if (!validation.isValid) {
     // Копируем ошибки в reactive объект
     Object.assign(formErrors, validation.errors);
     console.log('❌ Ошибки валидации:', validation.errors);
-    
+
     // Скроллим к первой ошибке и открываем аккордеон, если нужно
     await handleValidationErrors();
-    
+
     return false;
   }
-  
+
   try {
     const updated = await blockService.updateBlock(currentBlockId.value, {
       props: { ...formData }
     } as any);
-    
+
     const index = blocks.value.findIndex(b => b.id === currentBlockId.value);
     if (index !== -1) {
       blocks.value[index] = updated as any;
     }
-    
+
     // Перенастраиваем watchers после обновления блока
     await setupBreakpointWatchers();
-    
+
     emit('block-updated', updated as any);
     console.log('✅ Блок обновлен:', updated);
     return true;
@@ -768,10 +778,10 @@ const handleDuplicateBlock = async (id: TBlockId) => {
   try {
     const duplicated = await blockService.duplicateBlock(id);
     blocks.value.push(duplicated as any);
-    
+
     // Перенастраиваем watchers после дублирования
     await setupBreakpointWatchers();
-    
+
     emit('block-added', duplicated as any);
     console.log('✅ Блок продублирован:', duplicated);
   } catch (error) {
@@ -789,7 +799,7 @@ const handleDeleteBlock = async (id: TBlockId) => {
         unsubscribe();
         breakpointUnsubscribers.delete(id);
       }
-      
+
       await blockService.deleteBlock(id);
       blocks.value = blocks.value.filter(b => b.id !== id);
       emit('block-deleted', id);
@@ -823,7 +833,7 @@ const handleMoveDown = (id: TBlockId) => {
 const handleToggleLock = async (blockId: TBlockId) => {
   const block = blocks.value.find((b) => b.id === blockId);
   if (!block) return;
-  
+
   await blockService.setBlockLocked(blockId, !block.locked);
   await loadBlocks();
   await setupBreakpointWatchers();
@@ -833,7 +843,7 @@ const handleToggleLock = async (blockId: TBlockId) => {
 const handleToggleVisibility = async (blockId: TBlockId) => {
   const block = blocks.value.find((b) => b.id === blockId);
   if (!block) return;
-  
+
   await blockService.setBlockVisible(blockId, !block.visible);
   await loadBlocks();
   await setupBreakpointWatchers();
@@ -857,13 +867,13 @@ const showNotification = (message: string, type: 'success' | 'error' | 'info' = 
   const notification = document.createElement('div');
   notification.className = 'block-builder-notification';
   notification.textContent = message;
-  
+
   const colors = {
     success: '#4caf50',
     error: '#dc3545',
     info: '#007bff'
   };
-  
+
   notification.style.cssText = `
     position: fixed;
     top: 20px;
@@ -927,7 +937,7 @@ const handleClearAll = async () => {
 const getBlockSpacingStyles = (block: IBlock): Record<string, string> => {
   // Проверяем, есть ли spacing в props блока
   const spacing = block.props?.spacing as ISpacingData | undefined;
-  
+
   if (!spacing || Object.keys(spacing).length === 0) {
     return {};
   }
@@ -942,10 +952,10 @@ const getBlockSpacingStyles = (block: IBlock): Record<string, string> => {
 // Получение props для пользовательского компонента (без служебного spacing)
 const getUserComponentProps = (block: IBlock): Record<string, any> => {
   if (!block.props) return {};
-  
+
   // Исключаем spacing - это служебное поле для BlockBuilder
   const { spacing, ...userProps } = block.props;
-  
+
   return userProps;
 };
 
@@ -958,14 +968,14 @@ const setupBreakpointWatchers = async () => {
 
   blocks.value.forEach(block => {
     const spacing = block.props?.spacing as ISpacingData | undefined;
-    
+
     if (!spacing || Object.keys(spacing).length === 0) {
       return;
     }
 
     // Находим DOM элемент блока
     const element = document.querySelector(`[data-block-id="${block.id}"]`) as HTMLElement;
-    
+
     if (!element) {
       return;
     }
@@ -998,22 +1008,22 @@ const cleanupBreakpointWatchers = () => {
  */
 const handleValidationErrors = async () => {
   await nextTick(); // Ждем, пока ошибки отрисуются в DOM
-  
+
   const modalContent = document.querySelector('.block-builder-modal-body') as HTMLElement;
-  
+
   if (!modalContent) {
     console.warn('[handleValidationErrors] Не найден контейнер модального окна');
     return;
   }
-  
+
   // Добавляем небольшую задержку перед скроллом для стабильной позиции
   setTimeout(async () => {
     // Находим первую ошибку
     const firstErrorKey = Object.keys(formErrors)[0];
     if (!firstErrorKey) return;
-    
+
     const errorInfo = parseErrorKey(firstErrorKey);
-    
+
     // Если ошибка в repeater - СНАЧАЛА открываем аккордеон, ПОТОМ скроллим
     if (errorInfo.isRepeaterField && errorInfo.repeaterFieldName) {
       await openRepeaterAccordion(errorInfo.repeaterFieldName, errorInfo.repeaterIndex || 0);
@@ -1035,29 +1045,29 @@ const handleValidationErrors = async () => {
 const openRepeaterAccordion = async (repeaterFieldName: string, itemIndex: number): Promise<void> => {
   // Ждем следующий тик, чтобы убедиться, что компонент отрисован
   await nextTick();
-  
+
   // Получаем ссылку на RepeaterControl компонент
   const repeaterComponent = repeaterRefs.get(repeaterFieldName);
-  
+
   if (!repeaterComponent) {
     console.warn(`[openRepeaterAccordion] Не найден ref для repeater: ${repeaterFieldName}`);
     return;
   }
-  
+
   // Проверяем, свернут ли элемент
   if (repeaterComponent.isItemCollapsed && repeaterComponent.isItemCollapsed(itemIndex)) {
     console.log('[openRepeaterAccordion] Раскрываем аккордеон для элемента:', itemIndex);
-    
+
     // Раскрываем элемент через exposed метод
     if (repeaterComponent.expandItem) {
       repeaterComponent.expandItem(itemIndex);
-      
+
       // Ждем, пока аккордеон откроется и DOM полностью обновится
       await nextTick();
-      
+
       // Даем время на завершение анимации раскрытия
       await new Promise(resolve => setTimeout(resolve, 350));
-      
+
       // Теперь скроллим к конкретному полю с ошибкой
       const modalContent = document.querySelector('.block-builder-modal-body') as HTMLElement;
       if (modalContent) {
@@ -1071,7 +1081,7 @@ const openRepeaterAccordion = async (repeaterFieldName: string, itemIndex: numbe
     }
   } else {
     console.log('[openRepeaterAccordion] Элемент уже развернут, скроллим к полю');
-    
+
     // Элемент уже развернут - скроллим к полю сразу
     const modalContent = document.querySelector('.block-builder-modal-body') as HTMLElement;
     if (modalContent) {
@@ -1108,7 +1118,7 @@ onBeforeUnmount(() => {
 .block-builder-form-errors {
   margin-top: 4px;
   font-size: 12px;
-  
+
   .error {
     display: block;
     color: var(--bb-color-danger, #dc3545);
@@ -1118,7 +1128,7 @@ onBeforeUnmount(() => {
 
 .block-builder-form-control.error {
   border-color: var(--bb-color-danger, #dc3545);
-  
+
   &:focus {
     border-color: var(--bb-color-danger, #dc3545);
     box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);

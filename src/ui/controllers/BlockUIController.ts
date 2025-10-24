@@ -12,6 +12,7 @@ import { ModalManager } from '../services/ModalManager';
 import { StyleManager } from '../services/StyleManager';
 import { SpacingControlRenderer } from '../services/SpacingControlRenderer';
 import { RepeaterControlRenderer } from '../services/RepeaterControlRenderer';
+import { ApiSelectControlRenderer } from '../services/ApiSelectControlRenderer';
 import { copyToClipboard } from '../../utils/copyToClipboard';
 import { UniversalValidator } from '../../utils/universalValidation';
 import { addSpacingFieldToFields } from '../../utils/blockSpacingHelpers';
@@ -34,11 +35,12 @@ export class BlockUIController {
   private onSave?: (blocks: IBlockDto[]) => Promise<boolean> | boolean;
   private spacingRenderers: Map<string, SpacingControlRenderer> = new Map();
   private repeaterRenderers: Map<string, RepeaterControlRenderer> = new Map();
+  private apiSelectRenderers: Map<string, ApiSelectControlRenderer> = new Map();
 
   constructor(config: IBlockUIControllerConfig) {
     this.config = config;
     this.onSave = config.onSave;
-    
+
     // Инициализация сервисов (Dependency Injection)
     this.uiRenderer = new UIRenderer({
       containerId: config.containerId,
@@ -56,10 +58,10 @@ export class BlockUIController {
   async init(): Promise<void> {
     // Инъекция стилей
     this.styleManager.injectStyles();
-    
+
     // Рендеринг UI
     this.uiRenderer.renderContainer();
-    
+
     // Загрузка и отображение блоков
     await this.refreshBlocks();
   }
@@ -81,8 +83,8 @@ export class BlockUIController {
         const title = config.title || type;
         const icon = config.icon || '📦';
         return `
-          <button 
-            onclick="blockBuilder.showAddBlockFormAtPosition('${type}', ${position !== undefined ? position : 'undefined'})" 
+          <button
+            onclick="blockBuilder.showAddBlockFormAtPosition('${type}', ${position !== undefined ? position : 'undefined'})"
             class="block-builder-block-type-card"
           >
             <span class="block-builder-block-type-card__icon">${icon}</span>
@@ -112,7 +114,7 @@ export class BlockUIController {
   /**
    * Показать форму добавления блока на определенной позиции
    */
-  showAddBlockFormAtPosition(type: string, position?: number): void {
+  async showAddBlockFormAtPosition(type: string, position?: number): Promise<void> {
     // Закрываем модалку выбора типа
     this.modalManager.closeModal();
 
@@ -143,9 +145,13 @@ export class BlockUIController {
       submitButtonText: 'Добавить'
     });
 
-    // Инициализируем spacing и repeater контролы после рендеринга модалки
-    this.initializeSpacingControls();
-    this.initializeRepeaterControls();
+    // Инициализируем spacing, repeater и api-select контролы после рендеринга модалки
+    // Используем setTimeout чтобы дождаться следующего цикла событий когда DOM точно готов
+    setTimeout(async () => {
+      this.initializeSpacingControls();
+      this.initializeRepeaterControls();
+      await this.initializeApiSelectControls();
+    }, 0);
   }
 
   /**
@@ -164,14 +170,14 @@ export class BlockUIController {
 
     // Находим все контейнеры для spacing
     const containers = document.querySelectorAll('.spacing-control-container');
-    
+
     containers.forEach(container => {
       const config = container.getAttribute('data-spacing-config');
       if (!config) return;
 
       try {
         const spacingConfig = JSON.parse(config.replace(/&quot;/g, '"'));
-        
+
         // Создаем рендерер
         const renderer = new SpacingControlRenderer({
           fieldName: spacingConfig.field,
@@ -216,14 +222,14 @@ export class BlockUIController {
 
     // Находим все контейнеры для repeater
     const containers = document.querySelectorAll('.repeater-control-container');
-    
+
     containers.forEach(container => {
       const config = container.getAttribute('data-repeater-config');
       if (!config) return;
 
       try {
         const repeaterConfig = JSON.parse(config.replace(/&quot;/g, '"'));
-        
+
         // Создаем рендерер
         const renderer = new RepeaterControlRenderer({
           fieldName: repeaterConfig.field,
@@ -260,7 +266,63 @@ export class BlockUIController {
   }
 
   /**
-   * Получение данных формы с учетом spacing и repeater контролов
+   * Инициализация api-select контролов
+   */
+  private async initializeApiSelectControls(): Promise<void> {
+    // Очищаем старые рендереры
+    this.cleanupApiSelectControls();
+
+    // Находим все контейнеры для api-select
+    const containers = document.querySelectorAll('.api-select-control-container');
+
+    for (const container of Array.from(containers)) {
+      const config = container.getAttribute('data-api-select-config');
+      if (!config) {
+        console.warn('⚠️ API Select: контейнер без конфигурации', container);
+        continue;
+      }
+
+      try {
+        const apiSelectConfig = JSON.parse(config.replace(/&quot;/g, '"'));
+
+        // Создаем рендерер
+        const renderer = new ApiSelectControlRenderer({
+          fieldName: apiSelectConfig.field,
+          label: apiSelectConfig.label,
+          rules: apiSelectConfig.rules || [],
+          config: apiSelectConfig,
+          value: apiSelectConfig.value || (apiSelectConfig.multiple ? [] : null),
+          onChange: (value) => {
+            // Обновление значения при изменении
+            // Сохраняем в data-атрибуте для последующего получения
+            container.setAttribute('data-api-select-value', JSON.stringify(value));
+          }
+        });
+
+        // Инициализируем и рендерим контрол (асинхронно)
+        await renderer.init(container as HTMLElement);
+
+        // Сохраняем рендерер
+        this.apiSelectRenderers.set(apiSelectConfig.field, renderer);
+      } catch (error) {
+        console.error('❌ Ошибка инициализации api-select контрола:', error);
+      }
+    }
+  }
+
+  /**
+   * Очистка api-select контролов
+   */
+  private cleanupApiSelectControls(): void {
+    // Вызываем destroy для каждого рендерера
+    this.apiSelectRenderers.forEach((renderer) => {
+      renderer.destroy();
+    });
+    this.apiSelectRenderers.clear();
+  }
+
+  /**
+   * Получение данных формы с учетом spacing, repeater и api-select контролов
    */
   private getFormDataWithSpacing(formId: string): Record<string, any> {
     const props = this.modalManager.getFormData(formId);
@@ -272,6 +334,11 @@ export class BlockUIController {
 
     // Добавляем данные из repeater контролов
     this.repeaterRenderers.forEach((renderer, fieldName) => {
+      props[fieldName] = renderer.getValue();
+    });
+
+    // Добавляем данные из api-select контролов
+    this.apiSelectRenderers.forEach((renderer, fieldName) => {
       props[fieldName] = renderer.getValue();
     });
 
@@ -294,7 +361,7 @@ export class BlockUIController {
     try {
       // Получаем конфигурацию блока
       const blockConfig = this.config.blockConfigs[type];
-      
+
       // Создаем данные блока
       const createData: ICreateBlockDto = {
         type,
@@ -331,16 +398,16 @@ export class BlockUIController {
   private async insertBlockAtPosition(blockId: string, position: number): Promise<void> {
     const allBlocks = await this.config.useCase.getAllBlocks();
     const blockIds = allBlocks.map(b => b.id);
-    
+
     // Удаляем новый блок из конца
     const newBlockIndex = blockIds.indexOf(blockId);
     if (newBlockIndex !== -1) {
       blockIds.splice(newBlockIndex, 1);
     }
-    
+
     // Вставляем на нужную позицию
     blockIds.splice(position, 0, blockId);
-    
+
     // Обновляем порядок
     await this.config.useCase.reorderBlocks(blockIds);
   }
@@ -348,7 +415,7 @@ export class BlockUIController {
   /**
    * Редактирование блока
    */
-  editBlock(blockId: string): void {
+  async editBlock(blockId: string): Promise<void> {
     const block = this.blocks.find(b => b.id === blockId);
     if (!block) return;
 
@@ -378,9 +445,13 @@ export class BlockUIController {
       submitButtonText: 'Сохранить'
     });
 
-    // Инициализируем spacing и repeater контролы после рендеринга модалки
-    this.initializeSpacingControls();
-    this.initializeRepeaterControls();
+    // Инициализируем spacing, repeater и api-select контролы после рендеринга модалки
+    // Используем setTimeout чтобы дождаться следующего цикла событий когда DOM точно готов
+    setTimeout(async () => {
+      this.initializeSpacingControls();
+      this.initializeRepeaterControls();
+      await this.initializeApiSelectControls();
+    }, 0);
   }
 
   /**
@@ -438,7 +509,7 @@ export class BlockUIController {
 
     // Очищаем watcher для spacing перед удалением
     this.uiRenderer.cleanupBlockWatcher(blockId);
-    
+
     await this.config.useCase.deleteBlock(blockId);
     await this.refreshBlocks();
   }
@@ -542,13 +613,13 @@ export class BlockUIController {
     const notification = document.createElement('div');
     notification.className = 'block-builder-notification';
     notification.textContent = message;
-    
+
     const colors = {
       success: '#4caf50',
       error: '#dc3545',
       info: '#007bff'
     };
-    
+
     notification.style.cssText = `
       position: fixed;
       top: 20px;
@@ -649,18 +720,18 @@ export class BlockUIController {
     // Небольшая задержка, чтобы ошибки успели отрисоваться в DOM
     setTimeout(() => {
       const modalBody = document.querySelector('.block-builder-modal-body') as HTMLElement;
-      
+
       if (!modalBody) {
         console.warn('[handleScrollToFirstError] Не найден контейнер модального окна');
         return;
       }
-      
+
       // Находим первую ошибку
       const firstErrorKey = Object.keys(errors)[0];
       if (!firstErrorKey) return;
-      
+
       const errorInfo = parseErrorKey(firstErrorKey);
-      
+
       // Если ошибка в repeater - СНАЧАЛА открываем аккордеон, ПОТОМ скроллим
       if (errorInfo.isRepeaterField && errorInfo.repeaterFieldName) {
         this.openRepeaterAccordion(
@@ -685,33 +756,33 @@ export class BlockUIController {
   private openRepeaterAccordion(repeaterFieldName: string, itemIndex: number): void {
     // Получаем renderer для этого repeater
     const renderer = this.repeaterRenderers.get(repeaterFieldName);
-    
+
     if (!renderer) {
       console.warn(`[openRepeaterAccordion] Не найден renderer для repeater: ${repeaterFieldName}`);
       return;
     }
-    
+
     const modalBody = document.querySelector('.block-builder-modal-body') as HTMLElement;
     if (!modalBody) return;
-    
+
     // Проверяем, свернут ли элемент
     if (renderer.isItemCollapsed(itemIndex)) {
       console.log('[openRepeaterAccordion] Раскрываем аккордеон для элемента:', itemIndex);
-      
+
       // Раскрываем элемент
       renderer.expandItem(itemIndex);
-      
+
       // После раскрытия скроллим к конкретному полю
       // Увеличенная задержка для завершения анимации раскрытия
       setTimeout(() => {
         console.log('[openRepeaterAccordion] Скролл к полю после раскрытия аккордеона');
-        
+
         // Используем исходные ошибки для скролла - они уже содержат все нужные данные
         const allErrors: Record<string, string[]> = {};
         Object.entries(this.repeaterRenderers.get(repeaterFieldName)?.['errors'] || {}).forEach(([key, value]) => {
           allErrors[key] = value;
         });
-        
+
         // Скроллим к полю с ошибкой
         scrollToFirstError(modalBody, allErrors, {
           offset: 40,
@@ -721,7 +792,7 @@ export class BlockUIController {
       }, 350); // Увеличена задержка для завершения анимации раскрытия
     } else {
       console.log('[openRepeaterAccordion] Элемент уже развернут, скроллим к полю');
-      
+
       // Элемент уже развернут - скроллим к полю сразу
       scrollToFirstError(modalBody, this.getRepeaterErrors(), {
         offset: 40,
@@ -730,13 +801,13 @@ export class BlockUIController {
       });
     }
   }
-  
+
   /**
    * Получить все ошибки из repeater для скролла
    */
   private getRepeaterErrors(): Record<string, string[]> {
     const errors: Record<string, string[]> = {};
-    
+
     // Ищем все сообщения об ошибках в DOM
     document.querySelectorAll('.repeater-control__field-error').forEach(errorEl => {
       const field = errorEl.closest('.repeater-control__field') as HTMLElement;
@@ -745,7 +816,7 @@ export class BlockUIController {
         if (input) {
           const dataIndex = input.getAttribute('data-item-index');
           const fieldName = input.getAttribute('data-field-name');
-          
+
           if (dataIndex !== null && fieldName) {
             // Находим имя repeater по структуре DOM
             const repeaterControl = field.closest('.repeater-control') as HTMLElement;
@@ -760,7 +831,7 @@ export class BlockUIController {
         }
       }
     });
-    
+
     return errors;
   }
 
@@ -778,6 +849,7 @@ export class BlockUIController {
     this.clearValidationErrors();
     this.cleanupSpacingControls();
     this.cleanupRepeaterControls();
+    this.cleanupApiSelectControls();
     this.modalManager.closeModal();
   }
 

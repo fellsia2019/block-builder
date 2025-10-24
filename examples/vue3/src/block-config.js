@@ -1,7 +1,7 @@
 /**
  * Конфигурация блоков для пользователя
  * Это пример ПРАВИЛЬНОГО использования BlockBuilder с полноценным Vue3 + Vite
- * 
+ *
  * ✅ Настоящие Vue SFC компоненты (.vue файлы)
  * ✅ Настоящий Swiper из npm пакета
  * ✅ Полноценная сборка с Vite
@@ -20,6 +20,7 @@ import FeatureCard from './components/FeatureCard.vue'
 import GallerySliderBlock from './components/GallerySliderBlock.vue'
 import SpacedContentBlock from './components/SpacedContentBlock.vue'
 import RichCardListBlock from './components/RichCardListBlock.vue'
+import NewsListBlock from './components/NewsListBlock.vue'
 
 // ✅ АСИНХРОННЫЙ импорт компонента (загружается по требованию)
 const Counter = defineAsyncComponent(() => import('./components/Counter.vue'))
@@ -915,7 +916,7 @@ export const blockConfigs = {
         rules: [],
         defaultValue: 'center'
       },
-      
+
       // Карточки через repeater
       {
         field: 'cards',
@@ -1202,6 +1203,114 @@ export const blockConfigs = {
         min: 0,
         max: 120,
         step: 8
+      }
+    }
+  },
+
+  // 🆕 ПРИМЕР: Блок с API Select (работа с внешним API)
+  newsList: {
+    title: '📰 Список новостей из API',
+    icon: '📰',
+    description: 'Блок отображения новостей, выбранных через API',
+    render: {
+      kind: 'component',
+      framework: 'vue',
+      component: NewsListBlock
+    },
+    fields: [
+      {
+        field: 'title',
+        label: 'Заголовок секции',
+        type: 'text',
+        placeholder: 'Последние новости',
+        rules: [{ type: 'required', message: 'Заголовок обязателен' }],
+        defaultValue: 'Последние новости'
+      },
+      // ✅ ПРИМЕР: API-SELECT с одиночным выбором
+      {
+        field: 'featuredNewsId',
+        label: 'Главная новость',
+        type: 'api-select',
+        rules: [{ type: 'required', message: 'Выберите главную новость' }],
+        defaultValue: null,
+        apiSelectConfig: {
+          url: 'http://localhost:3001/api/news',
+          method: 'GET',
+          multiple: false, // Одиночный выбор
+          placeholder: 'Начните вводить для поиска новости...',
+          searchParam: 'search',
+          pageParam: 'page',
+          limitParam: 'limit',
+          limit: 10,
+          debounceMs: 300,
+          idField: 'id',
+          nameField: 'name',
+          minSearchLength: 0,
+          loadingText: 'Загрузка новостей...',
+          noResultsText: 'Новости не найдены',
+          errorText: 'Ошибка загрузки новостей'
+        }
+      },
+      // ✅ ПРИМЕР: API-SELECT с множественным выбором
+      {
+        field: 'newsIds',
+        label: 'Список новостей для отображения',
+        type: 'api-select',
+        rules: [{ type: 'required', message: 'Выберите хотя бы одну новость' }],
+        defaultValue: [],
+        apiSelectConfig: {
+          url: 'http://localhost:3001/api/news',
+          method: 'GET',
+          multiple: true, // Множественный выбор
+          placeholder: 'Выберите новости...',
+          limit: 10,
+          debounceMs: 300,
+          loadingText: 'Загрузка...',
+          noResultsText: 'Ничего не найдено',
+          errorText: 'Ошибка загрузки'
+        }
+      },
+      // Настройки отображения
+      {
+        field: 'showDate',
+        label: 'Показывать дату',
+        type: 'checkbox',
+        rules: [],
+        defaultValue: true
+      },
+      {
+        field: 'columns',
+        label: 'Количество колонок',
+        type: 'select',
+        options: [
+          { value: '1', label: '1 колонка' },
+          { value: '2', label: '2 колонки' },
+          { value: '3', label: '3 колонки' }
+        ],
+        rules: [],
+        defaultValue: '2'
+      },
+      {
+        field: 'backgroundColor',
+        label: 'Цвет фона',
+        type: 'color',
+        rules: [],
+        defaultValue: '#f8f9fa'
+      },
+      {
+        field: 'textColor',
+        label: 'Цвет текста',
+        type: 'color',
+        rules: [],
+        defaultValue: '#333333'
+      }
+    ],
+    spacingOptions: {
+      spacingTypes: ['margin-top', 'margin-bottom', 'padding-top', 'padding-bottom'],
+      config: {
+        min: 0,
+        max: 100,
+        step: 4
       }
     }
   }

@@ -5,7 +5,7 @@
 import { IValidationRule } from './validation';
 
 // Типы полей форм
-export type TFieldType = 'text' | 'number' | 'email' | 'url' | 'textarea' | 'select' | 'checkbox' | 'color' | 'file' | 'spacing' | 'repeater';
+export type TFieldType = 'text' | 'number' | 'email' | 'url' | 'textarea' | 'select' | 'checkbox' | 'color' | 'file' | 'spacing' | 'repeater' | 'api-select';
 
 // Типы отступов
 export type TSpacingType = 'padding-top' | 'padding-bottom' | 'margin-top' | 'margin-bottom';
@@ -61,6 +61,53 @@ export interface IRepeaterFieldConfig {
   collapsible?: boolean; // Можно ли сворачивать элементы (по умолчанию false)
 }
 
+// Метод HTTP запроса
+export type THttpMethod = 'GET' | 'POST';
+
+// Элемент списка из API
+export interface IApiSelectItem {
+  id: string | number;
+  name: string;
+}
+
+// Параметры для HTTP запроса к API
+export interface IApiRequestParams {
+  search?: string; // Поисковый запрос
+  page?: number; // Номер страницы
+  limit?: number; // Количество элементов
+  [key: string]: any; // Дополнительные параметры
+}
+
+// Ответ от API
+export interface IApiSelectResponse {
+  data: IApiSelectItem[]; // Массив элементов
+  total?: number; // Общее количество
+  page?: number; // Текущая страница
+  hasMore?: boolean; // Есть ли еще элементы
+}
+
+// Конфигурация для api-select поля
+export interface IApiSelectConfig {
+  url: string; // URL API пользователя
+  method?: THttpMethod; // Метод запроса (по умолчанию GET)
+  headers?: Record<string, string>; // Дополнительные заголовки
+  searchParam?: string; // Имя параметра для поиска (по умолчанию 'search')
+  pageParam?: string; // Имя параметра для страницы (по умолчанию 'page')
+  limitParam?: string; // Имя параметра для лимита (по умолчанию 'limit')
+  limit?: number; // Количество элементов на странице (по умолчанию 20)
+  debounceMs?: number; // Задержка для поиска в мс (по умолчанию 300)
+  multiple?: boolean; // Множественный выбор (по умолчанию false)
+  responseMapper?: (response: any) => IApiSelectResponse; // Функция преобразования ответа
+  dataPath?: string; // Путь к данным в ответе (например, 'data.items')
+  idField?: string; // Поле ID в элементах (по умолчанию 'id')
+  nameField?: string; // Поле name в элементах (по умолчанию 'name')
+  minSearchLength?: number; // Минимальная длина поиска (по умолчанию 0)
+  placeholder?: string; // Плейсхолдер для поля поиска
+  noResultsText?: string; // Текст когда нет результатов
+  loadingText?: string; // Текст во время загрузки
+  errorText?: string; // Текст при ошибке
+}
+
 // Конфигурация поля формы
 export interface IFormFieldConfig {
   field: string;
@@ -72,6 +119,7 @@ export interface IFormFieldConfig {
   rules?: IValidationRule[];
   spacingConfig?: ISpacingFieldConfig; // Для типа 'spacing'
   repeaterConfig?: IRepeaterFieldConfig; // Для типа 'repeater'
+  apiSelectConfig?: IApiSelectConfig; // Для типа 'api-select'
 }
 
 // Конфигурация блока с опциями spacing

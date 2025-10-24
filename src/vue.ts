@@ -9,6 +9,7 @@ export { default as BlockComponent } from './ui/components/BlockComponent.vue'
 export { default as BlockProperties } from './ui/components/BlockProperties.vue'
 export { default as SpacingControl } from './ui/components/SpacingControl.vue'
 export { default as RepeaterControl } from './ui/components/RepeaterControl.vue'
+export { default as ApiSelectField } from './ui/components/ApiSelectField.vue'
 
 // Core для использования в Vue компонентах
 export * from './core/use-cases/BlockManagementUseCase'
