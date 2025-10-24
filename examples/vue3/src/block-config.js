@@ -8,6 +8,8 @@
  * ✅ Все возможности современного фреймворка
  */
 
+import { defineAsyncComponent } from 'vue'
+
 // Импорт настоящих Vue SFC компонентов
 import TextBlock from './components/TextBlock.vue'
 import ImageBlock from './components/ImageBlock.vue'
@@ -15,6 +17,10 @@ import ButtonBlock from './components/ButtonBlock.vue'
 import CardListBlock from './components/CardListBlock.vue'
 import HeroBlock from './components/HeroBlock.vue'
 import GallerySliderBlock from './components/GallerySliderBlock.vue'
+
+// ✅ АСИНХРОННЫЙ импорт компонента (загружается по требованию)
+const Counter = defineAsyncComponent(() => import('./components/Counter.vue'))
+
 
 export const blockConfigs = {
   text: {
@@ -592,6 +598,166 @@ export const blockConfigs = {
           { type: 'max', value: 100, message: 'Максимум: 100' }
         ],
         defaultValue: 30
+      }
+    ]
+  },
+
+  counter: {
+    title: 'Счётчик',
+    icon: '🔢',
+    description: '✅ АСИНХРОННЫЙ компонент! Загружается только при использовании',
+    render: {
+      kind: 'component',
+      framework: 'vue',
+      component: Counter
+    },
+    fields: [
+      {
+        field: 'title',
+        label: 'Заголовок',
+        type: 'text',
+        placeholder: 'Счётчик',
+        rules: [{ type: 'required', message: 'Заголовок обязателен' }],
+        defaultValue: 'Счётчик'
+      },
+      {
+        field: 'description',
+        label: 'Описание',
+        type: 'textarea',
+        placeholder: 'Описание счётчика',
+        rules: [],
+        defaultValue: 'Интерактивный счётчик с настройками'
+      },
+      {
+        field: 'initialValue',
+        label: 'Начальное значение',
+        type: 'number',
+        rules: [{ type: 'required', message: 'Начальное значение обязательно' }],
+        defaultValue: 0
+      },
+      {
+        field: 'min',
+        label: 'Минимальное значение',
+        type: 'number',
+        rules: [{ type: 'required', message: 'Минимум обязателен' }],
+        defaultValue: 0
+      },
+      {
+        field: 'max',
+        label: 'Максимальное значение (0 = без ограничений)',
+        type: 'number',
+        rules: [],
+        defaultValue: 100
+      },
+      {
+        field: 'step',
+        label: 'Шаг изменения',
+        type: 'number',
+        rules: [
+          { type: 'required', message: 'Шаг обязателен' },
+          { type: 'min', value: 1, message: 'Минимум: 1' }
+        ],
+        defaultValue: 1
+      },
+      {
+        field: 'showReset',
+        label: 'Показать кнопку сброса',
+        type: 'checkbox',
+        rules: [],
+        defaultValue: true
+      },
+      {
+        field: 'showProgress',
+        label: 'Показать прогресс-бар',
+        type: 'checkbox',
+        rules: [],
+        defaultValue: true
+      },
+      {
+        field: 'incrementText',
+        label: 'Текст кнопки увеличения',
+        type: 'text',
+        rules: [],
+        defaultValue: 'Увеличить'
+      },
+      {
+        field: 'decrementText',
+        label: 'Текст кнопки уменьшения',
+        type: 'text',
+        rules: [],
+        defaultValue: 'Уменьшить'
+      },
+      {
+        field: 'resetText',
+        label: 'Текст кнопки сброса',
+        type: 'text',
+        rules: [],
+        defaultValue: 'Сбросить'
+      },
+      {
+        field: 'backgroundColor',
+        label: 'Цвет фона',
+        type: 'color',
+        rules: [{ type: 'required', message: 'Цвет фона обязателен' }],
+        defaultValue: '#f5f5f5'
+      },
+      {
+        field: 'primaryColor',
+        label: 'Основной цвет',
+        type: 'color',
+        rules: [{ type: 'required', message: 'Основной цвет обязателен' }],
+        defaultValue: '#007bff'
+      },
+      {
+        field: 'textColor',
+        label: 'Цвет текста',
+        type: 'color',
+        rules: [{ type: 'required', message: 'Цвет текста обязателен' }],
+        defaultValue: '#333333'
+      },
+      {
+        field: 'buttonColor',
+        label: 'Цвет кнопок',
+        type: 'color',
+        rules: [{ type: 'required', message: 'Цвет кнопок обязателен' }],
+        defaultValue: '#007bff'
+      },
+      {
+        field: 'buttonTextColor',
+        label: 'Цвет текста кнопок',
+        type: 'color',
+        rules: [{ type: 'required', message: 'Цвет текста кнопок обязателен' }],
+        defaultValue: '#ffffff'
+      },
+      {
+        field: 'titleSize',
+        label: 'Размер заголовка',
+        type: 'number',
+        rules: [
+          { type: 'min', value: 12, message: 'Минимум: 12px' },
+          { type: 'max', value: 48, message: 'Максимум: 48px' }
+        ],
+        defaultValue: 24
+      },
+      {
+        field: 'valueSize',
+        label: 'Размер значения',
+        type: 'number',
+        rules: [
+          { type: 'min', value: 24, message: 'Минимум: 24px' },
+          { type: 'max', value: 96, message: 'Максимум: 96px' }
+        ],
+        defaultValue: 48
+      },
+      {
+        field: 'borderRadius',
+        label: 'Скругление углов',
+        type: 'number',
+        rules: [
+          { type: 'min', value: 0, message: 'Минимум: 0' },
+          { type: 'max', value: 50, message: 'Максимум: 50' }
+        ],
+        defaultValue: 12
       }
     ]
   }
