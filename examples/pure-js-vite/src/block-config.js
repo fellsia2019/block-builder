@@ -31,7 +31,7 @@ export const blockConfigs = {
             background: ${props.backgroundColor};
             border-radius: 8px;
             transition: all 0.3s ease;
-          " onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.15)'" onmouseout="this.style.boxShadow='none'">
+          " >
             ${props.content}
           </div>
         `
@@ -88,9 +88,7 @@ export const blockConfigs = {
         min: 0,
         max: 120,
         step: 8,
-        // Отключаем дефолтные брекпоинты (Desktop, Tablet, Mobile)
-        defaultBreakpoints: false,
-        // Используем ТОЛЬКО кастомные брекпоинты: XL, Large, Medium, Small
+        // Кастомные брекпоинты (когда указаны, заменяют дефолтные)
         breakpoints: [
           { name: 'xlarge', label: 'XL (Desktop)', maxWidth: undefined }, // Desktop без ограничения
           { name: 'large', label: 'L (Laptop)', maxWidth: 1440 },

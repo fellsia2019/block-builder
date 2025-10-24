@@ -290,7 +290,6 @@
                 :max="field.spacingConfig?.max"
                 :step="field.spacingConfig?.step"
                 :breakpoints="field.spacingConfig?.breakpoints"
-                :use-default-breakpoints="field.spacingConfig?.defaultBreakpoints !== false"
                 :required="hasRequiredRule(field)"
                 :show-preview="true"
               />

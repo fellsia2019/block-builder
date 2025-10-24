@@ -23,8 +23,8 @@ export function initSpacingExample() {
       spacingTypes: ['padding-top', 'padding-bottom', 'margin-top', 'margin-bottom'],
       min: 0,
       max: 200,
-      step: 4,
-      defaultBreakpoints: true
+      step: 4
+      // breakpoints не указан - будут использованы дефолтные (desktop, tablet, mobile)
     },
     value: {
       desktop: {

@@ -83,9 +83,7 @@ export const blockConfigs = {
         min: 0,
         max: 120,
         step: 8,
-        // Отключаем дефолтные брекпоинты (Desktop, Tablet, Mobile)
-        defaultBreakpoints: false,
-        // Используем ТОЛЬКО кастомные брекпоинты: XL, Large, Medium, Small
+        // Кастомные брекпоинты (когда указаны, заменяют дефолтные)
         breakpoints: [
           { name: 'xlarge', label: 'XL (Desktop)', maxWidth: undefined }, // Desktop без ограничения
           { name: 'large', label: 'L (Laptop)', maxWidth: 1440 },
@@ -884,12 +882,14 @@ export const blockConfigs = {
           // Диапазон значений
           min: 0,
           max: 200,
-          step: 4,
-          // Использовать базовые брекпоинты (desktop, tablet, mobile)
-          defaultBreakpoints: true,
-          // Дополнительные кастомные брекпоинты (необязательно)
+          step: 4
+          // breakpoints не указан - будут использованы дефолтные (desktop, tablet, mobile)
+          // Если нужны кастомные брекпоинты:
           // breakpoints: [
-          //   { name: 'wide', label: 'Широкий экран', maxWidth: 1920 }
+          //   { name: 'desktop', label: 'Десктоп', maxWidth: undefined },
+          //   { name: 'wide', label: 'Широкий экран', maxWidth: 1920 },
+          //   { name: 'tablet', label: 'Планшет', maxWidth: 1024 },
+          //   { name: 'mobile', label: 'Телефон', maxWidth: 767 }
           // ]
         },
         defaultValue: {

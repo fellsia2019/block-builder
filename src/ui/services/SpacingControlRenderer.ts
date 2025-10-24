@@ -60,13 +60,14 @@ export class SpacingControlRenderer {
    * Получить список брекпоинтов
    */
   private getBreakpoints(): IBreakpoint[] {
-    const useDefault = this.config.defaultBreakpoints !== false;
     const custom = this.config.breakpoints || [];
-
+    
+    // Если breakpoints передан и не пустой - используем только его
     if (custom.length > 0) {
-      return useDefault ? [...DEFAULT_BREAKPOINTS, ...custom] : custom;
+      return custom;
     }
-
+    
+    // Иначе используем дефолтные
     return DEFAULT_BREAKPOINTS;
   }
 

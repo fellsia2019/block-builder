@@ -117,10 +117,6 @@ export default {
       type: Array,
       default: null
     },
-    useDefaultBreakpoints: {
-      type: Boolean,
-      default: true
-    },
     required: {
       type: Boolean,
       default: false
@@ -136,11 +132,11 @@ export default {
 
     // Вычисляемые свойства
     const allBreakpoints = computed(() => {
+      // Если breakpoints передан и не пустой - используем только его
       if (props.breakpoints && props.breakpoints.length > 0) {
-        return props.useDefaultBreakpoints
-          ? [...DEFAULT_BREAKPOINTS, ...props.breakpoints]
-          : props.breakpoints;
+        return props.breakpoints;
       }
+      // Иначе используем дефолтные
       return DEFAULT_BREAKPOINTS;
     });
 

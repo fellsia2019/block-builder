@@ -29,7 +29,6 @@ export interface ISpacingFieldConfig {
   max?: number; // Максимальное значение (по умолчанию 200)
   step?: number; // Шаг изменения (по умолчанию 1)
   breakpoints?: IBreakpoint[]; // Кастомные брекпоинты (если не указаны, используются базовые)
-  defaultBreakpoints?: boolean; // Использовать базовые брекпоинты (по умолчанию true)
 }
 
 // Опции для автоматического spacing в блоках

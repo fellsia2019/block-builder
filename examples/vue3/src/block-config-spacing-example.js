@@ -105,7 +105,7 @@ export const blockConfigs = {
   textWithCustomBreakpoints: {
     title: 'Текст (кастомные брекпоинты)',
     icon: '📝',
-    description: 'Текстовый блок с дополнительными брекпоинтами',
+    description: 'Текстовый блок с кастомными брекпоинтами (заменяют дефолтные)',
     render: {
       kind: 'component',
       framework: 'vue',
@@ -125,10 +125,12 @@ export const blockConfigs = {
         max: 300,
         step: 8,
         breakpoints: [
+          { name: 'desktop', label: 'Десктоп', maxWidth: undefined },
           { name: 'ultrawide', label: '4K', maxWidth: 2560 },
-          { name: 'large', label: 'Большой', maxWidth: 1440 }
-        ],
-        defaultBreakpoints: true // Добавляем к базовым брекпоинтам
+          { name: 'large', label: 'Большой', maxWidth: 1440 },
+          { name: 'tablet', label: 'Планшет', maxWidth: 1024 },
+          { name: 'mobile', label: 'Телефон', maxWidth: 767 }
+        ]
       }
     }
   },
