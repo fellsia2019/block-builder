@@ -5,7 +5,6 @@
 
 import { IApiSelectConfig, IApiSelectItem, IApiRequestParams } from '../../core/types/form';
 import { ApiSelectUseCase } from '../../core/use-cases/ApiSelectUseCase';
-import { FetchHttpClient } from '../../infrastructure/http/FetchHttpClient';
 
 export interface IApiSelectControlOptions {
   fieldName: string;
@@ -14,6 +13,7 @@ export interface IApiSelectControlOptions {
   errors?: Record<string, string[]>;
   config?: IApiSelectConfig;
   value?: string | number | (string | number)[] | null;
+  apiSelectUseCase: ApiSelectUseCase;
   onChange?: (value: string | number | (string | number)[] | null) => void;
 }
 
@@ -39,9 +39,8 @@ export class ApiSelectControlRenderer {
   private hasMore = false;
   private debounceTimer: ReturnType<typeof setTimeout> | null = null;
 
-  // Use Case
-  private httpClient = new FetchHttpClient();
-  private apiSelectUseCase = new ApiSelectUseCase(this.httpClient);
+  // Use Case (внедряется через конструктор)
+  private apiSelectUseCase: ApiSelectUseCase;
 
   // Обработчик клика вне области
   private handleClickOutsideBound = this.handleClickOutside.bind(this);
@@ -53,6 +52,7 @@ export class ApiSelectControlRenderer {
     this.errors = options.errors || {};
     this.config = options.config || { url: '' };
     this.value = options.value ?? (this.config.multiple ? [] : null);
+    this.apiSelectUseCase = options.apiSelectUseCase;
     this.onChange = options.onChange;
   }
 
@@ -163,7 +163,10 @@ export class ApiSelectControlRenderer {
   private openDropdown(): void {
     if (!this.isDropdownOpen) {
       this.isDropdownOpen = true;
-      if (this.items.length === 0 && !this.loading && !this.error) {
+      
+      // Всегда загружаем данные при открытии с учетом текущего searchQuery
+      // Это гарантирует актуальные результаты (либо по поиску, либо полный список)
+      if (!this.loading) {
         this.fetchData(true);
       } else {
         this.updateDropdownContent();
@@ -188,13 +191,21 @@ export class ApiSelectControlRenderer {
   private closeDropdown(): void {
     this.isDropdownOpen = false;
 
-    // Восстанавливаем отображение выбранного элемента для single select
-    if (!this.isMultiple() && this.selectedItems.length > 0) {
+    // Очищаем инпут поиска при закрытии
+    if (this.isMultiple()) {
+      // Для множественного выбора всегда очищаем
+      this.searchQuery = '';
+      if (this.searchInputElement) {
+        this.searchInputElement.value = '';
+      }
+    } else if (this.selectedItems.length > 0) {
+      // Для одиночного выбора показываем имя выбранного элемента
       this.searchQuery = this.selectedItems[0].name;
       if (this.searchInputElement) {
         this.searchInputElement.value = this.searchQuery;
       }
-    } else if (!this.isMultiple()) {
+    } else {
+      // Если ничего не выбрано, очищаем
       this.searchQuery = '';
       if (this.searchInputElement) {
         this.searchInputElement.value = '';

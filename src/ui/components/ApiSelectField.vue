@@ -97,13 +97,13 @@ import type {
   IApiSelectItem,
   IApiRequestParams,
 } from '../../core/types/form';
-import { ApiSelectUseCase } from '../../core/use-cases/ApiSelectUseCase';
-import { FetchHttpClient } from '../../infrastructure/http/FetchHttpClient';
+import type { ApiSelectUseCase } from '../../core/use-cases/ApiSelectUseCase';
 
 interface IProps {
   config: IFormFieldConfig;
   modelValue: string | number | (string | number)[] | null;
   validationError?: string;
+  apiSelectUseCase: ApiSelectUseCase;
 }
 
 const props = defineProps<IProps>();
@@ -128,9 +128,8 @@ const hasMore = ref(false);
 // Debounce таймер
 let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 
-// Use Case и HTTP клиент
-const httpClient = new FetchHttpClient();
-const apiSelectUseCase = new ApiSelectUseCase(httpClient);
+// Use Case (внедряется через props)
+const apiSelectUseCase = props.apiSelectUseCase;
 
 // Computed
 const apiConfig = computed(() => props.config.apiSelectConfig);
@@ -237,15 +236,12 @@ const onSearchInput = () => {
 
 const openDropdown = () => {
   if (!isDropdownOpen.value) {
-    // Если есть данные или ошибка, показываем dropdown сразу
-    if (items.value.length > 0 || error.value) {
-      isDropdownOpen.value = true;
-    }
-    // Если нет данных и не идет загрузка, загружаем и показываем dropdown после
-    else if (!loading.value) {
-      fetchData(true).then(() => {
-        isDropdownOpen.value = true;
-      });
+    isDropdownOpen.value = true;
+    
+    // Всегда загружаем данные при открытии с учетом текущего searchQuery
+    // Это гарантирует актуальные результаты (либо по поиску, либо полный список)
+    if (!loading.value) {
+      fetchData(true);
     }
   }
 };
@@ -261,10 +257,15 @@ const toggleDropdown = () => {
 const closeDropdown = () => {
   isDropdownOpen.value = false;
 
-  // Восстанавливаем отображение выбранного элемента для single select
-  if (!isMultiple.value && selectedItems.value.length > 0) {
+  // Очищаем инпут поиска при закрытии
+  if (isMultiple.value) {
+    // Для множественного выбора всегда очищаем
+    searchQuery.value = '';
+  } else if (selectedItems.value.length > 0) {
+    // Для одиночного выбора показываем имя выбранного элемента
     searchQuery.value = selectedItems.value[0].name;
-  } else if (!isMultiple.value) {
+  } else {
+    // Если ничего не выбрано, очищаем
     searchQuery.value = '';
   }
 };
@@ -347,9 +348,9 @@ onMounted(async () => {
 
       if (isMultiple.value) {
         const ids = props.modelValue as (string | number)[];
-        selectedItems.value = response.data.filter((item) => ids.includes(item.id));
+        selectedItems.value = response.data.filter((item: IApiSelectItem) => ids.includes(item.id));
       } else {
-        const selectedItem = response.data.find((item) => item.id === props.modelValue);
+        const selectedItem = response.data.find((item: IApiSelectItem) => item.id === props.modelValue);
         if (selectedItem) {
           selectedItems.value = [selectedItem];
           searchQuery.value = selectedItem.name;
@@ -368,9 +369,3 @@ onBeforeUnmount(() => {
   document.removeEventListener('click', handleClickOutside, true);
 });
 </script>
-
-<style scoped>
-/* Стили используются из общего файла src/ui/styles/components/_api-select-control.scss */
-/* Этот блок оставлен для возможности добавления специфичных для Vue стилей в будущем */
-</style>
-

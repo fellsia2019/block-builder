@@ -193,14 +193,67 @@ const html = formBuilder.generateCreateFormHTML(fields);
 ```
 
 ### 5. **Dependency Injection**
+
+**Принцип:** Зависимости передаются через конструктор, а не создаются внутри класса.
+
+#### BlockBuilderFacade
+Создает все зависимости Infrastructure слоя и передает их в Use Cases:
+
+```typescript
+// Создание HTTP клиента (Infrastructure)
+this.httpClient = new FetchHttpClient();
+
+// Создание ApiSelectUseCase с внедрением зависимости
+this.apiSelectUseCase = new ApiSelectUseCase(this.httpClient);
+
+// Передача в UI Controller
+this.uiController = new BlockUIController({
+  // ...
+  apiSelectUseCase: this.apiSelectUseCase
+});
+```
+
+#### BlockUIController
+Получает зависимости и передает их дальше:
+
 ```typescript
 constructor(config: IBlockUIControllerConfig) {
+  this.apiSelectUseCase = config.apiSelectUseCase;
   this.uiRenderer = new UIRenderer(...);
   this.formBuilder = new FormBuilder();
   this.modalManager = new ModalManager();
   this.styleManager = new StyleManager();
 }
 ```
+
+#### ApiSelectControlRenderer (Pure JS)
+Получает ApiSelectUseCase через конструктор:
+
+```typescript
+constructor(options: IApiSelectControlOptions) {
+  this.apiSelectUseCase = options.apiSelectUseCase; // Внедрение зависимости
+}
+```
+
+#### ApiSelectField.vue
+Получает ApiSelectUseCase через props:
+
+```vue
+<script setup lang="ts">
+interface IProps {
+  apiSelectUseCase: ApiSelectUseCase; // Внедрение зависимости
+}
+
+const props = defineProps<IProps>();
+const apiSelectUseCase = props.apiSelectUseCase;
+</script>
+```
+
+**Преимущества:**
+- ✅ UI не зависит от Infrastructure слоя
+- ✅ Легко тестировать с mock реализациями
+- ✅ Соблюдается инверсия зависимостей (SOLID)
+- ✅ Единственный экземпляр HTTP клиента на всё приложение
 
 ---
 

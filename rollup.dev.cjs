@@ -1,12 +1,13 @@
 const resolve = require('@rollup/plugin-node-resolve');
 const commonjs = require('@rollup/plugin-commonjs');
 const typescript = require('@rollup/plugin-typescript');
-const dts = require('rollup-plugin-dts').default;
 const postcss = require('rollup-plugin-postcss');
 const postcssImport = require('postcss-import');
 
 const packageJson = require('./package.json');
 
+// В dev режиме убираем второй этап сборки типов (dts bundling),
+// чтобы избежать ошибки "Cannot import the generated bundle" в watch mode
 module.exports = [
   {
     input: 'src/index.ts',
@@ -51,11 +52,9 @@ module.exports = [
       }),
     ],
     external: ['vue'],
-  },
-  {
-    input: './dist/index.d.ts',
-    output: [{ file: 'dist/index.d.ts', format: 'esm' }],
-    plugins: [dts()],
-    external: [/\.css$/, /\.scss$/],
+    watch: {
+      include: 'src/**',
+      exclude: 'node_modules/**'
+    }
   },
 ];

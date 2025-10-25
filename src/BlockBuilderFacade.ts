@@ -10,10 +10,13 @@
 import { IBlockDto, ICreateBlockDto, IUpdateBlockDto } from './core/types';
 import { IBlockRepository } from './core/ports/BlockRepository';
 import { IComponentRegistry } from './core/ports/ComponentRegistry';
+import { IHttpClient } from './core/ports/HttpClient';
 import { BlockManagementUseCase } from './core/use-cases/BlockManagementUseCase';
+import { ApiSelectUseCase } from './core/use-cases/ApiSelectUseCase';
 import { MemoryBlockRepositoryImpl } from './infrastructure/repositories/MemoryBlockRepositoryImpl';
 import { LocalStorageBlockRepositoryImpl } from './infrastructure/repositories/LocalStorageBlockRepositoryImpl';
 import { MemoryComponentRegistry } from './infrastructure/registries/MemoryComponentRegistry';
+import { FetchHttpClient } from './infrastructure/http/FetchHttpClient';
 import { BlockUIController } from './ui/controllers/BlockUIController';
 
 export interface IBlockBuilderOptions {
@@ -37,6 +40,8 @@ export class BlockBuilderFacade {
     private useCase: BlockManagementUseCase;
     private repository: IBlockRepository;
     private componentRegistry: IComponentRegistry;
+    private httpClient: IHttpClient;
+    private apiSelectUseCase: ApiSelectUseCase;
     private blockConfigs: Record<string, any>;
     private uiController?: BlockUIController;
     private onSave?: (blocks: IBlockDto[]) => Promise<boolean> | boolean;
@@ -56,6 +61,12 @@ export class BlockBuilderFacade {
 
         // Инициализация реестра компонентов
         this.componentRegistry = options.componentRegistry || new MemoryComponentRegistry();
+
+        // Создание HTTP клиента (Infrastructure слой)
+        this.httpClient = new FetchHttpClient();
+
+        // Создание ApiSelectUseCase (DIP - зависим от абстракций)
+        this.apiSelectUseCase = new ApiSelectUseCase(this.httpClient);
 
         // Создание главного Use Case (DIP - зависим от абстракций)
         this.useCase = new BlockManagementUseCase(this.repository, this.componentRegistry);
@@ -90,6 +101,7 @@ export class BlockBuilderFacade {
             containerId,
             blockConfigs: this.blockConfigs,
             useCase: this.useCase,
+            apiSelectUseCase: this.apiSelectUseCase,
             onSave: this.onSave
         });
 

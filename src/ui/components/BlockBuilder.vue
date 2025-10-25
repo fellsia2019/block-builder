@@ -322,10 +322,11 @@
 
               <!-- API Select Field -->
               <ApiSelectField
-                v-else-if="field.type === 'api-select'"
+                v-else-if="field.type === 'api-select' && props.apiSelectUseCase"
                 :config="field"
                 v-model="formData[field.field]"
                 :validation-error="formErrors[field.field]?.[0]"
+                :api-select-use-case="props.apiSelectUseCase"
               />
 
               <!-- Ошибки валидации (общие для всех типов полей) -->
@@ -356,6 +357,7 @@ import { BlockManagementUseCase } from '../../core/use-cases/BlockManagementUseC
 import { IBlockRepository } from '../../core/ports/BlockRepository';
 import { IComponentRegistry } from '../../core/ports/ComponentRegistry';
 import { MemoryBlockRepositoryImpl } from '../../infrastructure/repositories/MemoryBlockRepositoryImpl';
+import type { ApiSelectUseCase } from '../../core/use-cases/ApiSelectUseCase';
 import { copyToClipboard } from '../../utils/copyToClipboard';
 import { UniversalValidator } from '../../utils/universalValidation';
 import { addSpacingFieldToFields } from '../../utils/blockSpacingHelpers';
@@ -383,6 +385,7 @@ interface IProps {
   };
   blockRepository?: IBlockRepository;
   componentRegistry?: IComponentRegistry;
+  apiSelectUseCase?: ApiSelectUseCase;
   onSave?: (blocks: IBlock[]) => Promise<boolean> | boolean;
   initialBlocks?: IBlock[];
 }
@@ -889,11 +892,11 @@ const showNotification = (message: string, type: 'success' | 'error' | 'info' = 
   `;
   document.body.appendChild(notification);
 
-  // Удаляем уведомление через 2 секунды
+  // Удаляем уведомление через 12 секунд
   setTimeout(() => {
     notification.style.animation = 'fadeOut 0.3s ease-in-out';
     setTimeout(() => notification.remove(), 300);
-  }, 2000);
+  }, 12000);
 };
 
 // Сохранение всех блоков

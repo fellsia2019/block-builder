@@ -6,6 +6,7 @@
 
 import { IBlockDto, ICreateBlockDto, IUpdateBlockDto } from '../../core/types';
 import { BlockManagementUseCase } from '../../core/use-cases/BlockManagementUseCase';
+import { ApiSelectUseCase } from '../../core/use-cases/ApiSelectUseCase';
 import { UIRenderer } from '../services/UIRenderer';
 import { FormBuilder, TFieldConfig } from '../services/FormBuilder';
 import { ModalManager } from '../services/ModalManager';
@@ -22,6 +23,7 @@ export interface IBlockUIControllerConfig {
   containerId: string;
   blockConfigs: Record<string, any>;
   useCase: BlockManagementUseCase;
+  apiSelectUseCase: ApiSelectUseCase;
   onSave?: (blocks: IBlockDto[]) => Promise<boolean> | boolean;
 }
 
@@ -31,6 +33,7 @@ export class BlockUIController {
   private formBuilder: FormBuilder;
   private modalManager: ModalManager;
   private styleManager: StyleManager;
+  private apiSelectUseCase: ApiSelectUseCase;
   private blocks: IBlockDto[] = [];
   private onSave?: (blocks: IBlockDto[]) => Promise<boolean> | boolean;
   private spacingRenderers: Map<string, SpacingControlRenderer> = new Map();
@@ -40,6 +43,7 @@ export class BlockUIController {
   constructor(config: IBlockUIControllerConfig) {
     this.config = config;
     this.onSave = config.onSave;
+    this.apiSelectUseCase = config.apiSelectUseCase;
 
     // Инициализация сервисов (Dependency Injection)
     this.uiRenderer = new UIRenderer({
@@ -285,13 +289,14 @@ export class BlockUIController {
       try {
         const apiSelectConfig = JSON.parse(config.replace(/&quot;/g, '"'));
 
-        // Создаем рендерер
+        // Создаем рендерер с внедрением ApiSelectUseCase
         const renderer = new ApiSelectControlRenderer({
           fieldName: apiSelectConfig.field,
           label: apiSelectConfig.label,
           rules: apiSelectConfig.rules || [],
           config: apiSelectConfig,
           value: apiSelectConfig.value || (apiSelectConfig.multiple ? [] : null),
+          apiSelectUseCase: this.apiSelectUseCase,
           onChange: (value) => {
             // Обновление значения при изменении
             // Сохраняем в data-атрибуте для последующего получения
@@ -635,11 +640,11 @@ export class BlockUIController {
     `;
     document.body.appendChild(notification);
 
-    // Удаляем уведомление через 2 секунды
+    // Удаляем уведомление через 12 секунд
     setTimeout(() => {
       notification.style.animation = 'fadeOut 0.3s ease-in-out';
       setTimeout(() => notification.remove(), 300);
-    }, 2000);
+    }, 12000);
   }
 
   /**

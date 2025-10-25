@@ -14,6 +14,7 @@
       <BlockBuilderComponent 
         :config="{ availableBlockTypes }"
         :component-registry="registry"
+        :api-select-use-case="apiSelectUseCase"
         :on-save="handleSave"
         :initial-blocks="initialBlocks"
       />
@@ -23,8 +24,17 @@
 
 <script setup>
 import { ref } from 'vue'
-import { BlockBuilderComponent, MemoryComponentRegistry } from 'block-builder/vue'
+import { 
+  BlockBuilderComponent, 
+  MemoryComponentRegistry,
+  ApiSelectUseCase,
+  FetchHttpClient
+} from 'block-builder/vue'
 import { blockConfigs } from './block-config'
+
+// Создаем HTTP клиент и ApiSelectUseCase (Dependency Injection)
+const httpClient = new FetchHttpClient()
+const apiSelectUseCase = new ApiSelectUseCase(httpClient)
 
 // Создаем registry и регистрируем компоненты
 const registry = new MemoryComponentRegistry()

@@ -29,8 +29,8 @@ function startServer(port) {
 // Статические файлы
 app.use(express.static('dist'));
 app.use('/dist', express.static(path.join(__dirname, 'dist')));
-app.use('/examples', express.static('src/examples'));
-app.use('/ui', express.static('src/ui'));
+app.use('/examples', express.static(path.join(__dirname, 'examples')));
+app.use('/src', express.static(path.join(__dirname, 'src')));
 
 // Middleware для отладки запросов
 app.use((req, res, next) => {
@@ -124,7 +124,7 @@ app.get('/', (req, res) => {
             </p>
 
             <div class="examples">
-                <a href="/examples/pure-js/index.html" class="example-card js-card">
+                <a href="/examples/pure-js-vite/index.html" class="example-card js-card">
                     <h3>📄 Pure JavaScript Demo</h3>
                     <p>Демонстрация с готовым UI. Показывает возможности пакета с HTML шаблонами.</p>
                 </a>
@@ -137,6 +137,11 @@ app.get('/', (req, res) => {
                 <a href="/examples/api-usage/index.html" class="example-card api-card">
                     <h3>🔧 API Usage</h3>
                     <p>Правильное использование основного BlockBuilder API без UI. Показывает, как пользователь должен использовать пакет.</p>
+                </a>
+                
+                <a href="/examples/pure-js-cdn/index.html" class="example-card js-card">
+                    <h3>📡 Pure JS CDN Demo</h3>
+                    <p>Демонстрация использования через CDN без сборщиков.</p>
                 </a>
             </div>
         </div>
