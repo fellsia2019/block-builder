@@ -188,7 +188,7 @@
     </div>
 
     <!-- Модальное окно создания/редактирования -->
-    <div v-if="showModal" class="block-builder-modal" @click="closeModal">
+    <div v-if="showModal" class="block-builder-modal" @click="handleOverlayClick">
       <div class="block-builder-modal-content" @click.stop>
         <div class="block-builder-modal-header">
           <h3>{{ modalMode === 'create' ? 'Создать' : 'Редактировать' }} {{ currentBlockType?.label }}</h3>
@@ -329,6 +329,16 @@
                 :api-select-use-case="props.apiSelectUseCase"
               />
 
+              <!-- Custom Field -->
+              <div
+                v-else-if="field.type === 'custom'"
+                :data-custom-field="field.field"
+                :data-custom-renderer-id="field.customFieldConfig?.rendererId"
+                class="custom-field-container"
+              >
+                <!-- Контейнер будет заполнен через customFieldRendererRegistry -->
+              </div>
+
               <!-- Ошибки валидации (общие для всех типов полей) -->
               <div v-if="formErrors[field.field]" class="block-builder-form-errors">
                 <span v-for="error in formErrors[field.field]" :key="error" class="error">{{ error }}</span>
@@ -386,6 +396,7 @@ interface IProps {
   blockRepository?: IBlockRepository;
   componentRegistry?: IComponentRegistry;
   apiSelectUseCase?: ApiSelectUseCase;
+  customFieldRendererRegistry?: import('../../core/ports/CustomFieldRenderer').ICustomFieldRendererRegistry;
   onSave?: (blocks: IBlock[]) => Promise<boolean> | boolean;
   initialBlocks?: IBlock[];
 }
@@ -416,6 +427,7 @@ const selectedPosition = ref<number | undefined>(undefined);
 const formData = reactive<Record<string, any>>({});
 const formErrors = reactive<Record<string, string[]>>({});
 const repeaterRefs = new Map<string, any>();
+const customFieldInstances = new Map<string, any>();
 
 // Функция для установки ref к RepeaterControl компонентам
 const setRepeaterRef = (fieldName: string, el: any): void => {
@@ -495,7 +507,8 @@ const isRegularInputField = (field: any): boolean => {
   return field.type !== 'spacing' &&
          field.type !== 'repeater' &&
          field.type !== 'checkbox' &&
-         field.type !== 'api-select';
+         field.type !== 'api-select' &&
+         field.type !== 'custom';
 };
 
 /**
@@ -609,6 +622,11 @@ const openCreateModal = (type: string, position?: number) => {
   });
 
   showModal.value = true;
+  
+  // Инициализируем кастомные поля после рендеринга DOM
+  nextTick(() => {
+    initializeCustomFields();
+  });
 };
 
 // Открыть модалку редактирования
@@ -622,6 +640,132 @@ const openEditModal = (block: IBlock) => {
   Object.assign(formData, { ...block.props });
 
   showModal.value = true;
+  
+  // Инициализируем кастомные поля после рендеринга DOM
+  nextTick(() => {
+    initializeCustomFields();
+  });
+};
+
+// Инициализация кастомных полей
+const initializeCustomFields = () => {
+  if (!props.customFieldRendererRegistry) return;
+  
+  // Очищаем старые инстансы
+  cleanupCustomFields();
+  
+  const containers = document.querySelectorAll('.custom-field-container');
+  
+  containers.forEach((container: Element) => {
+    const fieldName = container.getAttribute('data-custom-field');
+    const rendererId = container.getAttribute('data-custom-renderer-id');
+    
+    if (!fieldName || !rendererId) return;
+    
+    const renderer = props.customFieldRendererRegistry!.get(rendererId);
+    if (!renderer) {
+      console.error(`Рендерер "${rendererId}" не найден в реестре`);
+      return;
+    }
+    
+    // Находим конфигурацию поля
+    const field = currentBlockFields.value.find(f => f.field === fieldName);
+    if (!field) return;
+    
+    const isRequired = field.rules?.some((rule: any) => rule.type === 'required') || false;
+    
+    try {
+      const result = renderer.render(container as HTMLElement, {
+        fieldName,
+        label: field.label,
+        value: formData[fieldName] || field.defaultValue || '',
+        required: isRequired,
+        options: field.customFieldConfig?.options,
+        onChange: (newValue: any) => {
+          formData[fieldName] = newValue;
+        },
+        onError: (error: string | null) => {
+          if (error) {
+            formErrors[fieldName] = [error];
+          } else {
+            delete formErrors[fieldName];
+          }
+        }
+      });
+      
+      customFieldInstances.set(fieldName, result);
+    } catch (error) {
+      console.error(`Ошибка инициализации кастомного поля "${fieldName}":`, error);
+    }
+  });
+};
+
+// Очистка кастомных полей
+const cleanupCustomFields = () => {
+  customFieldInstances.forEach((instance) => {
+    if (instance.destroy) {
+      try {
+        instance.destroy();
+      } catch (error) {
+        console.error('Ошибка при очистке кастомного поля:', error);
+      }
+    }
+  });
+  customFieldInstances.clear();
+};
+// Проверка, является ли элемент частью Jodit popup/dialog
+const isJoditElement = (element: HTMLElement | null): boolean => {
+  if (!element) return false;
+  
+  // Jodit создаёт элементы с различными классами
+  const joditClasses = [
+    'jodit',
+    'jodit-popup',
+    'jodit-dialog',
+    'jodit-toolbar-popup',
+    'jodit-ui',
+    'jodit-toolbar-button',
+    'jodit-workplace',
+    'jodit-wysiwyg'
+  ];
+  
+  let currentElement: HTMLElement | null = element;
+  
+  // Проверяем элемент и всех его родителей
+  while (currentElement) {
+    // Проверяем классы
+    const classList = currentElement.classList;
+    for (const joditClass of joditClasses) {
+      if (classList.contains(joditClass)) {
+        return true;
+      }
+    }
+    
+    // Проверяем data-атрибуты Jodit
+    if (currentElement.getAttribute('data-editor') === 'jodit' ||
+        currentElement.getAttribute('data-jodit')) {
+      return true;
+    }
+    
+    currentElement = currentElement.parentElement;
+  }
+  
+  return false;
+};
+
+// Обработчик клика по оверлею модалки
+const handleOverlayClick = (event: MouseEvent) => {
+  const target = event.target as HTMLElement;
+  
+  // Если клик был на элементе Jodit, не закрываем модалку
+  if (isJoditElement(target)) {
+    return;
+  }
+  
+  // Если клик был на оверлей (а не на content внутри), закрываем модалку
+  if (target.classList.contains('block-builder-modal')) {
+    closeModal();
+  }
 };
 
 // Закрыть модалку
@@ -633,6 +777,8 @@ const closeModal = () => {
   Object.keys(formErrors).forEach(key => delete formErrors[key]);
   // Очищаем refs к repeater компонентам
   repeaterRefs.clear();
+  // Очищаем кастомные поля
+  cleanupCustomFields();
 };
 
 // Отправка формы
@@ -651,12 +797,24 @@ const handleSubmit = async () => {
   }
 };
 
+// Получить значения из кастомных полей
+const collectCustomFieldValues = () => {
+  customFieldInstances.forEach((instance, fieldName) => {
+    if (instance.getValue) {
+      formData[fieldName] = instance.getValue();
+    }
+  });
+};
+
 // Создание блока
 const createBlock = async (): Promise<boolean> => {
   if (!currentType.value) return false;
 
   const blockType = currentBlockType.value;
   if (!blockType) return false;
+
+  // Собираем значения из кастомных полей
+  collectCustomFieldValues();
 
   // Валидация формы с помощью UniversalValidator
   const fields = currentBlockFields.value;
@@ -734,6 +892,9 @@ const createBlock = async (): Promise<boolean> => {
 // Обновление блока
 const updateBlock = async (): Promise<boolean> => {
   if (!currentBlockId.value) return false;
+
+  // Собираем значения из кастомных полей
+  collectCustomFieldValues();
 
   // Валидация формы с помощью UniversalValidator
   const fields = currentBlockFields.value;
@@ -1110,6 +1271,7 @@ onMounted(async () => {
 // Очистка при размонтировании
 onBeforeUnmount(() => {
   cleanupBreakpointWatchers();
+  cleanupCustomFields();
 });
 </script>
 

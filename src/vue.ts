@@ -18,7 +18,11 @@ export * from './core/use-cases/ApiSelectUseCase'
 export * from './infrastructure/repositories/MemoryBlockRepositoryImpl'
 export * from './infrastructure/repositories/LocalStorageBlockRepositoryImpl'
 export * from './infrastructure/registries/MemoryComponentRegistry'
+export * from './infrastructure/registries/CustomFieldRendererRegistry'
 export * from './infrastructure/http/FetchHttpClient'
+
+// Ports
+export * from './core/ports/CustomFieldRenderer'
 
 // Типы
 export type * from './core/types'

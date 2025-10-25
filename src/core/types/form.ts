@@ -3,9 +3,10 @@
  */
 
 import { IValidationRule } from './validation';
+import { ICustomFieldConfig } from '../ports/CustomFieldRenderer';
 
 // Типы полей форм
-export type TFieldType = 'text' | 'number' | 'email' | 'url' | 'textarea' | 'select' | 'checkbox' | 'color' | 'file' | 'spacing' | 'repeater' | 'api-select';
+export type TFieldType = 'text' | 'number' | 'email' | 'url' | 'textarea' | 'select' | 'checkbox' | 'color' | 'file' | 'spacing' | 'repeater' | 'api-select' | 'custom';
 
 // Типы отступов
 export type TSpacingType = 'padding-top' | 'padding-bottom' | 'margin-top' | 'margin-bottom';
@@ -120,6 +121,7 @@ export interface IFormFieldConfig {
   spacingConfig?: ISpacingFieldConfig; // Для типа 'spacing'
   repeaterConfig?: IRepeaterFieldConfig; // Для типа 'repeater'
   apiSelectConfig?: IApiSelectConfig; // Для типа 'api-select'
+  customFieldConfig?: ICustomFieldConfig; // Для типа 'custom'
 }
 
 // Конфигурация блока с опциями spacing

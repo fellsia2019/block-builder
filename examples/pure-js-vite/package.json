@@ -9,11 +9,13 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "autobind-decorator": "^2.4.0",
     "block-builder": "file:../..",
-    "swiper": "^11.1.15"
+    "jodit": "^4.7.4",
+    "swiper": "^11.1.15",
+    "typograf": "^7.6.0"
   },
   "devDependencies": {
     "vite": "^6.0.5"
   }
 }
-

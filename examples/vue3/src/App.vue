@@ -15,6 +15,7 @@
         :config="{ availableBlockTypes }"
         :component-registry="registry"
         :api-select-use-case="apiSelectUseCase"
+        :custom-field-renderer-registry="customFieldRendererRegistry"
         :on-save="handleSave"
         :initial-blocks="initialBlocks"
       />
@@ -28,13 +29,19 @@ import {
   BlockBuilderComponent, 
   MemoryComponentRegistry,
   ApiSelectUseCase,
-  FetchHttpClient
+  FetchHttpClient,
+  CustomFieldRendererRegistry
 } from 'block-builder/vue'
 import { blockConfigs } from './block-config'
+import { WysiwygFieldRenderer } from './customFieldRenderers/WysiwygFieldRenderer'
 
 // Создаем HTTP клиент и ApiSelectUseCase (Dependency Injection)
 const httpClient = new FetchHttpClient()
 const apiSelectUseCase = new ApiSelectUseCase(httpClient)
+
+// ✅ Создаем реестр кастомных полей и регистрируем WYSIWYG редактор
+const customFieldRendererRegistry = new CustomFieldRendererRegistry()
+customFieldRendererRegistry.register(new WysiwygFieldRenderer())
 
 // Создаем registry и регистрируем компоненты
 const registry = new MemoryComponentRegistry()

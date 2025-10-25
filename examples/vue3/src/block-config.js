@@ -21,14 +21,74 @@ import GallerySliderBlock from './components/GallerySliderBlock.vue'
 import SpacedContentBlock from './components/SpacedContentBlock.vue'
 import RichCardListBlock from './components/RichCardListBlock.vue'
 import NewsListBlock from './components/NewsListBlock.vue'
+import RichTextBlock from './components/RichTextBlock.vue'
 
 // ✅ АСИНХРОННЫЙ импорт компонента (загружается по требованию)
 const Counter = defineAsyncComponent(() => import('./components/Counter.vue'))
 
 
 export const blockConfigs = {
+  richText: {
+    title: 'Rich Text (с визуальным редактором)',
+    icon: '✍️',
+    description: 'Блок с визуальным редактором Jodit для форматированного текста',
+    render: {
+      kind: 'component',
+      framework: 'vue',
+      component: RichTextBlock
+    },
+    fields: [
+      {
+        field: 'content',
+        label: 'Содержимое',
+        type: 'custom', // ✅ Используем кастомный тип поля
+        customFieldConfig: {
+          rendererId: 'wysiwyg-editor', // ID зарегистрированного рендерера
+          options: {
+            mode: 'default' // Опции для редактора
+          }
+        },
+        rules: [
+          { type: 'required', message: 'Содержимое обязательно' }
+        ],
+        defaultValue: '<p>Введите ваш текст здесь...</p>'
+      },
+      {
+        field: 'fontSize',
+        label: 'Размер шрифта',
+        type: 'number',
+        rules: [
+          { type: 'required', message: 'Размер шрифта обязателен' },
+          { type: 'min', value: 12, message: 'Минимальный размер: 12px' },
+          { type: 'max', value: 48, message: 'Максимальный размер: 48px' }
+        ],
+        defaultValue: 16
+      },
+      {
+        field: 'textColor',
+        label: 'Цвет текста',
+        type: 'color',
+        rules: [{ type: 'required', message: 'Цвет обязателен' }],
+        defaultValue: '#333333'
+      },
+      {
+        field: 'textAlign',
+        label: 'Выравнивание',
+        type: 'select',
+        options: [
+          { value: 'left', label: 'По левому краю' },
+          { value: 'center', label: 'По центру' },
+          { value: 'right', label: 'По правому краю' },
+          { value: 'justify', label: 'По ширине' }
+        ],
+        rules: [{ type: 'required', message: 'Выравнивание обязательно' }],
+        defaultValue: 'left'
+      }
+    ]
+  },
+
   text: {
-    title: 'Текстовый блок',
+    title: 'Текстовый блок (простой)',
     icon: '📝',
     description: 'Добавьте текстовый контент на страницу',
     render: {

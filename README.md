@@ -2,6 +2,16 @@
 
 Библиотека для создания блочных конструкторов с правильной чистой архитектурой.
 
+## 📖 Содержание
+
+- [🎯 Принципы чистой архитектуры](#-принципы-чистой-архитектуры)
+- [🚀 Быстрый старт](#-быстрый-старт)
+- [📋 API](#-api)
+- [🎨 Кастомные типы полей](#-кастомные-типы-полей)
+- [🧪 Тестирование](#-тестирование)
+- [📚 Примеры](#-примеры)
+- [🛠️ Разработка](#️-разработка)
+
 ## 🎯 Принципы чистой архитектуры
 
 ### Структура проекта
@@ -213,7 +223,7 @@ const blockConfig = {
     {
       field: 'fieldName',
       label: 'Название поля',
-      type: 'text' | 'textarea' | 'number' | 'color' | 'select' | 'checkbox' | 'url',
+      type: 'text' | 'textarea' | 'number' | 'color' | 'select' | 'checkbox' | 'url' | 'custom',
       placeholder: 'Подсказка',
       rules: [
         {
@@ -230,6 +240,214 @@ const blockConfig = {
   ]
 }
 ```
+
+## 🎨 Кастомные типы полей
+
+BlockBuilder поддерживает плагинную систему для создания собственных типов полей. Это позволяет внедрять сторонние библиотеки (например, WYSIWYG редакторы, date pickers, color pickers) в формы редактирования блоков.
+
+### Основные понятия
+
+**Custom Field Renderer** - это объект, который реализует интерфейс `ICustomFieldRenderer` и отвечает за рендеринг и управление кастомным полем.
+
+### Быстрый старт
+
+#### 1. Создайте Custom Field Renderer
+
+**Vue 3:**
+```javascript
+// customFieldRenderers/WysiwygFieldRenderer.js
+import { createApp } from 'vue'
+import WysiwygEditor from './components/WysiwygEditor.vue'
+
+export class WysiwygFieldRenderer {
+  id = 'wysiwyg-editor'
+  name = 'WYSIWYG Editor'
+
+  render(container, context) {
+    const { value, onChange, onError } = context
+    
+    const app = createApp(WysiwygEditor, {
+      modelValue: value || '<p></p>',
+      'onUpdate:modelValue': onChange
+    })
+    
+    const instance = app.mount(container)
+    
+    return {
+      element: container,
+      getValue: () => instance.modelValue,
+      setValue: (newValue) => { instance.modelValue = newValue },
+      destroy: () => app.unmount()
+    }
+  }
+}
+```
+
+**Pure JavaScript:**
+```javascript
+// customFieldRenderers/WysiwygFieldRenderer.js
+import { createWysiwygEditor } from './components/WysiwygEditor.js'
+
+export class WysiwygFieldRenderer {
+  id = 'wysiwyg-editor'
+  name = 'WYSIWYG Editor'
+
+  render(container, context) {
+    const { value, onChange } = context
+    
+    // Создаём новый wrapper для редактора
+    const wrapper = document.createElement('div')
+    wrapper.className = 'wysiwyg-field-wrapper'
+    
+    // Инициализируем редактор
+    const editorAPI = createWysiwygEditor(wrapper, {
+      value: value || '<p></p>',
+      onChange: (newValue) => onChange(newValue)
+    })
+    
+    return {
+      element: wrapper,  // Возвращаем новый элемент!
+      getValue: () => editorAPI.getValue(),
+      setValue: (newValue) => editorAPI.setValue(newValue),
+      destroy: () => editorAPI.destroy()
+    }
+  }
+}
+```
+
+#### 2. Зарегистрируйте renderer
+
+**Vue 3:**
+```javascript
+import { BlockBuilderComponent } from 'block-builder/vue'
+import { WysiwygFieldRenderer } from './customFieldRenderers/WysiwygFieldRenderer.js'
+
+// В setup()
+const blockBuilder = ref(null)
+const wysiwygRenderer = new WysiwygFieldRenderer()
+
+onMounted(() => {
+  if (blockBuilder.value) {
+    blockBuilder.value.registerCustomFieldRenderer(wysiwygRenderer)
+  }
+})
+```
+
+**Pure JavaScript:**
+```javascript
+import { BlockBuilder } from 'block-builder'
+import { WysiwygFieldRenderer } from './customFieldRenderers/WysiwygFieldRenderer.js'
+
+const blockBuilder = new BlockBuilder({
+  containerId: 'block-builder-app',
+  blockConfigs: blockConfigs
+})
+
+// Регистрируем renderer
+const wysiwygRenderer = new WysiwygFieldRenderer()
+blockBuilder.registerCustomFieldRenderer(wysiwygRenderer)
+```
+
+#### 3. Используйте в конфигурации блока
+
+```javascript
+const blockConfigs = {
+  richText: {
+    title: 'Текстовый блок с визуальным редактором',
+    icon: '📝',
+    fields: [
+      {
+        field: 'content',
+        label: 'Содержимое',
+        type: 'custom',  // Указываем тип 'custom'
+        customFieldConfig: {
+          rendererId: 'wysiwyg-editor',  // ID вашего renderer'а
+          options: {
+            mode: 'default',
+            placeholder: 'Введите текст...'
+          }
+        },
+        rules: [
+          { type: 'required', message: 'Содержимое обязательно' }
+        ],
+        defaultValue: '<p></p>'
+      }
+    ]
+  }
+}
+```
+
+### Интерфейс ICustomFieldRenderer
+
+```typescript
+interface ICustomFieldRenderer {
+  id: string                    // Уникальный идентификатор
+  name: string                  // Человекочитаемое название
+  
+  render(
+    container: HTMLElement,     // Контейнер для рендеринга
+    context: ICustomFieldContext // Контекст поля
+  ): ICustomFieldRenderResult
+}
+
+interface ICustomFieldContext {
+  fieldName: string             // Имя поля
+  label: string                 // Лейбл поля
+  value: any                    // Текущее значение
+  required: boolean             // Обязательно ли поле
+  rendererId: string            // ID renderer'а
+  options?: Record<string, any> // Дополнительные опции
+  onChange: (value: any) => void    // Callback при изменении
+  onError?: (error: string | null) => void  // Callback для ошибок
+}
+
+interface ICustomFieldRenderResult {
+  element: HTMLElement | string // DOM элемент или HTML строка
+  getValue?: () => any          // Получить текущее значение
+  setValue?: (value: any) => void   // Установить значение
+  validate?: () => string | null    // Валидация (вернуть ошибку или null)
+  destroy?: () => void          // Очистка ресурсов
+}
+```
+
+### API для работы с Custom Fields
+
+```javascript
+// Регистрация одного renderer'а
+blockBuilder.registerCustomFieldRenderer(renderer)
+
+// Регистрация нескольких renderer'ов
+blockBuilder.registerCustomFieldRenderers([renderer1, renderer2])
+
+// Проверка наличия renderer'а
+blockBuilder.hasCustomFieldRenderer('wysiwyg-editor') // true/false
+
+// Получение renderer'а
+const renderer = blockBuilder.getCustomFieldRenderer('wysiwyg-editor')
+
+// Получение всех renderer'ов
+const allRenderers = blockBuilder.getAllCustomFieldRenderers() // Map<string, ICustomFieldRenderer>
+
+// Удаление renderer'а
+blockBuilder.unregisterCustomFieldRenderer('wysiwyg-editor')
+```
+
+### Важные моменты
+
+1. **Возвращайте новый элемент**: В `render()` метод получает `container`, но в `result.element` нужно вернуть **новый** HTMLElement, который будет добавлен в `container`.
+
+2. **Управление lifecycle**: Используйте метод `destroy()` для очистки ресурсов (event listeners, mounted компонентов и т.д.).
+
+3. **Не создавайте label вручную**: BlockBuilder автоматически создаёт label для поля, не нужно добавлять его в кастомном renderer'е.
+
+4. **Изоляция**: Каждый экземпляр BlockBuilder имеет свой собственный реестр renderer'ов.
+
+### Примеры
+
+Полные рабочие примеры доступны в:
+- **Vue 3**: `examples/vue3/src/customFieldRenderers/`
+- **Pure JS**: `examples/pure-js-vite/src/customFieldRenderers/`
+
 
 ## 🧪 Тестирование
 
@@ -279,27 +497,6 @@ src/
 │   └── http/__tests__/             # Тесты HTTP клиента
 └── utils/__tests__/                # Тесты утилит
 ```
-
-### 🎯 Покрытие тестами
-
-| Слой | Coverage | Статус |
-|------|----------|--------|
-| Core Entities | 100% | ✅ |
-| Core Use Cases | 93-100% | ✅ |
-| Infrastructure | 93-100% | ✅ |
-| Utils (основные) | 71-100% | ✅ |
-| **UI Services** | **38.69%** | ✅ |
-| - StyleManager | 100% | ✅ |
-| - ModalManager | 100% | ✅ |
-| - FormBuilder | ~95% | ✅ |
-| - UIRenderer | ~80% | ✅ |
-| - SpacingControlRenderer | ~85% | ✅ |
-| - RepeaterControlRenderer | ~85% | ✅ |
-| - ApiSelectControlRenderer | ~85% | ✅ |
-| **UI Controllers** | **11%** | ✅ |
-| - BlockUIController | 11% | ✅ |
-
-**Результат**: При любом изменении кода автоматически запускаются тесты и выявляются ошибки программно, а не ручной проверкой!
 
 ## 🛠️ Разработка
 

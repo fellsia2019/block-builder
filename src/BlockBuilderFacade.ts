@@ -16,11 +16,13 @@ import { ApiSelectUseCase } from './core/use-cases/ApiSelectUseCase';
 import { MemoryBlockRepositoryImpl } from './infrastructure/repositories/MemoryBlockRepositoryImpl';
 import { LocalStorageBlockRepositoryImpl } from './infrastructure/repositories/LocalStorageBlockRepositoryImpl';
 import { MemoryComponentRegistry } from './infrastructure/registries/MemoryComponentRegistry';
+import { CustomFieldRendererRegistry } from './infrastructure/registries/CustomFieldRendererRegistry';
+import { ICustomFieldRenderer, ICustomFieldRendererRegistry } from './core/ports/CustomFieldRenderer';
 import { FetchHttpClient } from './infrastructure/http/FetchHttpClient';
 import { BlockUIController } from './ui/controllers/BlockUIController';
 
 export interface IBlockBuilderOptions {
-    containerId: string;
+    containerId?: string;
     blockConfigs: Record<string, any>;
     repository?: IBlockRepository;
     componentRegistry?: IComponentRegistry;
@@ -28,6 +30,7 @@ export interface IBlockBuilderOptions {
     locale?: string;
     storage?: 'memory' | 'localStorage';
     autoRender?: boolean;
+    autoInit?: boolean;
     onSave?: (blocks: IBlockDto[]) => Promise<boolean> | boolean;
     initialBlocks?: IBlockDto[];
 }
@@ -40,6 +43,7 @@ export class BlockBuilderFacade {
     private useCase: BlockManagementUseCase;
     private repository: IBlockRepository;
     private componentRegistry: IComponentRegistry;
+    private customFieldRendererRegistry: ICustomFieldRendererRegistry;
     private httpClient: IHttpClient;
     private apiSelectUseCase: ApiSelectUseCase;
     private blockConfigs: Record<string, any>;
@@ -62,6 +66,9 @@ export class BlockBuilderFacade {
         // Инициализация реестра компонентов
         this.componentRegistry = options.componentRegistry || new MemoryComponentRegistry();
 
+        // Инициализация реестра кастомных полей
+        this.customFieldRendererRegistry = new CustomFieldRendererRegistry();
+
         // Создание HTTP клиента (Infrastructure слой)
         this.httpClient = new FetchHttpClient();
 
@@ -75,13 +82,16 @@ export class BlockBuilderFacade {
         this.registerComponentsFromConfig();
 
         // Асинхронная инициализация (загрузка блоков + UI)
-        this.initialize(options.containerId, options.initialBlocks, options.autoRender);
+        // Проверяем autoInit (по умолчанию true)
+        if (options.autoInit !== false) {
+            this.initialize(options.containerId, options.initialBlocks, options.autoRender);
+        }
     }
 
     /**
      * Асинхронная инициализация: загрузка начальных блоков и рендеринг UI
      */
-    private async initialize(containerId: string, initialBlocks?: IBlockDto[], autoRender?: boolean): Promise<void> {
+    private async initialize(containerId?: string, initialBlocks?: IBlockDto[], autoRender?: boolean): Promise<void> {
         // Загрузка начальных блоков (если переданы)
         if (initialBlocks && initialBlocks.length > 0) {
             await this.loadInitialBlocks(initialBlocks);
@@ -102,6 +112,7 @@ export class BlockBuilderFacade {
             blockConfigs: this.blockConfigs,
             useCase: this.useCase,
             apiSelectUseCase: this.apiSelectUseCase,
+            customFieldRendererRegistry: this.customFieldRendererRegistry,
             onSave: this.onSave
         });
 
@@ -493,6 +504,59 @@ export class BlockBuilderFacade {
     submitModal(): void {
         this.uiController?.submitModal();
     }
+
+    // ===== ПУБЛИЧНЫЙ API ДЛЯ РАБОТЫ С КАСТОМНЫМИ ПОЛЯМИ =====
+
+    /**
+     * Регистрация кастомного рендерера поля
+     * @param renderer - Рендерер кастомного поля
+     */
+    registerCustomFieldRenderer(renderer: ICustomFieldRenderer): void {
+        this.customFieldRendererRegistry.register(renderer);
+    }
+
+    /**
+     * Массовая регистрация кастомных рендереров
+     * @param renderers - Массив рендереров
+     */
+    registerCustomFieldRenderers(renderers: ICustomFieldRenderer[]): void {
+        renderers.forEach(renderer => {
+            this.customFieldRendererRegistry.register(renderer);
+        });
+    }
+
+    /**
+     * Получение кастомного рендерера по ID
+     * @param id - ID рендерера
+     */
+    getCustomFieldRenderer(id: string): ICustomFieldRenderer | null {
+        return this.customFieldRendererRegistry.get(id);
+    }
+
+    /**
+     * Проверка существования кастомного рендерера
+     * @param id - ID рендерера
+     */
+    hasCustomFieldRenderer(id: string): boolean {
+        return this.customFieldRendererRegistry.has(id);
+    }
+
+    /**
+     * Удаление кастомного рендерера
+     * @param id - ID рендерера
+     */
+    unregisterCustomFieldRenderer(id: string): boolean {
+        return this.customFieldRendererRegistry.unregister(id);
+    }
+
+    /**
+     * Получение всех кастомных рендереров
+     */
+    getAllCustomFieldRenderers(): Map<string, ICustomFieldRenderer> {
+        return this.customFieldRendererRegistry.getAll();
+    }
+
+    // ===== УТИЛИТЫ =====
 
     /**
      * Очистка ресурсов

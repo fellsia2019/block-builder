@@ -12,6 +12,73 @@ import 'swiper/css/navigation'
 import 'swiper/css/pagination'
 
 export const blockConfigs = {
+  richText: {
+    title: 'Rich Text (с визуальным редактором)',
+    icon: '✍️',
+    description: 'Блок с визуальным редактором Jodit для форматированного текста',
+    render: {
+      kind: 'html',
+      template: (props) => `
+        <div class="rich-text-block" style="
+          font-size: ${props.fontSize || 16}px;
+          color: ${props.textColor || '#333333'};
+          text-align: ${props.textAlign || 'left'};
+          padding: 15px;
+          border: 1px solid #eee;
+          border-radius: 4px;
+          background-color: #fff;
+        ">
+          ${props.content || '<p>Нет содержимого</p>'}
+        </div>
+      `
+    },
+    fields: [
+      {
+        field: 'content',
+        label: 'Содержимое',
+        type: 'custom', // ✅ Используем кастомный тип поля
+        customFieldConfig: {
+          rendererId: 'wysiwyg-editor', // ID зарегистрированного рендерера
+          options: {
+            mode: 'default' // Опции для редактора
+          }
+        },
+        rules: [
+          { type: 'required', message: 'Содержимое обязательно' }
+        ],
+        defaultValue: '<p>Введите ваш текст здесь...</p>'
+      },
+      {
+        field: 'fontSize',
+        label: 'Размер шрифта',
+        type: 'number',
+        rules: [
+          { type: 'min', value: 12, message: 'Минимум: 12px' },
+          { type: 'max', value: 32, message: 'Максимум: 32px' }
+        ],
+        defaultValue: 16
+      },
+      {
+        field: 'textColor',
+        label: 'Цвет текста',
+        type: 'color',
+        defaultValue: '#333333'
+      },
+      {
+        field: 'textAlign',
+        label: 'Выравнивание',
+        type: 'select',
+        options: [
+          { value: 'left', label: 'По левому краю' },
+          { value: 'center', label: 'По центру' },
+          { value: 'right', label: 'По правому краю' },
+          { value: 'justify', label: 'По ширине' }
+        ],
+        defaultValue: 'left'
+      }
+    ]
+  },
+
   spacedText: {
     title: 'Текст с отступами',
     icon: '📐',

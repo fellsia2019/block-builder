@@ -2,6 +2,7 @@ import './style.css'
 import '../../../src/ui/styles/index.scss' // Импорт стилей BlockBuilder
 import { BlockBuilder } from 'block-builder'
 import { blockConfigs } from './block-config.js'
+import { WysiwygFieldRenderer } from './customFieldRenderers/WysiwygFieldRenderer.js'
 
 // Загрузка сохранённых блоков из localStorage
 const loadSavedBlocks = () => {
@@ -51,7 +52,11 @@ const blockBuilder = new BlockBuilder({
   }
 })
 
+// ✅ Регистрируем кастомный WYSIWYG редактор
+blockBuilder.registerCustomFieldRenderer(new WysiwygFieldRenderer())
+
 console.log('✅ BlockBuilder инициализирован')
+console.log('✅ Зарегистрирован WYSIWYG редактор')
 console.log('📦 Доступные блоки:', Object.keys(blockConfigs))
 console.log('🎯 Это чистый JS пример с Vite сборкой')
 

@@ -14,6 +14,8 @@ import { StyleManager } from '../services/StyleManager';
 import { SpacingControlRenderer } from '../services/SpacingControlRenderer';
 import { RepeaterControlRenderer } from '../services/RepeaterControlRenderer';
 import { ApiSelectControlRenderer } from '../services/ApiSelectControlRenderer';
+import { CustomFieldControlRenderer } from '../services/CustomFieldControlRenderer';
+import { ICustomFieldRendererRegistry } from '../../core/ports/CustomFieldRenderer';
 import { copyToClipboard } from '../../utils/copyToClipboard';
 import { UniversalValidator } from '../../utils/universalValidation';
 import { addSpacingFieldToFields } from '../../utils/blockSpacingHelpers';
@@ -24,6 +26,7 @@ export interface IBlockUIControllerConfig {
   blockConfigs: Record<string, any>;
   useCase: BlockManagementUseCase;
   apiSelectUseCase: ApiSelectUseCase;
+  customFieldRendererRegistry?: ICustomFieldRendererRegistry;
   onSave?: (blocks: IBlockDto[]) => Promise<boolean> | boolean;
 }
 
@@ -34,16 +37,19 @@ export class BlockUIController {
   private modalManager: ModalManager;
   private styleManager: StyleManager;
   private apiSelectUseCase: ApiSelectUseCase;
+  private customFieldRendererRegistry?: ICustomFieldRendererRegistry;
   private blocks: IBlockDto[] = [];
   private onSave?: (blocks: IBlockDto[]) => Promise<boolean> | boolean;
   private spacingRenderers: Map<string, SpacingControlRenderer> = new Map();
   private repeaterRenderers: Map<string, RepeaterControlRenderer> = new Map();
   private apiSelectRenderers: Map<string, ApiSelectControlRenderer> = new Map();
+  private customFieldRenderers: Map<string, CustomFieldControlRenderer> = new Map();
 
   constructor(config: IBlockUIControllerConfig) {
     this.config = config;
     this.onSave = config.onSave;
     this.apiSelectUseCase = config.apiSelectUseCase;
+    this.customFieldRendererRegistry = config.customFieldRendererRegistry;
 
     // Инициализация сервисов (Dependency Injection)
     this.uiRenderer = new UIRenderer({
@@ -149,12 +155,13 @@ export class BlockUIController {
       submitButtonText: 'Добавить'
     });
 
-    // Инициализируем spacing, repeater и api-select контролы после рендеринга модалки
+    // Инициализируем spacing, repeater, api-select и custom field контролы после рендеринга модалки
     // Используем setTimeout чтобы дождаться следующего цикла событий когда DOM точно готов
     setTimeout(async () => {
       this.initializeSpacingControls();
       this.initializeRepeaterControls();
       await this.initializeApiSelectControls();
+      await this.initializeCustomFieldControls();
     }, 0);
   }
 
@@ -327,7 +334,106 @@ export class BlockUIController {
   }
 
   /**
-   * Получение данных формы с учетом spacing, repeater и api-select контролов
+   * Инициализация кастомных полей
+   */
+  private async initializeCustomFieldControls(): Promise<void> {
+    // Проверяем наличие реестра
+    if (!this.customFieldRendererRegistry) {
+      return; // Кастомные поля не поддерживаются
+    }
+
+    // Очищаем старые рендереры
+    this.cleanupCustomFieldControls();
+
+    // Находим все контейнеры для кастомных полей
+    const containers = document.querySelectorAll('.custom-field-control-container');
+
+    for (const container of Array.from(containers)) {
+      const config = container.getAttribute('data-custom-field-config');
+      if (!config) {
+        console.warn('⚠️ Custom Field: контейнер без конфигурации', container);
+        continue;
+      }
+
+      try {
+        const customFieldConfig = JSON.parse(config.replace(/&quot;/g, '"'));
+        
+        // Проверяем наличие rendererId
+        if (!customFieldConfig.rendererId) {
+          console.error('❌ Custom Field: не указан rendererId', customFieldConfig);
+          continue;
+        }
+
+        // Получаем рендерер из реестра
+        const renderer = this.customFieldRendererRegistry.get(customFieldConfig.rendererId);
+        if (!renderer) {
+          console.error(`❌ Custom Field: рендерер "${customFieldConfig.rendererId}" не найден в реестре`);
+          this.showCustomFieldError(container as HTMLElement, `Рендерер "${customFieldConfig.rendererId}" не зарегистрирован`);
+          continue;
+        }
+
+        // Находим или создаем контейнер для рендеринга
+        let renderContainer = container.querySelector('.custom-field-placeholder') as HTMLElement;
+        if (!renderContainer) {
+          renderContainer = container as HTMLElement;
+        }
+
+        // Создаем контроллер кастомного поля
+        const fieldRenderer = new CustomFieldControlRenderer(renderContainer, renderer, {
+          fieldName: customFieldConfig.field,
+          label: customFieldConfig.label,
+          value: customFieldConfig.value,
+          required: customFieldConfig.required || false,
+          rendererId: customFieldConfig.rendererId,
+          options: customFieldConfig.options,
+          onChange: (value) => {
+            // Обновление значения при изменении
+            // Сохраняем в data-атрибуте для последующего получения
+            container.setAttribute('data-custom-field-value', JSON.stringify(value));
+          },
+          onError: (error) => {
+            if (error) {
+              console.error(`❌ Custom Field Error (${customFieldConfig.field}):`, error);
+            }
+          }
+        });
+
+        // Сохраняем рендерер
+        this.customFieldRenderers.set(customFieldConfig.field, fieldRenderer);
+      } catch (error) {
+        console.error('❌ Ошибка инициализации кастомного поля:', error);
+        this.showCustomFieldError(container as HTMLElement, `Ошибка: ${error}`);
+      }
+    }
+  }
+
+  /**
+   * Показ ошибки в контейнере кастомного поля
+   */
+  private showCustomFieldError(container: HTMLElement, message: string): void {
+    const placeholder = container.querySelector('.custom-field-placeholder');
+    if (placeholder) {
+      placeholder.innerHTML = `
+        <div style="padding: 10px; border: 1px solid #ff4444; border-radius: 4px; background-color: #fff5f5; color: #ff4444;">
+          ❌ ${message}
+        </div>
+      `;
+    }
+  }
+
+  /**
+   * Очистка кастомных полей
+   */
+  private cleanupCustomFieldControls(): void {
+    // Вызываем destroy для каждого рендерера
+    this.customFieldRenderers.forEach((renderer) => {
+      renderer.destroy();
+    });
+    this.customFieldRenderers.clear();
+  }
+
+  /**
+   * Получение данных формы с учетом spacing, repeater, api-select и custom контролов
    */
   private getFormDataWithSpacing(formId: string): Record<string, any> {
     const props = this.modalManager.getFormData(formId);
@@ -344,6 +450,11 @@ export class BlockUIController {
 
     // Добавляем данные из api-select контролов
     this.apiSelectRenderers.forEach((renderer, fieldName) => {
+      props[fieldName] = renderer.getValue();
+    });
+
+    // Добавляем данные из кастомных полей
+    this.customFieldRenderers.forEach((renderer, fieldName) => {
       props[fieldName] = renderer.getValue();
     });
 
@@ -450,12 +561,13 @@ export class BlockUIController {
       submitButtonText: 'Сохранить'
     });
 
-    // Инициализируем spacing, repeater и api-select контролы после рендеринга модалки
+    // Инициализируем spacing, repeater, api-select и custom контролы после рендеринга модалки
     // Используем setTimeout чтобы дождаться следующего цикла событий когда DOM точно готов
     setTimeout(async () => {
       this.initializeSpacingControls();
       this.initializeRepeaterControls();
       await this.initializeApiSelectControls();
+      await this.initializeCustomFieldControls();
     }, 0);
   }
 
@@ -855,6 +967,7 @@ export class BlockUIController {
     this.cleanupSpacingControls();
     this.cleanupRepeaterControls();
     this.cleanupApiSelectControls();
+    this.cleanupCustomFieldControls();
     this.modalManager.closeModal();
   }
 
@@ -877,6 +990,9 @@ export class BlockUIController {
    */
   destroy(): void {
     this.cleanupSpacingControls();
+    this.cleanupRepeaterControls();
+    this.cleanupApiSelectControls();
+    this.cleanupCustomFieldControls();
     this.styleManager.removeAllStyles();
     this.modalManager.closeModal();
   }

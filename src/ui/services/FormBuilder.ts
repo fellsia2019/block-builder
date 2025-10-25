@@ -63,6 +63,9 @@ export class FormBuilder {
       case 'api-select':
         return this.generateApiSelectPlaceholderHTML(fieldId, field, value, required);
 
+      case 'custom':
+        return this.generateCustomFieldPlaceholderHTML(fieldId, field, value, required);
+
       default: // text
         return this.generateTextHTML(fieldId, field, value, required);
     }
@@ -293,6 +296,38 @@ export class FormBuilder {
         </label>
         <div style="padding: 10px; border: 1px dashed #ccc; border-radius: 4px; color: #999;">
           ⏳ Инициализация API Select...
+        </div>
+      </div>
+    `;
+  }
+
+  /**
+   * Генерация контейнера для кастомного поля
+   * Будет инициализирован через CustomFieldControlRenderer в BlockUIController
+   */
+  private generateCustomFieldPlaceholderHTML(fieldId: string, field: TFieldConfig, value: any, required: string): string {
+    const customFieldConfig = field.customFieldConfig || { rendererId: '' };
+    const configJson = JSON.stringify({
+      field: field.field,
+      label: field.label,
+      rules: field.rules || [],
+      value: value || field.defaultValue || '',
+      required: !!required,
+      ...customFieldConfig
+    }).replace(/"/g, '&quot;');
+
+    return `
+      <div
+        class="block-builder-form-group custom-field-control-container"
+        data-field-type="custom"
+        data-field-name="${field.field}"
+        data-custom-field-config="${configJson}"
+      >
+        <label class="block-builder-form-label">
+          ${field.label} ${required ? '<span class="required">*</span>' : ''}
+        </label>
+        <div class="custom-field-placeholder" style="padding: 10px; border: 1px dashed #ccc; border-radius: 4px; color: #999;">
+          ⏳ Инициализация кастомного поля...
         </div>
       </div>
     `;

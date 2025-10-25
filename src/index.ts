@@ -30,6 +30,7 @@ export * from './core/entities/Block';
 // Core - Ports (интерфейсы)
 export * from './core/ports/BlockRepository';
 export * from './core/ports/ComponentRegistry';
+export * from './core/ports/CustomFieldRenderer';
 export type { IHttpClient, IHttpResponse, IHttpError, IHttpRequestOptions } from './core/ports/HttpClient';
 
 // Core - Use Cases (единственный вход в ядро)
@@ -56,6 +57,8 @@ export { SpacingControlRenderer } from './ui/services/SpacingControlRenderer';
 export type { ISpacingControlOptions } from './ui/services/SpacingControlRenderer';
 export { ApiSelectControlRenderer } from './ui/services/ApiSelectControlRenderer';
 export type { IApiSelectControlOptions } from './ui/services/ApiSelectControlRenderer';
+export { CustomFieldControlRenderer } from './ui/services/CustomFieldControlRenderer';
+export type { ICustomFieldControlOptions } from './ui/services/CustomFieldControlRenderer';
 
 // UI Types
 export type { TFieldConfig } from './ui/services/FormBuilder';
@@ -67,6 +70,7 @@ export type { IBlockUIControllerConfig } from './ui/controllers/BlockUIControlle
 export * from './infrastructure/repositories/MemoryBlockRepositoryImpl';
 export * from './infrastructure/repositories/LocalStorageBlockRepositoryImpl';
 export * from './infrastructure/registries/MemoryComponentRegistry';
+export * from './infrastructure/registries/CustomFieldRendererRegistry';
 export { FetchHttpClient } from './infrastructure/http/FetchHttpClient';
 
 // UI компоненты (только для Vue3 проектов)
