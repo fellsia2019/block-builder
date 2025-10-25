@@ -685,6 +685,313 @@ export const blockConfigs = {
         defaultValue: 30
       }
     ]
+  },
+
+  timelapse: {
+    title: '⏱️ Таймлапс с этапами',
+    icon: '⏱️',
+    description: 'Таймер с последовательными этапами и обратным отсчетом',
+    render: {
+      kind: 'custom',
+      mount: function(container, props) {
+        const stages = props.stages || []
+        const blockId = 'timelapse-' + Math.random().toString(36).substr(2, 9)
+        
+        // Создаем HTML
+        container.innerHTML = 
+          '<div class="timelapse-block" id="' + blockId + '">' +
+            (props.title ? '<h2 class="timelapse-block__title">' + props.title + '</h2>' : '') +
+            '<div class="timelapse-block__content">' +
+              '<div class="timelapse-block__stages" data-stages-container>' +
+                stages.map(function(stage, index) {
+                  return '<div class="timelapse-block__stage" data-stage-index="' + index + '">' +
+                    '<div class="timelapse-block__stage-number">' + (index + 1) + '</div>' +
+                    '<div class="timelapse-block__stage-content">' +
+                      '<div class="timelapse-block__stage-name">' + (stage.name || 'Этап ' + (index + 1)) + '</div>' +
+                      '<div class="timelapse-block__stage-duration">' + (stage.duration || 0) + ' сек</div>' +
+                    '</div>' +
+                    '<div class="timelapse-block__stage-check" style="display: none;">✓</div>' +
+                  '</div>'
+                }).join('') +
+              '</div>' +
+              '<div class="timelapse-block__timer-panel">' +
+                '<div class="timelapse-block__timer">' +
+                  '<div class="timelapse-block__timer-value" data-timer-value>00:00</div>' +
+                  '<div class="timelapse-block__timer-label">до следующего этапа</div>' +
+                '</div>' +
+                '<div class="timelapse-block__current-stage" data-current-stage>' +
+                  '<div class="timelapse-block__current-label">Текущий этап:</div>' +
+                  '<div class="timelapse-block__current-name" data-current-name>Нажмите "Старт"</div>' +
+                '</div>' +
+                '<div class="timelapse-block__progress">' +
+                  '<div class="timelapse-block__progress-bar" data-progress-bar style="width: 0%"></div>' +
+                '</div>' +
+                '<div class="timelapse-block__controls">' +
+                  '<button class="timelapse-block__btn timelapse-block__btn--start" data-start-btn>Старт</button>' +
+                  '<button class="timelapse-block__btn timelapse-block__btn--pause" data-pause-btn style="display: none;">Пауза</button>' +
+                  '<button class="timelapse-block__btn timelapse-block__btn--reset" data-reset-btn>Сброс</button>' +
+                '</div>' +
+                '<div class="timelapse-block__completed" data-completed style="display: none;">🎉 Все этапы завершены!</div>' +
+              '</div>' +
+            '</div>' +
+          '</div>' +
+          '<style>' +
+            '.timelapse-block { padding: 20px; background: #f5f5f5; border-radius: 12px; }' +
+            '.timelapse-block__title { margin: 0 0 24px 0; font-size: 28px; font-weight: 700; color: #333; text-align: center; }' +
+            '.timelapse-block__content { display: flex; gap: 30px; align-items: flex-start; }' +
+            '.timelapse-block__stages { flex: 1; display: flex; flex-direction: column; gap: 12px; }' +
+            '.timelapse-block__stage { display: flex; align-items: center; gap: 12px; padding: 16px; background: white; border-radius: 8px; border: 2px solid #e0e0e0; transition: all 0.3s ease; }' +
+            '.timelapse-block__stage--active { border-color: #4CAF50; background: #f1f8f4; box-shadow: 0 2px 8px rgba(76, 175, 80, 0.2); }' +
+            '.timelapse-block__stage--completed { border-color: #2196F3; background: #e3f2fd; }' +
+            '.timelapse-block__stage-number { display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; background: #e0e0e0; border-radius: 50%; font-weight: 700; color: #666; flex-shrink: 0; }' +
+            '.timelapse-block__stage--active .timelapse-block__stage-number { background: #4CAF50; color: white; }' +
+            '.timelapse-block__stage--completed .timelapse-block__stage-number { background: #2196F3; color: white; }' +
+            '.timelapse-block__stage-content { flex: 1; }' +
+            '.timelapse-block__stage-name { font-size: 16px; font-weight: 600; color: #333; margin-bottom: 4px; }' +
+            '.timelapse-block__stage-duration { font-size: 13px; color: #666; }' +
+            '.timelapse-block__stage-check { font-size: 24px; color: #2196F3; flex-shrink: 0; }' +
+            '.timelapse-block__timer-panel { flex: 1; display: flex; flex-direction: column; gap: 20px; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); }' +
+            '.timelapse-block__timer { text-align: center; }' +
+            '.timelapse-block__timer-value { font-size: 64px; font-weight: 700; color: #4CAF50; font-family: "Courier New", monospace; letter-spacing: 4px; }' +
+            '.timelapse-block__timer-label { font-size: 14px; color: #666; margin-top: 8px; }' +
+            '.timelapse-block__current-stage { text-align: center; padding: 16px; background: #f5f5f5; border-radius: 8px; }' +
+            '.timelapse-block__current-label { font-size: 12px; color: #666; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }' +
+            '.timelapse-block__current-name { font-size: 20px; font-weight: 600; color: #333; }' +
+            '.timelapse-block__progress { width: 100%; height: 8px; background: #e0e0e0; border-radius: 4px; overflow: hidden; }' +
+            '.timelapse-block__progress-bar { height: 100%; background: linear-gradient(90deg, #4CAF50 0%, #8BC34A 100%); transition: width 1s linear; }' +
+            '.timelapse-block__controls { display: flex; gap: 12px; justify-content: center; }' +
+            '.timelapse-block__btn { padding: 12px 24px; font-size: 16px; font-weight: 600; border: none; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; min-width: 120px; }' +
+            '.timelapse-block__btn--start { background: #4CAF50; color: white; }' +
+            '.timelapse-block__btn--start:hover { background: #45a049; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3); }' +
+            '.timelapse-block__btn--pause { background: #FF9800; color: white; }' +
+            '.timelapse-block__btn--pause:hover { background: #F57C00; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(255, 152, 0, 0.3); }' +
+            '.timelapse-block__btn--reset { background: #f44336; color: white; }' +
+            '.timelapse-block__btn--reset:hover { background: #d32f2f; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(244, 67, 54, 0.3); }' +
+            '.timelapse-block__completed { text-align: center; font-size: 24px; font-weight: 700; color: #4CAF50; padding: 20px; background: #f1f8f4; border-radius: 8px; }' +
+            '@media (max-width: 768px) { .timelapse-block__content { flex-direction: column; } .timelapse-block__timer-value { font-size: 48px; } .timelapse-block__controls { flex-direction: column; } .timelapse-block__btn { width: 100%; } }' +
+          '</style>'
+        
+        // Инициализация логики после рендера HTML
+        setTimeout(function() {
+          const blockEl = container.querySelector('#' + blockId)
+          if (!blockEl) {
+            console.error('Timelapse block not found')
+            return
+          }
+          
+          let currentStageIndex = 0
+          let timeLeft = 0
+          let isRunning = false
+          let isCompleted = false
+          let intervalId = null
+          
+          // Элементы DOM
+          const timerValue = blockEl.querySelector('[data-timer-value]')
+          const currentName = blockEl.querySelector('[data-current-name]')
+          const progressBar = blockEl.querySelector('[data-progress-bar]')
+          const startBtn = blockEl.querySelector('[data-start-btn]')
+          const pauseBtn = blockEl.querySelector('[data-pause-btn]')
+          const resetBtn = blockEl.querySelector('[data-reset-btn]')
+          const completedMsg = blockEl.querySelector('[data-completed]')
+          const stageElements = blockEl.querySelectorAll('[data-stage-index]')
+          
+          function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60)
+            const secs = seconds % 60
+            return String(minutes).padStart(2, '0') + ':' + String(secs).padStart(2, '0')
+          }
+          
+          function updateUI() {
+            if (!timerValue || !currentName || !progressBar) return
+            
+            timerValue.textContent = formatTime(timeLeft)
+            
+            if (stages[currentStageIndex]) {
+              currentName.textContent = stages[currentStageIndex].name
+              const elapsed = stages[currentStageIndex].duration - timeLeft
+              const percentage = (elapsed / stages[currentStageIndex].duration) * 100
+              progressBar.style.width = percentage + '%'
+            } else {
+              currentName.textContent = 'Нажмите "Старт"'
+              progressBar.style.width = '0%'
+            }
+            
+            stageElements.forEach(function(el, index) {
+              el.classList.remove('timelapse-block__stage--active', 'timelapse-block__stage--completed')
+              const check = el.querySelector('.timelapse-block__stage-check')
+              
+              if (index === currentStageIndex) {
+                el.classList.add('timelapse-block__stage--active')
+                if (check) check.style.display = 'none'
+              } else if (index < currentStageIndex) {
+                el.classList.add('timelapse-block__stage--completed')
+                if (check) check.style.display = 'block'
+              } else {
+                if (check) check.style.display = 'none'
+              }
+            })
+          }
+          
+          function start() {
+            if (isCompleted) return
+            
+            isRunning = true
+            if (startBtn) startBtn.style.display = 'none'
+            if (pauseBtn) pauseBtn.style.display = 'inline-block'
+            
+            if (timeLeft === 0 && stages[currentStageIndex]) {
+              timeLeft = stages[currentStageIndex].duration
+            }
+            
+            intervalId = setInterval(function() {
+              if (timeLeft > 0) {
+                timeLeft--
+                updateUI()
+              } else {
+                moveToNextStage()
+              }
+            }, 1000)
+          }
+          
+          function pause() {
+            isRunning = false
+            if (startBtn) {
+              startBtn.style.display = 'inline-block'
+              startBtn.textContent = 'Продолжить'
+            }
+            if (pauseBtn) pauseBtn.style.display = 'none'
+            clearTimer()
+          }
+          
+          function reset() {
+            isRunning = false
+            isCompleted = false
+            currentStageIndex = 0
+            timeLeft = stages[0] ? stages[0].duration : 0
+            
+            if (startBtn) {
+              startBtn.style.display = 'inline-block'
+              startBtn.textContent = 'Старт'
+            }
+            if (pauseBtn) pauseBtn.style.display = 'none'
+            if (completedMsg) completedMsg.style.display = 'none'
+            
+            clearTimer()
+            updateUI()
+          }
+          
+          function moveToNextStage() {
+            if (currentStageIndex < stages.length - 1) {
+              currentStageIndex++
+              timeLeft = stages[currentStageIndex].duration
+              updateUI()
+            } else {
+              isCompleted = true
+              isRunning = false
+              if (completedMsg) completedMsg.style.display = 'block'
+              if (startBtn) startBtn.style.display = 'none'
+              if (pauseBtn) pauseBtn.style.display = 'none'
+              clearTimer()
+            }
+          }
+          
+          function clearTimer() {
+            if (intervalId) {
+              clearInterval(intervalId)
+              intervalId = null
+            }
+          }
+          
+          // Инициализация
+          if (stages.length > 0) {
+            timeLeft = stages[0].duration
+          }
+          updateUI()
+          
+          // События
+          if (startBtn) startBtn.addEventListener('click', start)
+          if (pauseBtn) pauseBtn.addEventListener('click', pause)
+          if (resetBtn) resetBtn.addEventListener('click', reset)
+          
+          // Очистка при удалении блока
+          blockEl.cleanup = clearTimer
+        }, 0)
+      }
+    },
+    fields: [
+      {
+        field: 'title',
+        label: 'Заголовок',
+        type: 'text',
+        placeholder: 'План мероприятия',
+        rules: [{ type: 'required', message: 'Заголовок обязателен' }],
+        defaultValue: 'План мероприятия'
+      },
+      {
+        field: 'stages',
+        label: 'Этапы',
+        type: 'repeater',
+        rules: [
+          { type: 'required', message: 'Необходим хотя бы один этап' }
+        ],
+        defaultValue: [
+          {
+            name: 'Регистрация участников',
+            duration: 300
+          },
+          {
+            name: 'Открытие мероприятия',
+            duration: 180
+          },
+          {
+            name: 'Основной доклад',
+            duration: 600
+          },
+          {
+            name: 'Перерыв',
+            duration: 120
+          },
+          {
+            name: 'Вопросы и ответы',
+            duration: 300
+          }
+        ],
+        repeaterConfig: {
+          itemTitle: 'Этап',
+          addButtonText: 'Добавить этап',
+          removeButtonText: 'Удалить',
+          min: 1,
+          max: 20,
+          collapsible: true,
+          fields: [
+            {
+              field: 'name',
+              label: 'Название этапа',
+              type: 'text',
+              placeholder: 'Введите название этапа',
+              rules: [
+                { type: 'required', message: 'Название этапа обязательно' },
+                { type: 'minLength', value: 3, message: 'Минимум 3 символа' },
+                { type: 'maxLength', value: 100, message: 'Максимум 100 символов' }
+              ],
+              defaultValue: 'Новый этап'
+            },
+            {
+              field: 'duration',
+              label: 'Длительность (секунды)',
+              type: 'number',
+              placeholder: '60',
+              rules: [
+                { type: 'required', message: 'Длительность обязательна' },
+                { type: 'min', value: 1, message: 'Минимум 1 секунда' },
+                { type: 'max', value: 7200, message: 'Максимум 7200 секунд (2 часа)' }
+              ],
+              defaultValue: 60
+            }
+          ]
+        }
+      }
+    ]
   }
 };
 

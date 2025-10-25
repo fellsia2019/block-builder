@@ -22,6 +22,7 @@ import SpacedContentBlock from './components/SpacedContentBlock.vue'
 import RichCardListBlock from './components/RichCardListBlock.vue'
 import NewsListBlock from './components/NewsListBlock.vue'
 import RichTextBlock from './components/RichTextBlock.vue'
+import TimelapseBlock from './components/TimelapseBlock.vue'
 
 // ✅ АСИНХРОННЫЙ импорт компонента (загружается по требованию)
 const Counter = defineAsyncComponent(() => import('./components/Counter.vue'))
@@ -1373,6 +1374,91 @@ export const blockConfigs = {
         step: 4
       }
     }
+  },
+
+  timelapse: {
+    title: '⏱️ Таймлапс с этапами',
+    icon: '⏱️',
+    description: 'Таймер с последовательными этапами и обратным отсчетом',
+    render: {
+      kind: 'component',
+      framework: 'vue',
+      component: TimelapseBlock
+    },
+    fields: [
+      {
+        field: 'title',
+        label: 'Заголовок',
+        type: 'text',
+        placeholder: 'План мероприятия',
+        rules: [{ type: 'required', message: 'Заголовок обязателен' }],
+        defaultValue: 'План мероприятия'
+      },
+      {
+        field: 'stages',
+        label: 'Этапы',
+        type: 'repeater',
+        rules: [
+          { type: 'required', message: 'Необходим хотя бы один этап' }
+        ],
+        defaultValue: [
+          {
+            name: 'Регистрация участников',
+            duration: 300
+          },
+          {
+            name: 'Открытие мероприятия',
+            duration: 180
+          },
+          {
+            name: 'Основной доклад',
+            duration: 600
+          },
+          {
+            name: 'Перерыв',
+            duration: 120
+          },
+          {
+            name: 'Вопросы и ответы',
+            duration: 300
+          }
+        ],
+        repeaterConfig: {
+          itemTitle: 'Этап',
+          addButtonText: 'Добавить этап',
+          removeButtonText: 'Удалить',
+          min: 1,
+          max: 20,
+          collapsible: true,
+          fields: [
+            {
+              field: 'name',
+              label: 'Название этапа',
+              type: 'text',
+              placeholder: 'Введите название этапа',
+              rules: [
+                { type: 'required', message: 'Название этапа обязательно' },
+                { type: 'minLength', value: 3, message: 'Минимум 3 символа' },
+                { type: 'maxLength', value: 100, message: 'Максимум 100 символов' }
+              ],
+              defaultValue: 'Новый этап'
+            },
+            {
+              field: 'duration',
+              label: 'Длительность (секунды)',
+              type: 'number',
+              placeholder: '60',
+              rules: [
+                { type: 'required', message: 'Длительность обязательна' },
+                { type: 'min', value: 1, message: 'Минимум 1 секунда' },
+                { type: 'max', value: 7200, message: 'Максимум 7200 секунд (2 часа)' }
+              ],
+              defaultValue: 60
+            }
+          ]
+        }
+      }
+    ]
   }
 }
 

@@ -26,7 +26,7 @@
 <script setup>
 import { ref } from 'vue'
 import { 
-  BlockBuilderComponent, 
+  BlockBuilderComponent,
   MemoryComponentRegistry,
   ApiSelectUseCase,
   FetchHttpClient,
