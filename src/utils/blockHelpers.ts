@@ -1,4 +1,5 @@
 import { TBlock, TBlockWithChildren, TBlockId, IBlockDto } from '../core/types';
+import { deepClone } from './deepClone';
 
 // Реэкспорт типов для обратной совместимости
 export type { TBlock, TBlockWithChildren, TBlockId } from '../core/types';
@@ -15,18 +16,15 @@ export type { TBlock, TBlockWithChildren, TBlockId } from '../core/types';
  * Создает копию блока с новым ID
  */
 export function cloneBlock(block: TBlock, newId: TBlockId): TBlock {
-  return {
-    ...block,
-    id: newId,
-    // В DTO дети представлены как массив id, поэтому копируем как есть
-    children: Array.isArray(block.children) ? [...(block.children as any[])] : block.children,
-    metadata: {
-      ...block.metadata,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      version: 1
-    }
+  const cloned = deepClone(block);
+  cloned.id = newId;
+  cloned.metadata = {
+    ...cloned.metadata,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    version: 1
   };
+  return cloned;
 }
 
 /**

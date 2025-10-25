@@ -1,5 +1,6 @@
 import { IBlockDto, ICreateBlockDto, IUpdateBlockDto } from '../../core/types';
 import { IBlockRepository } from '../../core/ports/BlockRepository';
+import { deepClone } from '../../utils/deepClone';
 
 /**
  * Реализация репозитория блоков в памяти
@@ -26,12 +27,12 @@ export class MemoryBlockRepositoryImpl implements IBlockRepository {
     };
 
     this.blocks.set(id, block);
-    return { ...block };
+    return deepClone(block);
   }
 
   async getById(id: string): Promise<IBlockDto | null> {
     const block = this.blocks.get(id);
-    return block ? { ...block } : null;
+    return block ? deepClone(block) : null;
   }
 
   async getAll(): Promise<IBlockDto[]> {
@@ -45,19 +46,19 @@ export class MemoryBlockRepositoryImpl implements IBlockRepository {
         const dateB = b.metadata?.createdAt ? new Date(b.metadata.createdAt) : new Date(0);
         return dateA.getTime() - dateB.getTime();
       })
-      .map(block => ({ ...block }));
+      .map(block => deepClone(block));
   }
 
   async getByType(type: string): Promise<IBlockDto[]> {
     return Array.from(this.blocks.values())
       .filter(block => block.type === type)
-      .map(block => ({ ...block }));
+      .map(block => deepClone(block));
   }
 
   async getChildren(parentId: string): Promise<IBlockDto[]> {
     return Array.from(this.blocks.values())
       .filter(block => block.parent === parentId)
-      .map(block => ({ ...block }));
+      .map(block => deepClone(block));
   }
 
   async update(id: string, updates: IUpdateBlockDto): Promise<IBlockDto> {
@@ -78,7 +79,7 @@ export class MemoryBlockRepositoryImpl implements IBlockRepository {
     };
 
     this.blocks.set(id, updatedBlock);
-    return { ...updatedBlock };
+    return deepClone(updatedBlock);
   }
 
   async delete(id: string): Promise<boolean> {

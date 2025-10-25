@@ -8,6 +8,7 @@ import {
   TRenderRef,
   IFormGenerationConfig
 } from '../types';
+import { deepClone } from '../../utils/deepClone';
 
 /**
  * Доменная сущность блока
@@ -17,7 +18,7 @@ export class BlockEntity {
   private _block: IBlock;
 
   constructor(block: IBlock) {
-    this._block = { ...block };
+    this._block = deepClone(block);
   }
 
   get id(): TBlockId {
@@ -29,11 +30,11 @@ export class BlockEntity {
   }
 
   get settings(): IBlockSettings {
-    return { ...this._block.settings };
+    return deepClone(this._block.settings);
   }
 
   get props(): IBlockProps {
-    return { ...this._block.props };
+    return deepClone(this._block.props);
   }
 
   get style(): IBlockStyle | undefined {
@@ -187,7 +188,7 @@ export class BlockEntity {
    * Возвращает сериализованный блок
    */
   toJSON(): IBlock {
-    return { ...this._block };
+    return deepClone(this._block);
   }
 
   /**
