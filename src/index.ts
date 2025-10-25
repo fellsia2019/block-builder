@@ -39,7 +39,6 @@ export * from './core/use-cases/DeleteBlockUseCase';
 export * from './core/use-cases/DuplicateBlockUseCase';
 export * from './core/use-cases/BlockManagementUseCase';
 export * from './core/use-cases/ComponentManagementUseCase';
-export * from './core/use-cases/FormGenerationUseCase';
 export * from './core/use-cases/ApiSelectUseCase';
 
 // Main API (главный класс пакета) - применен паттерн Facade
